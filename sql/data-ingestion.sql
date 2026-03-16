@@ -27,4 +27,4 @@ LOAD DATA LOCAL INFILE '../data/raw/apple_stock_history_1980_2025.csv'
 INTO TABLE aapl_daily
 FIELDS TERMINATED BY ',' 
 IGNORE 1 LINES                          -- Skip the CSV header row
-(trade_date, open_price, high_price, low_price, close_price, adj_close_price, volume);
+(trade_date, adj_close_price, close_price, high_price, low_price, open_price, volume);
