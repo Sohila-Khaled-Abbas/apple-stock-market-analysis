@@ -1,46 +1,36 @@
 -- =========================================================================================
 -- Apple Stock Market Analysis - Data Cleaning & Validation Script
--- Purpose: This script performs post-ingestion quality checks, removes duplicate entries,
---          verifies logical price consistency, and calculates new analytical metrics.
+-- Purpose: This script performs data quality assertions and data imputation on the 
+--          aapl_daily table to ensure the dataset is ready for reliable analytics.
 -- =========================================================================================
 
 -- -----------------------------------------------------------------------------------------
--- 1. Identify and Remove Potential Duplicates
+-- 1. Logical Range Assertion (Price Boundaries)
 -- -----------------------------------------------------------------------------------------
--- Description: Self-joins the aapl_daily table on the trade date. If two rows share the 
--- same date, it deletes the one with the lower trading volume (assuming higher volume 
--- records represent more complete/precise daily trading data).
-DELETE t1 FROM aapl_daily t1
-INNER JOIN aapl_daily t2 
-WHERE t1.trade_date = t2.trade_date AND t1.volume < t2.volume;
-
--- -----------------------------------------------------------------------------------------
--- 2. Logical Consistency Check
--- -----------------------------------------------------------------------------------------
--- Description: Returns any anomalous rows where the highest price of the day is somehow
--- lower than the lowest price or the closing price. These indicate faulty source data 
--- that may require manual review or exclusion.
+-- Description: Retrieves any records where the daily High_Price is unexpectedly lower than 
+-- the Low_Price or Close_Price, or where the Low_Price is higher than the Close_Price.
+-- Expected Result: 0 rows (Ideally, all standard prices should fall between High and Low).
 SELECT * FROM aapl_daily 
-WHERE high_price < low_price 
-   OR high_price < close_price;
+WHERE High_Price < Low_Price OR High_Price < Close_Price OR Low_Price > Close_Price;
 
 -- -----------------------------------------------------------------------------------------
--- 3. Calculate Derived Metrics for Analytics (Daily Return)
+-- 2. Data Imputation: Fix the 0 Volume Anomaly
 -- -----------------------------------------------------------------------------------------
--- Description: Adds a new column to store the calculated percentage change in closing 
--- price from the previous trading day.
-ALTER TABLE aapl_daily ADD COLUMN daily_return DECIMAL(10, 6);
-
--- Temporarily disable safe updates to allow updating all rows in the table
-SET SQL_SAFE_UPDATES = 0;
-
--- Update the new column using the LAG() window function
--- Formula: (Current Adjusted Close - Previous Adjusted Close) / Previous Adjusted Close
+-- Description: The data profiling step identified a trading day (e.g., 1981-08-10) with an 
+-- erroneous trading volume of 0. This query imputes that missing volume by calculating the 
+-- average volume over a surrounding 20-day period ('1981-08-01' to '1981-08-20') and 
+-- updates the anomalous row with this moving average to maintain data continuity.
 UPDATE aapl_daily t1
-JOIN (
-    SELECT trade_date, 
-           (adj_close_price - LAG(adj_close_price) OVER (ORDER BY trade_date)) / 
-           LAG(adj_close_price) OVER (ORDER BY trade_date) as ret
-    FROM aapl_daily
-) t2 ON t1.trade_date = t2.trade_date
-SET t1.daily_return = t2.ret;
+JOIN (SELECT AVG(Volume) as avg_v FROM aapl_daily WHERE Trade_Date BETWEEN '1981-08-01' AND '1981-08-20') t2
+SET t1.Volume = t2.avg_v
+WHERE t1.Volume = 0;
+
+-- -----------------------------------------------------------------------------------------
+-- 3. Consistency Check: Adjusted Close vs. Close Price
+-- -----------------------------------------------------------------------------------------
+-- Description: Counts records where the Adjusted Close price is strictly greater than the 
+-- standard Close Price. 
+-- Note: Adjusted Close usually accounts for historical stock splits and dividends, meaning 
+-- it should typically be less than or equal to the actual Close Price on that day. If 
+-- Adj_Close > Close_Price, the data provider might be using a non-standard adjustment method.
+SELECT COUNT(*) FROM aapl_daily WHERE Adj_Close > Close_Price;
