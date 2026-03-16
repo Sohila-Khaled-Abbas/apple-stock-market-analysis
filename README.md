@@ -12,6 +12,7 @@
 ---
 
 ## 📑 Table of Contents
+
 - [🍏 Apple Stock Market Analysis (1980-2025)](#-apple-stock-market-analysis-1980-2025)
   - [📑 Table of Contents](#-table-of-contents)
   - [🚀 Project Overview](#-project-overview)
@@ -60,7 +61,7 @@ This project focuses on the ingestion, processing, and visualization of Apple’
 
 ### 1. The "Cook" Premium
 
-Post-2011 (under Tim Cook's leadership), Apple's volatility steadily decreased while institutional ownership and share buybacks increased. 
+Post-2011 (under Tim Cook's leadership), Apple's volatility steadily decreased while institutional ownership and share buybacks increased.
 
 - **Recommendation for Portfolio Managers:** AAPL should be treated as a **"Core Equity"** (value/stability) rather than purely a **"Growth Speculation."**
 
@@ -123,4 +124,3 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 4. Load the raw data from `data/raw/` into your standard MySQL Server setup using the scripts provided in `/sql/`.
 
 5. Open the interactive dashboard found in `/dashboard/` with Power BI.
-
