@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# PowerBI Temp / Lock Files
+*.pbix.lock
+~*.pbix
+
+# Project Data
+# (Uncomment below if you wish to track your large data files in GitHub, otherwise they are ignored to save repo space)
+# data/raw/*.csv
+# data/raw/*.xlsx
+# data/processed/
+
+# OS generated files
+.DS_Store
+Thumbs.db

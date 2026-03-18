@@ -89,9 +89,16 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   ├── raw/               # Original, immutable datasets (CSV, Excel)
 │   └── processed/         # Cleaned and transformed data for DB ingestion
 ├── dashboard/             # Power BI (.pbix) dashboard files
-├── notebooks/             # Jupyter notebooks for data profiling (01_data_profiling.ipynb)
-├── sql/                   # MySQL schema definitions and analytical queries
-└── docs/                  # Project documentation and visualizations
+├── docs/                  # Technical documentation (e.g., data_pipeline.md)
+├── notebooks/             # Jupyter notebooks
+│   ├── 01_data_profiling.ipynb  # Initial EDA and assertions
+│   └── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
+├── sql/                   # MySQL scripts for ELT
+│   ├── 01_data_ingestion.sql    # Schema initialization and CSV bulk loading
+│   ├── 02_data_cleaning.sql     # Validation, imputation, and anomaly checks
+│   └── 03_eda_and_metrics.sql   # CAGR & Simple Moving Average tracking
+├── requirements.txt       # Python dependencies
+└── .gitignore             # Git ignore definitions
 ```
 
 ---
@@ -112,18 +119,21 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
    git clone https://github.com/Sohila-Khaled-Abbas/apple-stock-analytics.git
    ```
 
-2. Navigate to the project directory and install profiling tools:
+2. Navigate to the project directory and install the dependencies:
 
    ```bash
-   pip install pandas openpyxl jupyter
+   pip install -r requirements.txt
    ```
 
-3. Run the profiling notebook:
+3. Set up the Database:
+   - Execute `sql/01_data_ingestion.sql` in your MySQL environment to load the historical CSV.
 
-   ```bash
-   jupyter notebook notebooks/01_data_profiling.ipynb
-   ```
+4. Fetch the latest live data increments:
+   - Run `notebooks/02_data_loading.ipynb` to automatically append new dates via the Yahoo Finance API.
 
-4. Load the raw data from `data/raw/` into your standard MySQL Server setup using the scripts provided in `/sql/`.
+5. Validate and calculate indicators:
+   - Run `sql/02_data_cleaning.sql` to impute missing volumes and check logic.
+   - Run `sql/03_eda_and_metrics.sql` to generate Moving Averages and CAGR metrics.
 
-5. Open the interactive dashboard found in `/dashboard/` with Power BI.
+6. Launch Dashboard:
+   - Open the interactive dashboard found in `/dashboard/` with Power BI.

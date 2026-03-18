@@ -11,10 +11,12 @@ The data pipeline follows an **ELT (Extract, Load, Transform)** pattern combined
 ## 1. Data Ingestion & Incremental Loading
 
 ### Initial Database Setup (`sql/01_data_ingestion.sql`)
+
 - **Action:** Initializes the `apple_stock_db` MySQL database and provisions the `aapl_daily` table schema.
 - **Bulk Load:** Executes a `LOAD DATA LOCAL INFILE` command. This uses the massive, historically complete `apple_stock_history_1980_2025.csv` (located in `data/raw/`) to seed the database instantly up to the last known date.
 
 ### Incremental Fetching (`notebooks/02_data_loading.ipynb`)
+
 - **Action:** Runs a Python script utilizing `yfinance`, `pandas`, and `sqlalchemy`.
 - **Process:** 
   1. Queries MySQL (`SELECT MAX(Trade_Date)...`) to uniquely identify the most recent trading session registered.
@@ -27,10 +29,12 @@ The data pipeline follows an **ELT (Extract, Load, Transform)** pattern combined
 ## 2. Data Cleaning & Automated QA
 
 ### Pre-Analysis Profiling (`notebooks/01_data_profiling.ipynb`)
+
 - **Action:** Exploratory Jupyter notebook serving as the initial sandbox.
 - **Process:** Generates Pandas-driven `describe()` metrics, null-value tallies, and manual logic assertions (e.g., confirming `High` >= `Low`) before committing structural schema definitions to SQL.
 
 ### SQL Cleaning Validation (`sql/02_data_cleaning.sql`)
+
 - **Objective:** Maintain persistent data integrity and resolve anomalies inside the data warehouse.
 - **Duplicate Handing:** A self-join DELETE strategy drops exact duplicate dates, specifically favoring rows with a higher reported `Volume` under the assumption they represent more granular precision.
 - **Logical Rules Validation:** Detects illogical inputs natively, throwing warning rows if `High_Price < Low_Price` or `High_Price < Close_Price`.
@@ -41,6 +45,7 @@ The data pipeline follows an **ELT (Extract, Load, Transform)** pattern combined
 ## 3. Metrics & Exploratory Data Analysis (EDA)
 
 ### Advanced Analytics (`sql/03_eda_and_metrics.sql`)
+
 - **Objective:** Translates raw stock prices into meaningful financial derivatives to be served directly into Power BI.
 - **Compound Annual Growth Rate (CAGR):** Performs a mathematical scaling equation `(Ending Value / Beginning Value) ^ (1 / Number of Years) - 1` across the dataset's entire footprint footprint.
 - **Moving Average Signals:**
