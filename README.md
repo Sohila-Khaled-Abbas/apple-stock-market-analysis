@@ -37,6 +37,35 @@ This project focuses on the ingestion, processing, and visualization of Apple’
 
 ## 🏗️ Project Architecture
 
+![Pipeline Architecture](images/pipeline_architecture.jpg)
+
+This diagram visualizes the end-to-end architecture of your Apple Stock (AAPL) data analysis project. It is structured horizontally and vertically to show how different technologies interact to move data from historical sources and the live API through your database and into the visualization layer.
+
+The pipeline is organized into three distinct labeled zones that correspond to the lifecycle of the project:
+
+### Zone 1: Initial Historical Load (Past Data)
+This section represents the one-time, manual setup phase where you imported the long-term historical data.
+- **Excel Source:** The `Apple-Stock-Historical-Data.xlsx` file (1980–2025) is the origin.
+- **Python Script (Initialization):** A Python script (often run in a Jupyter Notebook for one-time loads) reads the Excel file, cleans the data, and formats it for ingestion.
+- **MySQL Database:** The script uses an SQL `INSERT` command to populate the main `aapl_daily` table. As you requested, this table uses high-precision `DOUBLE` and `BIGINT` types to prevent data truncation.
+
+### Zone 2: Automated Daily Enrichment (Present Data)
+This section shows the automated "engine" we discussed in prompt #9, which runs daily on your local machine to keep the database enriched.
+- **Scheduled Trigger (Task Scheduler):** The loop is initiated by the Windows Task Scheduler, set to run after market close. It executes the `.bat` file to activate your Conda environment.
+- **Python Script (`yf_update.py`):** The batch file runs the incremental update script.
+- **Logic (1. Check MAX Date):** The script first queries MySQL to see the latest available date.
+- **Logic (2. Fetch New Data):** It calls the Yahoo Finance API (`yfinance`) to get data only for the missing days (Start Date = `MAX(Date)` + 1 day).
+- **Logic (3. Clean and Flatten):** The script handles MultiIndex flattening and dictionary mapping to ensure data is clean.
+- **Logic (4. SQL APPEND):** The new records are appended to the existing MySQL Database.
+
+### Zone 3: BI Visualization & Cloud Sync
+This final section shows how the data moves from your local computer into Microsoft's cloud for the end user to view.
+- **MySQL Database:** The shared data repository is the single source of truth.
+- **On-premises Data Gateway:** This is the critical security bridge we discussed. Installed on your PC, it creates a secure tunnel between your local MySQL database and Power BI Service.
+- **Power BI Service (Cloud):** Microsoft's cloud-based platform holds the dataset and executes a Scheduled Refresh (18:30) that reaches through the gateway to pull new data from MySQL.
+- **Interactive Dashboard:** The end-user view where your CAGR, Drawdown, and Moving Average analysis are visualized on the web or mobile.
+
+### Core Technologies Workflow
 1. **Data Profiling (Python/Pandas):** Initial dataset exploration, quality checking, and anomaly detection.
 2. **Data Storage & Transformation (MySQL):** Aggregations, window functions for moving averages, and structured queries to prep the data for visualization.
 3. **Interactive Visualization (Power BI):** Business intelligence dashboards that bring the "Cook Premium" and the "Buy the Dip" signals to life.
