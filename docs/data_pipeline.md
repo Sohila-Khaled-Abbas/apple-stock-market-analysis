@@ -24,6 +24,14 @@ The data pipeline follows an **ELT (Extract, Load, Transform)** pattern combined
   3. Formats the parsed data gracefully into strict MySQL columns (`Trade_Date`, `Adj_Close`, etc.), flattens multi-indexes, and handles NaNs.
   4. Appends only new records to the database.
 
+### Automated Data Loading (`Task Scheduler` & `.bat`)
+
+- **Action:** Automates the execution of the incremental Python script on a daily schedule.
+- **Process:**
+  1. The **Windows Task Scheduler** triggers a native `.bat` file (e.g., `yf_update.bat`) every day after market close.
+  2. The `.bat` script activates the appropriate Conda/Python environment.
+  3. The script executes the incremental update logic (e.g., `yf_update.py` or the configured loading script) to pull historical limits directly into the MySQL database entirely hands-free.
+
 ---
 
 ## 2. Data Cleaning & Automated QA

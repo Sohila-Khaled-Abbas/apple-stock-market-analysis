@@ -122,6 +122,9 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 ├── notebooks/             # Jupyter notebooks
 │   ├── 01_data_profiling.ipynb  # Initial EDA and assertions
 │   └── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
+├── scripts/               # Automation scripts
+│   ├── yf_update.py             # Python script for incremental updates
+│   └── yf_update.bat            # Batch executable for Task Scheduler
 ├── sql/                   # MySQL scripts for ELT
 │   ├── 01_data_ingestion.sql    # Schema initialization and CSV bulk loading
 │   ├── 02_data_cleaning.sql     # Validation, imputation, and anomaly checks
