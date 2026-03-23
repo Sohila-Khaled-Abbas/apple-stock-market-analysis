@@ -33,6 +33,9 @@
 
 This project focuses on the ingestion, processing, and visualization of Apple’s stock market data spanning from **1980 to 2025**. By combining **Python** for initial profiling, **MySQL** for robust relational data storage and querying, and **Power BI** for interactive dashboards, this project highlights how historical market trends can inform future investment strategies.
 
+📊 **[View the Executive Business Case Presentation (Google Slides)](https://docs.google.com/presentation/d/1v5ssMhSDsMxkJXG-Xy1a-X05HoXnfY5Ce7pQUGvhGaE/edit?usp=sharing)**
+For an actionable breakdown of the engineering pipeline and the resulting strategic insights, you can also refer to the [Presentation Outline](docs/business_case_presentation.md).
+
 ---
 
 ## 🏗️ Project Architecture
@@ -118,7 +121,10 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   ├── raw/               # Original, immutable datasets (CSV, Excel)
 │   └── processed/         # Cleaned and transformed data for DB ingestion
 ├── dashboard/             # Power BI (.pbix) dashboard files
-├── docs/                  # Technical documentation (e.g., data_pipeline.md)
+├── docs/                  # Technical documentation
+│   ├── data_pipeline.md             # Data flow and architecture
+│   ├── data_lineage.md              # Origin-to-destination map
+│   └── business_case_presentation.md # Business Case slide outline
 ├── notebooks/             # Jupyter notebooks
 │   ├── 01_data_profiling.ipynb  # Initial EDA and assertions
 │   └── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
