@@ -1,0 +1,175 @@
+{
+    "name": "Apple Brand Dark Analytics",
+    "dataColors": [
+        "#0066cc", 
+        "#f5f5f7", 
+        "#30d158", 
+        "#ff453a", 
+        "#ff9f0a", 
+        "#64d2ff", 
+        "#5e5ce6", 
+        "#86868b"
+    ],
+    "background": "#000000",
+    "foreground": "#f5f5f7",
+    "tableAccent": "#0066cc",
+    "textClasses": {
+        "callout": {
+            "fontSize": 28,
+            "fontFace": "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif",
+            "color": "#ffffff"
+        },
+        "title": {
+            "fontSize": 16,
+            "fontFace": "'Segoe UI Semibold', wf_segoe-ui_semibold, helvetica, arial, sans-serif",
+            "color": "#ffffff"
+        },
+        "header": {
+            "fontSize": 12,
+            "fontFace": "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif",
+            "color": "#86868b"
+        },
+        "label": {
+            "fontSize": 10,
+            "fontFace": "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif",
+            "color": "#86868b"
+        }
+    },
+    "visualStyles": {
+        "page": {
+            "*": {
+                "background": [
+                    {
+                        "color": { "solid": { "color": "#000000" } },
+                        "transparency": 0
+                    }
+                ],
+                "outspace": [
+                    {
+                        "color": { "solid": { "color": "#000000" } }
+                    }
+                ],
+                "pageSize": [
+                    {
+                        "type": "Custom",
+                        "width": 1920,
+                        "height": 1080
+                    }
+                ]
+            }
+        },
+        "*": {
+            "*": {
+                "background": [
+                    {
+                        "show": true,
+                        "color": { "solid": { "color": "#1d1d1f" } },
+                        "transparency": 0
+                    }
+                ],
+                "border": [
+                    {
+                        "show": true,
+                        "color": { "solid": { "color": "#424245" } },
+                        "radius": 12
+                    }
+                ],
+                "dropShadow": [
+                    {
+                        "show": true,
+                        "color": { "solid": { "color": "#000000" } },
+                        "position": "Outer",
+                        "preset": "Bottom",
+                        "shadowBlur": 15,
+                        "shadowSpread": 0,
+                        "transparency": 60
+                    }
+                ],
+                "visualHeader": [
+                    {
+                        "foreground": { "solid": { "color": "#86868b" } },
+                        "background": { "solid": { "color": "#1d1d1f" } },
+                        "border": { "solid": { "color": "#424245" } }
+                    }
+                ],
+                "visualTooltip": [
+                    {
+                        "titleFontColor": { "solid": { "color": "#ffffff" } },
+                        "valueFontColor": { "solid": { "color": "#f5f5f7" } },
+                        "background": { "solid": { "color": "#1d1d1f" } }
+                    }
+                ]
+            }
+        },
+        "card": {
+            "*": {
+                "labels": [
+                    {
+                        "color": { "solid": { "color": "#ffffff" } },
+                        "fontSize": 32
+                    }
+                ],
+                "categoryLabels": [
+                    {
+                        "show": true,
+                        "color": { "solid": { "color": "#86868b" } },
+                        "fontSize": 12
+                    }
+                ]
+            }
+        },
+        "lineChart": {
+            "*": {
+                "legend": [
+                    {
+                        "show": true,
+                        "position": "Top",
+                        "labelColor": { "solid": { "color": "#f5f5f7" } }
+                    }
+                ],
+                "categoryAxis": [
+                    {
+                        "show": true,
+                        "labelColor": { "solid": { "color": "#86868b" } },
+                        "gridlineShow": false
+                    }
+                ],
+                "valueAxis": [
+                    {
+                        "show": true,
+                        "labelColor": { "solid": { "color": "#86868b" } },
+                        "gridlineShow": true,
+                        "gridlineColor": { "solid": { "color": "#424245" } },
+                        "gridlineStyle": "dashed"
+                    }
+                ]
+            }
+        },
+        "slicer": {
+            "*": {
+                "background": [
+                    {
+                        "show": false
+                    }
+                ],
+                "border": [
+                    {
+                        "show": false
+                    }
+                ],
+                "dropShadow": [
+                    {
+                        "show": false
+                    }
+                ],
+                "items": [
+                    {
+                        "fontColor": { "solid": { "color": "#f5f5f7" } },
+                        "background": { "solid": { "color": "#1d1d1f" } },
+                        "selectedColor": { "solid": { "color": "#0066cc" } }
+                    }
+                ]
+            }
+        }
+    }
+}
