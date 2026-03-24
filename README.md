@@ -17,6 +17,7 @@
   - [📑 Table of Contents](#-table-of-contents)
   - [🚀 Project Overview](#-project-overview)
   - [🏗️ Project Architecture](#️-project-architecture)
+  - [🎨 Power BI Dashboard Design & Storytelling](#-power-bi-dashboard-design--storytelling)
   - [📊 Data Profile Summary](#-data-profile-summary)
   - [💡 Business Recommendations](#-business-recommendations)
     - [1. The "Cook" Premium](#1-the-cook-premium)
@@ -75,6 +76,19 @@ This final section shows how the data moves from your local computer into Micros
 
 ---
 
+## 🎨 Power BI Dashboard Design & Storytelling
+
+A financial dashboard's purpose is not merely to display data, but to present an actionable visual argument. The typical "Data Dump Fallacy" is avoided by architecting a purposeful, two-page layout:
+
+1. **Page 1: The Executive Macro View:** Focuses on multi-decade compounding using a logarithmic scale, visualizing Apple's performance across different CEO eras, benchmarking against the S&P 500, and demonstrating the risk-weighted return (CAGR vs. Volatility).
+2. **Page 2: The Technical Deep Dive:** Focuses on tactical analysis including a price action engine, volume surges, and RSI oscillators.
+
+Advanced native Power BI features such as Report Page Tooltips, dynamic DAX titles, bookmarks, and a fully custom HTML/CSS application-style landing page elevate the experience.
+
+For the comprehensive design blueprint, technical DAX setups, and the custom HTML landing page button, refer to the [Power BI Dashboard Design & Storytelling Guide](docs/powerbi_dashboard_design.md).
+
+---
+
 ## 📊 Data Profile Summary
 
 | Metric | Profile Result | Status |
@@ -124,7 +138,8 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 ├── docs/                  # Technical documentation
 │   ├── data_pipeline.md             # Data flow and architecture
 │   ├── data_lineage.md              # Origin-to-destination map
-│   └── business_case_presentation.md # Business Case slide outline
+│   ├── business_case_presentation.md # Business Case slide outline
+│   └── powerbi_dashboard_design.md  # Power BI UI/UX & DAX architecture
 ├── notebooks/             # Jupyter notebooks
 │   ├── 01_data_profiling.ipynb  # Initial EDA and assertions
 │   └── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
