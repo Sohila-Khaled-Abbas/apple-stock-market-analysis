@@ -76,16 +76,31 @@ This final section shows how the data moves from your local computer into Micros
 
 ---
 
-## 🎨 Power BI Dashboard Design & Storytelling
+## 🎨 Power BI Dashboard Design & Architecture
 
-A financial dashboard's purpose is not merely to display data, but to present an actionable visual argument. The typical "Data Dump Fallacy" is avoided by architecting a purposeful, two-page layout:
+Your dashboard is now a fully realized, enterprise-grade financial application. Here is the final summary of the architecture deployed:
 
-1. **Page 1: The Executive Macro View:** Focuses on multi-decade compounding using a logarithmic scale, visualizing Apple's performance across different CEO eras, benchmarking against the S&P 500, and demonstrating the risk-weighted return (CAGR vs. Volatility).
-2. **Page 2: The Technical Deep Dive:** Focuses on tactical analysis including a price action engine, volume surges, and RSI oscillators.
+### 1. Data Architecture (The Backend)
+- **Pattern:** Star Schema. Fact tables (`aapl_daily`, `sp500_daily`) connected to a central Date dimension (`Calendar`).
+- **Optimization:** $O(N^2)$ bottlenecks (Drawdown, Volatility, Beta) were stripped out of DAX measures and materialized into Calculated Columns during the refresh phase.
+- **Result:** The dashboard renders instantly, even when calculating complex linear regressions over 11,000 days.
 
-Advanced native Power BI features such as Report Page Tooltips, dynamic DAX titles, bookmarks, and a fully custom HTML/CSS application-style landing page elevate the experience.
+### 2. User Interface (The Frontend)
+- **Framework:** "Glassmorphism" Apple Dark Mode (`#1d1d1f`, `#f5f5f7`, System Colors).
+- **Theme Enforcement:** Controlled entirely by a global JSON Theme file to ensure 1920x1080 resolution and automated visual styling (rounded corners, shadows).
+- **Headers & Cards:** Built using HTML Content visuals for flexbox alignment, gradient backgrounds, and scalable SVG icons, bypassing Power BI's rigid native shapes.
 
-For the comprehensive design blueprint, technical DAX setups, and the custom HTML landing page button, refer to the [Power BI Dashboard Design & Storytelling Guide](docs/powerbi_dashboard_design.md).
+### 3. Advanced Storytelling & Context
+- **PiotrBartela.TitleContext:** Used to translate slicer inputs into human-readable presentation strings (e.g., "Last 5 Years" instead of "2020-2025").
+- **SavoryData:** Integrated into native Power BI Buttons as hovering "Badges" to explicitly state active filter contexts above charts.
+- **Automated Advisory:** A DAX `SWITCH` statement acts as a quantitative analyst, writing dynamic text paragraphs based on RSI, Moving Averages, and Beta.
+
+### 4. High-Density Visuals (IBCS & SVG)
+- **PowerofBI.IBCS:** Embedded in matrices to show standardized Absolute Variance (YoY price changes) using red/green delta bars.
+- **DaxLib.SVG:** Used to render granular Price Trend sparklines and Volatility Boxplots inside table rows.
+- **XU.SVG.Progress:** Deployed inside Report Page Tooltips to provide instant visual context (Donuts, Capsules) on hover, without cluttering the main canvas.
+
+For the definitive deployment checklist and the custom HTML landing page DAX measure, refer to the [Power BI Dashboard Design & Storytelling Guide](docs/powerbi_dashboard_design.md).
 
 ---
 

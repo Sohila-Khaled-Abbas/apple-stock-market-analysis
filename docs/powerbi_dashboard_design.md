@@ -1,51 +1,91 @@
-# Power BI Dashboard Design & Storytelling
+# Power BI Dashboard Design & Architecture Blueprint
 
-A financial dashboard must go beyond being a mere "database GUI"; it must present a visual argument. To effectively visualize the Apple (AAPL) dataset (1980–2025) and avoid the "Data Dump Fallacy," our reporting approach separates macro-economic trends from micro-trading technicals through an architected two-page storytelling layout.
+A financial dashboard must go beyond being a mere "database GUI"; it must present a visual argument. The semantic model and visualization layers are strictly separated, highly performant, and structurally sound. This document serves as the definitive deployment checklist to assemble the distinct codebases, external UDF libraries, and optimized data models into a cohesive, web-tier financial application.
 
-## Page 1: The Executive Macro View
+## Phase 1: The Environment & Foundation
 
-**Objective:** Answer the strategic questions: *How has AAPL performed across different CEO eras? How does it compare to the S&P 500? What is the baseline risk?*
+Before placing a single visual on the canvas, the underlying environment must be strictly controlled.
 
-### Phase 1: Global Formatting & The "Scale" Fallacy
-When visualizing multi-decade compounding assets, a standard linear Y-axis creates an illusion of complete flatness until recent years.
-- **Logarithmic Scaling:** The main Price Line Charts use a Logarithmic Y-axis to ensure percentage gains are visually proportionate across different eras and valuations.
+1. **Apply the JSON Theme:** Import your `Apple_Stock_Theme.json` file. This locks your report canvas to a 1920x1080 resolution and enforces the global `#000000` dark mode background.
+2. **Install the UDF Libraries:** Ensure your Tabular Editor TMDL scripts have successfully injected the following libraries into your semantic model:
+    * `PowerofBI.IBCS` (For absolute variance bars)
+    * `SavoryData.Selection2List` (For dynamic slicer text extraction)
+    * `DaxLib.SVG` (For sparklines and boxplots)
+    * `XU.SVG.Progress` (For tooltip progress bars and donuts)
+    * `PiotrBartela.TitleContext` (For presentation-style date and filter narratives)
+3. **Data Category Enforcement (Critical):** Go to your `_Measures` table. Select every measure that outputs HTML or SVG code (Headers, KPIs, Sparklines, Boxplots, IBCS charts, Tooltips). In the Measure Tools ribbon, you **must** change the Data Category from "Uncategorized" to **Image URL**. 
 
-### Phase 2: Page 1 Layout Elements
-1. **The "Z-Pattern" Header:** High-density aggregate metrics across the top.
-   - **Cards:** `Latest Price`, `CAGR` (vs S&P 500), `Sharpe Ratio` (conditionally formatted green > 1.0, red < 1.0), and `Max Drawdown`.
-2. **The Primary Anchor Visual:**
-   - **Line Chart:** `Calendar[Date]` (Year -> Quarter) vs `Total Return %` and `SP500 Daily Return %`. Includes Error Bars to highlight the Jobs Era (1997) vs Cook Era (2011).
-3. **The Risk/Reward Matrix:**
-   - **Scatter Chart:** `Annualized Volatility` (X) vs `CAGR` (Y) grouped by `Decade`, visually demonstrating which decade offered the best risk-adjusted returns.
-4. **Slicer Pane:**
-   - Dropdown for `CEO Era` and timeline slider for `Date`.
+## Phase 2: Data Model Optimization
 
----
+Do not attempt to render visuals without materializing your heavy statistical calculations. If you skip this, the VertiPaq engine will time out ($O(N^2)$ iteration failure).
 
-## Page 2: The Technical Deep Dive
+1. **`aapl_daily` Calculated Columns:** Ensure you have physical columns for `Historical_Daily_Return`, `Historical_Rolling_Max`, and `Historical_Drawdown`.
+2. **`sp500_daily` Calculated Columns:** Ensure you have the physical column for `Historical_SP500_Return`.
+3. Verify that your measures for `Annualized Volatility`, `Max Drawdown`, and `Beta (AAPL to Market)` have been updated to read from these static columns rather than iterating over the entire calendar table.
 
-**Objective:** Answer tactical trading questions: *Is the stock currently overbought? Where are the momentum shifts? When did institutional volume spike?*
+## Phase 3: Page Assembly
 
-### Phase 3: Page 2 Layout Elements
-1. **The Price Action Engine (Top Half):**
-   - **Line Chart:** Stacked and synchronized rather than spaghetti-layered.
-   - **Values:** `Latest Price` (Black), `50-Day SMA` (Light Blue), and `200-Day SMA` (Dark Blue).
-2. **The Momentum & Volume Oscillators (Bottom Half):**
-   - **Volume Surge (Bottom Left):** Stacked Column Chart for `Volume`. Colored Bright Orange for surge/capitulation days, Light Grey otherwise.
-   - **RSI (Bottom Right):** Line Chart with static reference lines at **70** (Overbought) and **30** (Oversold).
+For every **HTML Content** visual used in this phase, you must go to the Format Pane > General > Effects and turn **Background OFF** and **Visual Border OFF**.
 
----
+### Act I: The Landing Page (`Home`)
+1. **Canvas:** Set to standard page, zero background.
+2. **The Visual:** Add an HTML Content visual covering the entire screen (Width: 1920, Height: 1080, X: 0, Y: 0).
+3. **The Measure:** Drop in `Landing Page HTML`.
+4. **The Route:** Insert a native Power BI **Blank Button**. Strip its formatting (no fill, no border, no icon). Place it perfectly over the "Enter Analytics Dashboard" UI element. Set the button Action to `Page Navigation -> Macro View`.
 
-## Phase 4: Advanced Storytelling Techniques & Polish
+### Act II: Executive Macro View (`Macro View`)
+1. **The Navigation Sidebar (Left Edge):**
+    * HTML Content Visual (240x1080 at X: 0, Y: 0). Measure: `Sidebar Navigation HTML` (Ensure `VAR ActivePage = "Macro"`).
+    * Overlay three transparent Blank Buttons mapped to navigate to your three respective pages.
+2. **The Global Header (Top Right):**
+    * HTML Content Visual (1680x90 at X: 240, Y: 0). Measure: `Header - Macro View HTML`.
+3. **The Slicer Strip:**
+    * Below the header, add native Power BI slicers for `CEO Era` (Dropdown) and `Date` (Between/Timeline Slider). Format them to blend into the dark background.
+4. **The KPI Strip:**
+    * Add four HTML Content visuals side-by-side (400x120 at Y: 160).
+    * Map them to: `KPI - Latest Price`, `KPI - CAGR`, `KPI - Sharpe Ratio`, and `KPI - Max Drawdown`.
+5. **The Price Action Chart (Center-Left):**
+    * Native Line Chart (1000x740 at 240, 300).
+    * X-Axis: `Date`. Y-Axis: `Latest Price`. Legend: `CEO Era`.
+    * **Action:** Turn ON Logarithmic Scale for the Y-Axis.
+6. **The Decade Summary Matrix (Center-Right):**
+    * Native Matrix (640x740 at 1260, 300).
+    * Rows: `Decade`. 
+    * Values: `CAGR`, `SVG Sparkline - Price Trend`, `Annualized Volatility`, `SVG Boxplot - Daily Returns`.
+    * **Action:** Go to Format > Image Size and set it to Height 45, Width 160. Increase row padding to 15px.
 
-- **Report Page Tooltips:** Hovering over a massive drop reveals a hidden context page with `Days Since ATH` and a gauge for `Daily Drawdown %`.
-- **Dynamic Titles:** Measures dynamically update titles based on interactions. Example: `Apple Risk & Return Profile: Jobs Era`.
-- **Bookmark Toggles:** An overlay Area Chart plotting `Daily Drawdown %` on top of the Price Line. Two bookmarks ("Show Price Trend", "Show Drawdown Risk") allow analysts to toggle views contextually.
+### Act III: Technical Deep Dive (`Technical View`)
+1. **Sidebar & Header:**
+    * Copy the Sidebar from Page 1 (Update measure to `ActivePage = "Technical"`).
+    * HTML Content Visual (1680x90 at 240, 0). Measure: `Header - Technical View HTML`.
+2. **The Slicer & Context Badge:**
+    * Add a Native **Relative Date Slicer**. Set the default to "Last 1 Year".
+    * Add a Native Power BI **Pill Button** above your charts. Use Conditional Formatting (`fx`) to map the button text to `Button Text - Active Dates` (the SavoryData measure). Configure hover states for tactical UI feedback.
+3. **The KPI Strip:**
+    * Three HTML visuals side-by-side (540x120 at Y: 160). Map to: `KPI - Volatility`, `KPI - RSI`, and `KPI - Trend State`.
+4. **The Technical Stack (Center Stage vertically stacked):**
+    * **Price:** Line chart (1640x350). Y-Axis: `Latest Price`, `50-Day SMA`, `200-Day SMA`. Turn off X-Axis labels.
+    * **Volume:** Stacked Column Chart (1640x150). Y-Axis: `Volume`. Apply `Is Volume Surge` conditional formatting. Turn off X-Axis labels.
+    * **Oscillator:** Line Chart (1640x150). Y-Axis: `RSI (14-Day)`. Add Y-Axis constant reference lines at 30 and 70. Keep X-Axis labels ON to anchor the timeline for the stack above it.
+5. **The Advisory Engine (Footer):**
+    * HTML Content Visual (1640x100 at the bottom). Map to `Dynamic Business Recommendation`.
 
-### HTML Content Visual & "Enter Dashboard" Button
-To bypass native visual limitations and introduce an Apple-like SaaS experience, a custom HTML/CSS measure renders an application-like entry page. This uses the **HTML Content** visual (by Daniel Marsh-Patrick) combined with an invisible native Power BI navigation button.
+## Phase 4: The Hidden Context Layers (Tooltips)
 
-**Landing Page HTML DAX Measure:**
+These hidden pages replace native black-box tooltips with custom SVG visual reporting.
+
+1. **Build `Tooltip_Macro`:**
+    * Create a hidden page, set Canvas Type to "Tooltip" (320x240), Background `#1d1d1f` (0% transparency).
+    * Add a Matrix visual containing `[SVG Tooltip - Drawdown Recovery]`.
+    * Go to Page 1, select the Price Action Line Chart, and map its Tooltip to `Tooltip_Macro`.
+2. **Build `Tooltip_Tech`:**
+    * Create a hidden page, set Canvas Type to "Tooltip", Background `#1d1d1f`.
+    * Add a Matrix containing `[SVG Tooltip - RSI Capsule]` and `[SVG Tooltip - Volatility Donut]`.
+    * Go to Page 2 and map this tooltip to your Decade Matrix or Technical charts.
+
+## Appendix: Custom HTML DAX Measures
+
+### Landing Page HTML DAX Measure:
 ```dax
 Landing Page HTML = 
 // 1. Fetch Dynamic Data from the Semantic Model
@@ -135,7 +175,7 @@ VAR HtmlContent =
     </div>
 
 </div>
-\"
+"
 RETURN HtmlContent
 ```
 
