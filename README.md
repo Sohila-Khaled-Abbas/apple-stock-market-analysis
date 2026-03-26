@@ -171,12 +171,18 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 ├── data/                  # Datasets
 │   ├── raw/               # Original, immutable datasets (CSV, Excel)
 │   └── processed/         # Cleaned and transformed data for DB ingestion
-├── dashboard/             # Power BI (.pbix) dashboard files
+├── dashboard/             # Power BI dashboard files
+│   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.pbix
+│   └── theme/             # Custom JSON themes and assets
 ├── docs/                  # Technical documentation
+│   ├── Automation Architecture & SOP.md # Standard Operating Procedures
 │   ├── data_pipeline.md             # Data flow and architecture
 │   ├── data_lineage.md              # Origin-to-destination map
 │   ├── business_case_presentation.md # Business Case slide outline
 │   └── powerbi_dashboard_design.md  # Power BI UI/UX & DAX architecture
+├── presentation/          # Executive summary and business case decks
+│   ├── Apple-AAPL-Stock-Market-Analysis-Business-Case-and-Strategies-1980-2025.pdf
+│   └── Apple-AAPL-Stock-Market-Analysis-Business-Case-and-Strategies-1980-2025.pptx
 ├── notebooks/             # Jupyter notebooks
 │   ├── 01_data_profiling.ipynb  # Initial EDA and assertions
 │   ├── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
