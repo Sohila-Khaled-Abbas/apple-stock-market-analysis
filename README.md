@@ -1,23 +1,32 @@
-# 🍏 Apple Stock Market Analysis (1980-2025)
+# 🍏 Apple Stock Market Analysis (1980-Present Day)
 
 [![Power BI](https://img.shields.io/badge/PowerBI-F2C811?style=for-the-badge&logo=Power%20BI&logoColor=black)](https://powerbi.microsoft.com/)
 [![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Jupyter](https://img.shields.io/badge/Jupyter-F37626.svg?&style=for-the-badge&logo=Jupyter&logoColor=white)](https://jupyter.org/)
 [![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> An end-to-end data engineering and analytics project analyzing 45 years of Apple Inc. (AAPL) historical stock market data to extract actionable business insights and investment strategies.
+> An end-to-end data engineering and analytics project analyzing historical Apple Inc. (AAPL) stock market data up to the present day, to extract actionable business insights and investment strategies.
 
 ---
 
 ## 📑 Table of Contents
 
-- [🍏 Apple Stock Market Analysis (1980-2025)](#-apple-stock-market-analysis-1980-2025)
+- [🍏 Apple Stock Market Analysis (1980-Present Day)](#-apple-stock-market-analysis-1980-present-day)
   - [📑 Table of Contents](#-table-of-contents)
   - [🚀 Project Overview](#-project-overview)
   - [🏗️ Project Architecture](#️-project-architecture)
-  - [🎨 Power BI Dashboard Design & Storytelling](#-power-bi-dashboard-design--storytelling)
+    - [Zone 1: Initial Historical Load (Past Data)](#zone-1-initial-historical-load-past-data)
+    - [Zone 2: Automated Daily Enrichment (Present Data)](#zone-2-automated-daily-enrichment-present-data)
+    - [Zone 3: BI Visualization \& Cloud Sync](#zone-3-bi-visualization--cloud-sync)
+    - [Core Technologies Workflow](#core-technologies-workflow)
+  - [🎨 Power BI Dashboard Design \& Architecture](#-power-bi-dashboard-design--architecture)
+    - [1. Data Architecture (The Backend)](#1-data-architecture-the-backend)
+    - [2. User Interface (The Frontend)](#2-user-interface-the-frontend)
+    - [3. Advanced Storytelling \& Context](#3-advanced-storytelling--context)
+    - [4. High-Density Visuals (IBCS \& SVG)](#4-high-density-visuals-ibcs--svg)
   - [📊 Data Profile Summary](#-data-profile-summary)
   - [💡 Business Recommendations](#-business-recommendations)
     - [1. The "Cook" Premium](#1-the-cook-premium)
@@ -32,7 +41,7 @@
 
 ## 🚀 Project Overview
 
-This project focuses on the ingestion, processing, and visualization of Apple’s stock market data spanning from **1980 to 2025**. By combining **Python** for initial profiling, **MySQL** for robust relational data storage and querying, and **Power BI** for interactive dashboards, this project highlights how historical market trends can inform future investment strategies.
+This project focuses on the ingestion, processing, and visualization of Apple’s stock market data spanning from **1980 to the present day**, using the Yahoo Finance API for continuous daily updates. By combining **Python** for initial profiling, **MySQL** for robust relational data storage and querying, and **Power BI** for interactive dashboards, this project highlights how historical and current market trends can inform future investment strategies.
 
 📊 **[View the Executive Business Case Presentation (Google Slides)](https://docs.google.com/presentation/d/1v5ssMhSDsMxkJXG-Xy1a-X05HoXnfY5Ce7pQUGvhGaE/edit?usp=sharing)**
 For an actionable breakdown of the engineering pipeline and the resulting strategic insights, you can also refer to the [Presentation Outline](docs/business_case_presentation.md).
@@ -48,13 +57,17 @@ This diagram visualizes the end-to-end architecture of your Apple Stock (AAPL) d
 The pipeline is organized into three distinct labeled zones that correspond to the lifecycle of the project:
 
 ### Zone 1: Initial Historical Load (Past Data)
+
 This section represents the one-time, manual setup phase where you imported the long-term historical data.
+
 - **Excel Source:** The `Apple-Stock-Historical-Data.xlsx` file (1980–2025) is the origin.
 - **Python Script (Initialization):** A Python script (often run in a Jupyter Notebook for one-time loads) reads the Excel file, cleans the data, and formats it for ingestion.
 - **MySQL Database:** The script uses an SQL `INSERT` command to populate the main `aapl_daily` table. As you requested, this table uses high-precision `DOUBLE` and `BIGINT` types to prevent data truncation.
 
 ### Zone 2: Automated Daily Enrichment (Present Data)
+
 This section shows the automated "engine" we discussed in prompt #9, which runs daily on your local machine to keep the database enriched.
+
 - **Scheduled Trigger (Task Scheduler):** The loop is initiated by the Windows Task Scheduler, set to run after market close. It executes the `.bat` file to activate your Conda environment.
 - **Python Script (`yf_update.py`):** The batch file runs the incremental update script.
 - **Logic (1. Check MAX Date):** The script first queries MySQL to see the latest available date.
@@ -63,16 +76,20 @@ This section shows the automated "engine" we discussed in prompt #9, which runs 
 - **Logic (4. SQL APPEND):** The new records are appended to the existing MySQL Database.
 
 ### Zone 3: BI Visualization & Cloud Sync
+
 This final section shows how the data moves from your local computer into Microsoft's cloud for the end user to view.
+
 - **MySQL Database:** The shared data repository is the single source of truth.
 - **On-premises Data Gateway:** This is the critical security bridge we discussed. Installed on your PC, it creates a secure tunnel between your local MySQL database and Power BI Service.
 - **Power BI Service (Cloud):** Microsoft's cloud-based platform holds the dataset and executes a Scheduled Refresh (18:30) that reaches through the gateway to pull new data from MySQL.
 - **Interactive Dashboard:** The end-user view where your CAGR, Drawdown, and Moving Average analysis are visualized on the web or mobile.
 
 ### Core Technologies Workflow
-1. **Data Profiling (Python/Pandas):** Initial dataset exploration, quality checking, and anomaly detection.
-2. **Data Storage & Transformation (MySQL):** Aggregations, window functions for moving averages, and structured queries to prep the data for visualization.
-3. **Interactive Visualization (Power BI):** Business intelligence dashboards that bring the "Cook Premium" and the "Buy the Dip" signals to life.
+
+1. **Data Acquisition & Automation (yfinance/SQLAlchemy):** Automated daily extraction via `yfinance` API and seamless loading into MySQL using `SQLAlchemy`.
+2. **Data Profiling & Validation (Python/Pandas):** Live database connection to perform initial dataset exploration, quality checking, and API cross-validation.
+3. **Data Storage & Transformation (MySQL):** Persistent robust storage, data cleansing imputation, aggregations, window functions (moving averages), and structured queries to prep the data for visualization.
+4. **Interactive Visualization (Power BI):** Business intelligence dashboards that bring the "Cook Premium" and the "Buy the Dip" signals to life.
 
 ---
 
@@ -81,21 +98,25 @@ This final section shows how the data moves from your local computer into Micros
 Your dashboard is now a fully realized, enterprise-grade financial application. Here is the final summary of the architecture deployed:
 
 ### 1. Data Architecture (The Backend)
+
 - **Pattern:** Star Schema. Fact tables (`aapl_daily`, `sp500_daily`) connected to a central Date dimension (`Calendar`).
 - **Optimization:** $O(N^2)$ bottlenecks (Drawdown, Volatility, Beta) were stripped out of DAX measures and materialized into Calculated Columns during the refresh phase.
 - **Result:** The dashboard renders instantly, even when calculating complex linear regressions over 11,000 days.
 
 ### 2. User Interface (The Frontend)
+
 - **Framework:** "Glassmorphism" Apple Dark Mode (`#1d1d1f`, `#f5f5f7`, System Colors).
 - **Theme Enforcement:** Controlled entirely by a global JSON Theme file to ensure 1920x1080 resolution and automated visual styling (rounded corners, shadows).
 - **Headers & Cards:** Built using HTML Content visuals for flexbox alignment, gradient backgrounds, and scalable SVG icons, bypassing Power BI's rigid native shapes.
 
 ### 3. Advanced Storytelling & Context
+
 - **PiotrBartela.TitleContext:** Used to translate slicer inputs into human-readable presentation strings (e.g., "Last 5 Years" instead of "2020-2025").
 - **SavoryData:** Integrated into native Power BI Buttons as hovering "Badges" to explicitly state active filter contexts above charts.
 - **Automated Advisory:** A DAX `SWITCH` statement acts as a quantitative analyst, writing dynamic text paragraphs based on RSI, Moving Averages, and Beta.
 
 ### 4. High-Density Visuals (IBCS & SVG)
+
 - **PowerofBI.IBCS:** Embedded in matrices to show standardized Absolute Variance (YoY price changes) using red/green delta bars.
 - **DaxLib.SVG:** Used to render granular Price Trend sparklines and Volatility Boxplots inside table rows.
 - **XU.SVG.Progress:** Deployed inside Report Page Tooltips to provide instant visual context (Donuts, Capsules) on hover, without cluttering the main canvas.
@@ -108,12 +129,13 @@ For the definitive deployment checklist and the custom HTML landing page DAX mea
 
 | Metric | Profile Result | Status |
 | :--- | :--- | :--- |
-| **Row Count** | `11,107` | Consistent with 44 years of trading |
-| **Date Range** | `1980-12-12` to `2025-01-03` | Covers all major modern market cycles |
+| **Row Count** | `11,412` | Continuously updated via yfinance API |
+| **Date Range** | `1980-12-12` to `present day` | Covers all major modern market cycles |
 | **Missing Values** | 0 Nulls | High Quality |
 | **Price Consistency** | High >= Low/Open/Close | 100% Logic Pass |
 | **Volume Anomaly** | 1 row with 0 Volume (1981-08-10) | Needs imputation |
 | **Adj Close Range** | $0.037 to $259.02 | Verified (Split-adjusted) |
+| **API Validation** | Passed | 100% Match with External Source |
 
 **Quality Score:** 98% (Excellent completeness; only one minor volume anomaly detected).
 
@@ -157,7 +179,8 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   └── powerbi_dashboard_design.md  # Power BI UI/UX & DAX architecture
 ├── notebooks/             # Jupyter notebooks
 │   ├── 01_data_profiling.ipynb  # Initial EDA and assertions
-│   └── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
+│   ├── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
+│   └── 03_data_validation.ipynb # Automated data quality & API cross-validation
 ├── scripts/               # Automation scripts
 │   ├── yf_update.py             # Python script for incremental updates
 │   └── yf_update.bat            # Batch executable for Task Scheduler
@@ -201,6 +224,7 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 
 5. Validate and calculate indicators:
    - Run `sql/02_data_cleaning.sql` to impute missing volumes and check logic.
+   - Run `notebooks/03_data_validation.ipynb` to cross-validate database figures against the live Yahoo Finance API.
    - Run `sql/03_eda_and_metrics.sql` to generate Moving Averages and CAGR metrics.
 
 6. Launch Dashboard:

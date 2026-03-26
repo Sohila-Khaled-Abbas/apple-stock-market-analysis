@@ -48,6 +48,14 @@ The data pipeline follows an **ELT (Extract, Load, Transform)** pattern combined
 - **Logical Rules Validation:** Detects illogical inputs natively, throwing warning rows if `High_Price < Low_Price` or `High_Price < Close_Price`.
 - **Imputation:** Resolves anomalous entries (such as the 1981-08-10 zero-volume day) natively in SQL by patching it over with an averaged 20-day moving volume window (`AVG(Volume) BETWEEN '1981-08-01' AND '1981-08-20'`).
 
+### Database & API Cross-Validation (`notebooks/03_data_validation.ipynb`)
+
+- **Objective:** Validates the structural integrity and factual accuracy of the `aapl_daily` table after it has been populated and cleaned.
+- **Process:**
+  1. Executes Pandas-driven structural asserts natively against the SQL engine (e.g., verifying zero nulls, strictly unique dates, and robust price boundaries).
+  2. Integrates an external data audit by sampling historical dates from the local database and cross-referencing them against fresh Yahoo Finance API calls.
+  3. Audits the `Adj_Close` mapping consistency against `Close_Price`.
+
 ---
 
 ## 3. Metrics & Exploratory Data Analysis (EDA)
