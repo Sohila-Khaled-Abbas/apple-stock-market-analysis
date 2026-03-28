@@ -8,6 +8,9 @@ import yfinance as yf
 import pandas as pd
 from sqlalchemy import create_engine, text, types
 from datetime import datetime, timedelta
+import os
+import time
+import schedule
 
 # 1. Database Configuration
 DB_USER = 'root'
@@ -115,5 +118,27 @@ def run_update():
             df.to_sql(TABLE_NAME, con=engine, if_exists='append', index=False, dtype=sql_dtypes)
             print(f"SUCCESS: {len(df)} new records appended to MySQL database.")
 
-if __name__ == "__main__":
+            # 6. EXPORT LATEST DATA TO CSV
+            csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'processed', 'aapl_daily.csv')
+            
+            # Export the entire updated table to ensure it remains perfectly synced with the database
+            print(f"EXPORTING: Saving latest full dataset to {csv_path}...")
+            full_df = pd.read_sql(f"SELECT * FROM {TABLE_NAME} ORDER BY Trade_Date", con=engine)
+            full_df.to_csv(csv_path, index=False)
+            print("SUCCESS: CSV export complete.")
+
+def start_scheduler():
+    print("Starting python automation daemon...")
+    # Run once immediately
     run_update()
+    
+    # Schedule to run daily at 18:00 (after market closes)
+    schedule.every().day.at("18:00").do(run_update)
+    
+    print("Scheduled to check for updates daily at 18:00. Keep this script running.")
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
+
+if __name__ == "__main__":
+    start_scheduler()

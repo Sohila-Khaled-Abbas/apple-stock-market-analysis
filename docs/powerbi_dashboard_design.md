@@ -2,6 +2,15 @@
 
 A financial dashboard must go beyond being a mere "database GUI"; it must present a visual argument. The semantic model and visualization layers are strictly separated, highly performant, and structurally sound. This document serves as the definitive deployment checklist to assemble the distinct codebases, external UDF libraries, and optimized data models into a cohesive, web-tier financial application.
 
+## Phase 0: Project Format & Version Control
+
+To enable proper source control and separation of the data model from the UI layer, this project utilizes the **Power BI Project (.pbip)** format rather than a monolithic `.pbix` file.
+
+1. **Dashboard Repository Structure:** The `dashboard/` directory contains the `.pbip` file alongside two main folders:
+    * `Apple-AAPL-Stock-Market-Analysis-Dashboard.SemanticModel/`: Contains the DAX measures, table definitions, and relationships (the backend).
+    * `Apple-AAPL-Stock-Market-Analysis-Dashboard.Report/`: Contains the JSON-based visual canvas, pages, and interactive elements (the frontend).
+2. **Development Workflow:** Always open the `.pbip` file to edit the project. Changes will be saved as human-readable text files in their respective folders, enabling strict Git version control.
+
 ## Phase 1: The Environment & Foundation
 
 Before placing a single visual on the canvas, the underlying environment must be strictly controlled.

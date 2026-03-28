@@ -66,14 +66,14 @@ This section represents the one-time, manual setup phase where you imported the 
 
 ### Zone 2: Automated Daily Enrichment (Present Data)
 
-This section shows the automated "engine" we discussed in prompt #9, which runs daily on your local machine to keep the database enriched.
+This section shows the automated "engine" running locally to keep your database and flat files enriched.
 
-- **Scheduled Trigger (Task Scheduler):** The loop is initiated by the Windows Task Scheduler, set to run after market close. It executes the `.bat` file to activate your Conda environment.
-- **Python Script (`yf_update.py`):** The batch file runs the incremental update script.
+- **Python Automation Daemon:** The `yf_update.py` script utilizes the `schedule` library to run automatically every day at 18:00 (after market close).
 - **Logic (1. Check MAX Date):** The script first queries MySQL to see the latest available date.
 - **Logic (2. Fetch New Data):** It calls the Yahoo Finance API (`yfinance`) to get data only for the missing days (Start Date = `MAX(Date)` + 1 day).
 - **Logic (3. Clean and Flatten):** The script handles MultiIndex flattening and dictionary mapping to ensure data is clean.
 - **Logic (4. SQL APPEND):** The new records are appended to the existing MySQL Database.
+- **Logic (5. Local CSV Export):** The perfectly synchronized table is exported to `data/processed/aapl_daily.csv` right after the database is updated.
 
 ### Zone 3: BI Visualization & Cloud Sync
 
@@ -172,10 +172,12 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   ├── raw/               # Original, immutable datasets (CSV, Excel)
 │   └── processed/         # Cleaned and transformed data for DB ingestion
 ├── dashboard/             # Power BI dashboard files
+│   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.pbip
 │   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.pbix
+│   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.Report/
+│   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.SemanticModel/
 │   └── theme/             # Custom JSON themes and assets
 ├── docs/                  # Technical documentation
-│   ├── Automation Architecture & SOP.md # Standard Operating Procedures
 │   ├── data_pipeline.md             # Data flow and architecture
 │   ├── data_lineage.md              # Origin-to-destination map
 │   ├── business_case_presentation.md # Business Case slide outline
@@ -188,8 +190,7 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   ├── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
 │   └── 03_data_validation.ipynb # Automated data quality & API cross-validation
 ├── scripts/               # Automation scripts
-│   ├── yf_update.py             # Python script for incremental updates
-│   └── yf_update.bat            # Batch executable for Task Scheduler
+│   └── yf_update.py             # Python daemon script for incremental updates and CSV export
 ├── sql/                   # MySQL scripts for ELT
 │   ├── 01_data_ingestion.sql    # Schema initialization and CSV bulk loading
 │   ├── 02_data_cleaning.sql     # Validation, imputation, and anomaly checks
