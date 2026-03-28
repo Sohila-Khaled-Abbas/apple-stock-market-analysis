@@ -1,0 +1,37 @@
+DEFINE
+    VAR _Tables = 
+        SELECTCOLUMNS(
+            INFO.TABLES(), 
+            "TableID", [ID], 
+            "TableName", [Name]
+        )
+    
+    VAR _Measures =
+        SELECTCOLUMNS(
+            FILTER(INFO.MEASURES(), [IsHidden] = FALSE),
+            "TableID", [TableID],
+            "ObjectName", [Name],
+            "ObjectType", "Measure",
+            "Expression", [Expression],
+            "Description", [Description],
+            "FormatString", [FormatString]
+        )
+        
+    VAR _Columns =
+        SELECTCOLUMNS(
+            -- FIX: Replaced "AND" with "&&"
+            FILTER(INFO.COLUMNS(), [Type] = 1 && [IsHidden] = FALSE), 
+            "TableID", [TableID],
+            "ObjectName", [ExplicitName],
+            "ObjectType", "Column",
+            "Expression", [Expression],
+            "Description", [Description],
+            "FormatString", [FormatString]
+        )
+        
+    VAR _Combined = UNION(_Measures, _Columns)
+
+EVALUATE
+    NATURALLEFTOUTERJOIN(_Combined, _Tables)
+ORDER BY 
+    [TableName], [ObjectType], [ObjectName]

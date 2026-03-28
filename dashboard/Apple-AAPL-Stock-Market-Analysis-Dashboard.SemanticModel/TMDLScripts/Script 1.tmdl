@@ -1,0 +1,371 @@
+createOrReplace
+
+    ref table _Measures
+
+        /// Retrieves the most recent adjusted closing price for the selected context, skipping non-trading days (weekends/holidays).
+        measure 'Latest Price' =
+                
+                CALCULATE(
+                    MAX(aapl_daily[Adj_Close]),
+                    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+                )
+            formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+            displayFolder: "01 - Absolute Performance"
+            lineageTag: 256572d0-8971-456b-b034-113c7ba08963
+            
+            annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+        /// Calculates the day-over-day percentage change in the adjusted closing price.
+        measure 'Daily Return %' = ```
+                
+                VAR CurrentDate = MAX('Calendar'[Date])
+                VAR PreviousTradingDay = 
+                    CALCULATE(
+                        MAX('Calendar'[Date]),
+                        FILTER(
+                            ALLSELECTED('Calendar'),
+                            'Calendar'[Date] < CurrentDate &&
+                            NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
+                        )
+                    )
+                VAR CurrentPrice = [Latest Price]
+                VAR PreviousPrice = 
+                    CALCULATE(
+                        [Latest Price],
+                        'Calendar'[Date] = PreviousTradingDay
+                    )
+                RETURN
+                    DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "01 - Absolute Performance"
+            lineageTag: 50717c72-45aa-4d38-8a5f-d6c010ee2788
+
+        /// Calculates the absolute percentage return from the first to the last trading day within the currently filtered time period.
+        measure 'Total Return %' = ```
+                
+                VAR StartPrice = 
+                    CALCULATE(
+                        MIN(aapl_daily[Adj_Close]), 
+                        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+                    )
+                VAR EndPrice = [Latest Price]
+                RETURN 
+                    DIVIDE(EndPrice - StartPrice, StartPrice)
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "01 - Absolute Performance"
+            lineageTag: adaaa74d-c0dc-4f8d-87ca-38abc482e538
+
+        /// Compound Annual Growth Rate. Normalizes the absolute return to an annualized percentage to accurately compare performance across different time horizons.
+        measure CAGR = ```
+                
+                VAR StartPrice = 
+                    CALCULATE(
+                        MIN(aapl_daily[Adj_Close]), 
+                        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+                    )
+                VAR EndPrice = [Latest Price]
+                VAR StartDate = CALCULATE(MIN('Calendar'[Date]), aapl_daily)
+                VAR EndDate = CALCULATE(MAX('Calendar'[Date]), aapl_daily)
+                VAR Years = DIVIDE(DATEDIFF(StartDate, EndDate, DAY), 365.25)
+                
+                RETURN
+                    IF(
+                        Years > 0 && StartPrice > 0, 
+                        (EndPrice / StartPrice) ^ (1 / Years) - 1, 
+                        BLANK()
+                    )
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "01 - Absolute Performance"
+            lineageTag: 517aea45-1ca9-4652-aa46-042557378a08
+
+        /// Calculates the 50-calendar-day simple moving average of the adjusted closing price. Acts as a short-to-medium-term momentum indicator.
+        measure '50-Day SMA' =
+                
+                AVERAGEX(
+                    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -50, DAY),
+                    CALCULATE(SUM(aapl_daily[Adj_Close]))
+                )
+            formatString: 0.00
+            displayFolder: "02 - Trend & Momentum"
+            lineageTag: d3a958b8-b3fa-42ae-9489-8160453a72f9
+
+        /// Calculates the 200-calendar-day simple moving average. The ultimate institutional indicator for long-term bull vs. bear market phases.
+        measure '200-Day SMA' =
+                
+                AVERAGEX(
+                    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -200, DAY),
+                    CALCULATE(SUM(aapl_daily[Adj_Close]))
+                )
+            formatString: 0.00
+            displayFolder: "02 - Trend & Momentum"
+            lineageTag: 7e2982cf-c937-4990-b74f-254d1dab3726
+
+        /// Identifies whether the asset is in a Golden Cross (50 SMA > 200 SMA) or Death Cross (50 SMA < 200 SMA).
+        measure 'Trend State' =
+                
+                VAR SMA50 = [50-Day SMA]
+                VAR SMA200 = [200-Day SMA]
+                RETURN
+                    IF(ISBLANK(SMA50) || ISBLANK(SMA200), BLANK(),
+                        IF(SMA50 > SMA200, "Bullish (Golden)", "Bearish (Death)")
+                    )
+            displayFolder: "02 - Trend & Momentum"
+            lineageTag: 34e5ad3a-046c-4448-be80-6fd1d4b10196
+
+        /// Relative Strength Index (SMA method). Oscillates from 0 to 100 to evaluate whether the stock is overbought (>70) or oversold (<30).
+        measure 'RSI (14-Day)' = ```
+                
+                VAR CurrentDate = MAX('Calendar'[Date])
+                VAR LookbackPeriod = 14
+                
+                -- Get the last 14 trading days
+                VAR ReferenceDates = 
+                    TOPN(
+                        LookbackPeriod, 
+                        FILTER(
+                            ALL('Calendar'), 
+                            'Calendar'[Date] <= CurrentDate && NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
+                        ), 
+                        'Calendar'[Date], DESC
+                    )
+                
+                -- Calculate average gains and losses over those 14 days
+                VAR GainsAndLosses = 
+                    ADDCOLUMNS(
+                        ReferenceDates,
+                        "Gain", IF([Daily Return %] > 0, [Daily Return %], 0),
+                        "Loss", IF([Daily Return %] < 0, ABS([Daily Return %]), 0)
+                    )
+                
+                VAR AvgGain = AVERAGEX(GainsAndLosses, [Gain])
+                VAR AvgLoss = AVERAGEX(GainsAndLosses, [Loss])
+                VAR RS = DIVIDE(AvgGain, AvgLoss)
+                
+                RETURN
+                    IF(
+                        ISBLANK(AvgLoss) || AvgLoss = 0, 100, -- If no losses, RSI is 100
+                        100 - DIVIDE(100, 1 + RS)
+                    )
+                ```
+            formatString: 0.00
+            displayFolder: "02 - Trend & Momentum"
+            lineageTag: 4383ee5d-8a7c-48e1-aed1-4fa415950dad
+
+        /// Binary flag (1 or 0) indicating if the trading volume for the day was more than double the trailing 30-day average. Useful for identifying institutional accumulation/distribution.
+        measure 'Is Volume Surge' = ```
+                
+                VAR Avg30DayVolume = 
+                    AVERAGEX(
+                        DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -30, DAY),
+                        CALCULATE(SUM(aapl_daily[Volume]))
+                    )
+                VAR CurrentVolume = CALCULATE(SUM(aapl_daily[Volume]))
+                RETURN
+                    IF(CurrentVolume > (Avg30DayVolume * 2), 1, 0)
+                ```
+            formatString: 0
+            displayFolder: "02 - Trend & Momentum"
+            lineageTag: d62f8bbf-4947-4db7-99a2-f376d9fdbead
+
+        /// Standard deviation of daily returns, multiplied by the square root of 252. Represents the historical risk or standard pricing dispersion of the asset.
+        measure 'Annualized Volatility' = ```
+                
+                VAR DailyStdDev = STDEVX.P(aapl_daily, [Daily Return %])
+                RETURN 
+                    DailyStdDev * SQRT(252)
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "03 - Risk & Volatility"
+            lineageTag: c9005927-a922-459b-b3b7-8c7fbfc9cebd
+
+        /// The continuous percentage drop from the highest historical peak within the currently selected time window.
+        measure 'Daily Drawdown %' = ```
+                
+                VAR CurrentDate = MAX('Calendar'[Date])
+                VAR RollingMax = 
+                    CALCULATE(
+                        MAX(aapl_daily[Adj_Close]),
+                        FILTER(
+                            ALLSELECTED('Calendar'[Date]),
+                            'Calendar'[Date] <= CurrentDate
+                        )
+                    )
+                VAR CurrentPrice = [Latest Price]
+                RETURN
+                    DIVIDE(CurrentPrice - RollingMax, RollingMax)
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "03 - Risk & Volatility"
+            lineageTag: 89b204ca-ba79-4d9b-95cc-2f46d96d9be4
+
+        /// Iterates over the selected context to find the absolute worst 'peak-to-trough' decline. The ultimate metric for downside pain tolerance.
+        measure 'Max Drawdown' = ```
+                
+                MINX(
+                    VALUES('Calendar'[Date]), 
+                    [Daily Drawdown %]
+                )
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "03 - Risk & Volatility"
+            lineageTag: 163e9ef4-c78c-4bef-b706-4f6a898258d3
+
+        /// Calculates how many calendar days an investor's capital has been trapped underwater since the highest point of the portfolio.
+        measure 'Days Since ATH' = ```
+                
+                VAR CurrentDate = MAX('Calendar'[Date])
+                VAR CurrentPrice = [Latest Price]
+                
+                VAR RollingMaxPrice = 
+                    CALCULATE(
+                        MAX(aapl_daily[Adj_Close]),
+                        FILTER(
+                            ALLSELECTED('Calendar'[Date]),
+                            'Calendar'[Date] <= CurrentDate
+                        )
+                    )
+                
+                VAR DateOfMaxPrice = 
+                    CALCULATE(
+                        MAX('Calendar'[Date]),
+                        FILTER(
+                            ALLSELECTED('Calendar'[Date]),
+                            'Calendar'[Date] <= CurrentDate &&
+                            CALCULATE(MAX(aapl_daily[Adj_Close])) = RollingMaxPrice 
+                        )
+                    )
+                
+                RETURN
+                    IF(
+                        ISBLANK(CurrentPrice) || ISBLANK(RollingMaxPrice),
+                        BLANK(),
+                        IF(
+                            CurrentPrice >= RollingMaxPrice, 
+                            0,
+                            DATEDIFF(DateOfMaxPrice, CurrentDate, DAY)
+                        )
+                    )
+                ```
+            formatString: 0
+            displayFolder: "03 - Risk & Volatility"
+            lineageTag: 53fedaf0-8efd-4f55-83b4-2fec162b4fad
+
+        /// The slope of the linear regression between AAPL and S&P500 returns. A Beta > 1 means AAPL is more volatile than the market.
+        measure 'Beta (AAPL to Market)' = ```
+                
+                VAR ReturnTable = 
+                    FILTER(
+                        ADDCOLUMNS(
+                            VALUES('Calendar'[Date]),
+                            "AssetReturn", [Daily Return %],
+                            "MarketReturn", [SP500 Daily Return %]
+                        ),
+                        NOT(ISBLANK([AssetReturn])) && NOT(ISBLANK([MarketReturn]))
+                    )
+                
+                VAR RegressionTable = 
+                    LINESTX(
+                        ReturnTable, 
+                        [AssetReturn], 
+                        [MarketReturn]
+                    )
+                
+                RETURN 
+                    MAXX(RegressionTable, [Slope1])
+                ```
+            formatString: 0.00
+            displayFolder: "04 - Advanced Portfolio Analytics"
+            lineageTag: cd3c9bef-3451-480e-88d1-b8a88c03e11d
+
+        /// Jensen's Alpha. Measures the exact percentage of outperformance (or underperformance) that cannot be attributed to general market movements (Beta).
+        measure 'Alpha (Annualized)' =
+                
+                VAR RiskFreeRate = 0.04
+                VAR AAPLReturn = [CAGR]
+                VAR MarketReturn = [SP500 CAGR]
+                VAR AssetBeta = [Beta (AAPL to Market)]
+                
+                VAR ExpectedReturn = RiskFreeRate + AssetBeta * (MarketReturn - RiskFreeRate)
+                
+                RETURN
+                    IF(
+                        NOT(ISBLANK(AssetBeta)),
+                        AAPLReturn - ExpectedReturn,
+                        BLANK()
+                    )
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "04 - Advanced Portfolio Analytics"
+            lineageTag: 33e6c164-23ec-4881-97ee-a80ce6803bd7
+
+        /// Evaluates risk-adjusted performance. A ratio greater than 1 indicates adequate compensation for the historical risk taken.
+        measure 'Sharpe Ratio' = ```
+                
+                VAR RiskFreeRate = 0.04 
+                VAR PortfolioReturn = [CAGR] 
+                VAR Volatility = [Annualized Volatility]
+                RETURN
+                    IF(
+                        NOT(ISBLANK(Volatility)) && Volatility > 0,
+                        DIVIDE(PortfolioReturn - RiskFreeRate, Volatility),
+                        BLANK()
+                    )
+                ```
+            formatString: 0.00
+            displayFolder: "04 - Advanced Portfolio Analytics"
+            lineageTag: 2c45cf84-2226-443b-8dac-30dff7a145c3
+
+        /// Retrieves the most recent closing price of the S&P 500 benchmark for the selected context.
+        measure 'SP500 Latest Price' =
+                
+                CALCULATE(
+                    MAX(sp500_daily[SP500_Close]),
+                    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(sp500_daily)))
+                )
+            formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+            displayFolder: "05 - S&P 500 Benchmark"
+            lineageTag: cf401d93-3fc9-41d4-b038-3f9085e1f4c2
+            
+            annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+        /// Calculates the day-over-day percentage change for the broad market (S&P 500) to serve as a baseline for Beta.
+        measure 'SP500 Daily Return %' = ```
+                
+                VAR CurrentDate = MAX('Calendar'[Date])
+                VAR PreviousTradingDay = 
+                    CALCULATE(
+                        MAX('Calendar'[Date]),
+                        FILTER(
+                            ALLSELECTED('Calendar'),
+                            'Calendar'[Date] < CurrentDate && NOT(ISBLANK(CALCULATE(COUNTROWS(sp500_daily))))
+                        )
+                    )
+                VAR CurrentPrice = [SP500 Latest Price]
+                VAR PreviousPrice = CALCULATE([SP500 Latest Price], 'Calendar'[Date] = PreviousTradingDay)
+                RETURN DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "05 - S&P 500 Benchmark"
+            lineageTag: ee3e7b1f-36e2-4617-80e2-c2ae6eb00353
+
+        /// The annualized compound growth rate of the broader market, used as the baseline for calculating Jensen's Alpha.
+        measure 'SP500 CAGR' = ```
+                
+                VAR StartPrice = 
+                    CALCULATE(
+                        MIN(sp500_daily[SP500_Close]), 
+                        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(sp500_daily)))
+                    )
+                VAR EndPrice = [SP500 Latest Price]
+                VAR StartDate = CALCULATE(MIN('Calendar'[Date]), sp500_daily)
+                VAR EndDate = CALCULATE(MAX('Calendar'[Date]), sp500_daily)
+                VAR Years = DIVIDE(DATEDIFF(StartDate, EndDate, DAY), 365.25)
+                
+                RETURN
+                    IF(Years > 0 && StartPrice > 0, (EndPrice / StartPrice) ^ (1 / Years) - 1, BLANK()) 
+                ```
+            formatString: 0.00%;-0.00%;0.00%
+            displayFolder: "05 - S&P 500 Benchmark"
+            lineageTag: 564013fd-6a8d-49b7-8c74-02ec680879f9

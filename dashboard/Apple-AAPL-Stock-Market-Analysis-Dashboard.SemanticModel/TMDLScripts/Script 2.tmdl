@@ -1,0 +1,793 @@
+createOrReplace
+
+	model Model
+		culture: en-US
+		defaultPowerBIDataSourceVersion: powerBI_V3
+		sourceQueryCulture: en-US
+		dataAccessOptions
+			legacyRedirects
+			returnErrorValuesAsNull
+
+		table aapl_daily
+			lineageTag: fcaea2a8-d740-4e49-9b25-27d9f558ae23
+
+			column Trade_Date
+				dataType: dateTime
+				isKey
+				formatString: Short Date
+				lineageTag: ae24425f-4baa-4b5e-b857-0cef7401e2e9
+				isDefaultLabel
+				summarizeBy: none
+				sourceColumn: Trade_Date
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column Adj_Close
+				dataType: double
+				isHidden
+				lineageTag: d52875c9-156c-4dcf-a5e6-96e85145ba0b
+				summarizeBy: sum
+				sourceColumn: Adj_Close
+
+				changedProperty = IsHidden
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Close_Price
+				dataType: double
+				lineageTag: 19d428e4-0016-4c09-b962-b6c50dc44014
+				summarizeBy: sum
+				sourceColumn: Close_Price
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column High_Price
+				dataType: double
+				lineageTag: 5c97e953-4bd9-4662-a956-1acde62d431c
+				summarizeBy: sum
+				sourceColumn: High_Price
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Low_Price
+				dataType: double
+				lineageTag: 2136b621-3485-4e2b-b294-2e3153f01732
+				summarizeBy: sum
+				sourceColumn: Low_Price
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Open_Price
+				dataType: double
+				lineageTag: cfdf1da0-603f-4513-bbd7-d893cf737661
+				summarizeBy: sum
+				sourceColumn: Open_Price
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Volume
+				dataType: int64
+				formatString: 0
+				lineageTag: 749e37b5-d820-437d-8459-6e38ecc25c9f
+				summarizeBy: sum
+				sourceColumn: Volume
+
+				annotation SummarizationSetBy = Automatic
+
+			column Daily_Spread_USD
+				dataType: double
+				lineageTag: 6db5de2f-131b-4158-b8f9-e6d09723597c
+				summarizeBy: sum
+				sourceColumn: Daily_Spread_USD
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Intraday_Spread_Pct
+				dataType: double
+				lineageTag: 66af5f68-c0f3-4eae-be51-332f90b05cb5
+				summarizeBy: sum
+				sourceColumn: Intraday_Spread_Pct
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Intraday_Return_Pct
+				dataType: double
+				lineageTag: f2f6172f-b224-489e-b8ec-64f2e05c7c0a
+				summarizeBy: sum
+				sourceColumn: Intraday_Return_Pct
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Candlestick_Direction
+				dataType: string
+				lineageTag: 8649a552-4e66-46cd-bd92-48b15c84dddc
+				summarizeBy: none
+				sourceColumn: Candlestick_Direction
+
+				annotation SummarizationSetBy = Automatic
+
+			column Open_Placement
+				dataType: string
+				lineageTag: 106a66c3-7db1-42c7-be78-8219751c5c9c
+				summarizeBy: none
+				sourceColumn: Open_Placement
+
+				annotation SummarizationSetBy = Automatic
+
+			partition aapl_daily = m
+				mode: import
+				source = ```
+						let
+						    Source = MySQL.Database("localhost", "apple_stock_db", [ReturnSingleDatabase=true]),
+						    apple_stock_db_aapl_daily = Source{[Schema="apple_stock_db",Item="aapl_daily"]}[Data],
+						    #"Changed Type" = Table.TransformColumnTypes(apple_stock_db_aapl_daily,{{"Trade_Date", type date}}),
+						    #"Added Intraday_Spread_Pct" = Table.AddColumn(#"Changed Type", "Intraday_Spread_Pct", each ([High_Price] - [Low_Price]) / [Open_Price]),
+						    #"Changed Type1" = Table.TransformColumnTypes(#"Added Intraday_Spread_Pct",{{"Intraday_Spread_Pct", Percentage.Type}}),
+						    #"Added Candlestick_Direction" = Table.AddColumn(#"Changed Type1", "Candlestick_Direction", each if [Close_Price] > [Open_Price] then "Bullish" 
+						else if [Close_Price] < [Open_Price] then "Bearish" 
+						else "Doji (Flat)"),
+						    #"Changed Type2" = Table.TransformColumnTypes(#"Added Candlestick_Direction",{{"Candlestick_Direction", type text}}),
+						    #"Added Intraday_Return_Pct" = Table.AddColumn(#"Changed Type2", "Intraday_Return_Pct", each ([Close_Price] - [Open_Price]) / [Open_Price]),
+						    #"Reordered Columns" = Table.ReorderColumns(#"Added Intraday_Return_Pct",{"Trade_Date", "Adj_Close", "Close_Price", "High_Price", "Low_Price", "Open_Price", "Volume", "Intraday_Spread_Pct", "Intraday_Return_Pct", "Candlestick_Direction"}),
+						    #"Changed Type3" = Table.TransformColumnTypes(#"Reordered Columns",{{"Intraday_Return_Pct", Percentage.Type}}),
+						    #"Added Daily_Spread_USD" = Table.AddColumn(#"Changed Type3", "Daily_Spread_USD", each [High_Price] - [Low_Price]),
+						    #"Changed Type4" = Table.TransformColumnTypes(#"Added Daily_Spread_USD",{{"Daily_Spread_USD", type number}}),
+						    #"Reordered Columns1" = Table.ReorderColumns(#"Changed Type4",{"Trade_Date", "Adj_Close", "Close_Price", "High_Price", "Low_Price", "Open_Price", "Daily_Spread_USD", "Volume", "Intraday_Spread_Pct", "Intraday_Return_Pct", "Candlestick_Direction"}),
+						    #"Added Open_Placement" = Table.AddColumn(#"Reordered Columns1", "Open_Placement", each if [Open_Price] >= [High_Price] then "Gap Up / High Open"
+						else if [Open_Price] <= [Low_Price] then "Gap Down / Low Open"
+						else "Inside Range"),
+						    #"Changed Type5" = Table.TransformColumnTypes(#"Added Open_Placement",{{"Open_Placement", type text}})
+						in
+						    #"Changed Type5"
+						```
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table Calendar
+			lineageTag: 18ee3baf-1dcf-4674-8901-95975ce3e771
+			dataCategory: Time
+
+			column Date
+				dataType: dateTime
+				isKey
+				formatString: Short Date
+				lineageTag: 7bb419ba-5eae-46f8-8879-2ec1d0f4ee95
+				summarizeBy: none
+				sourceColumn: Date
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column Year
+				dataType: int64
+				formatString: 0
+				lineageTag: 28f7d1dd-f88d-41ba-81e3-665b06134884
+				summarizeBy: sum
+				sourceColumn: Year
+
+				annotation SummarizationSetBy = Automatic
+
+			column Quarter
+				dataType: string
+				lineageTag: cf11467c-7e76-4d59-83e9-88d7b9715fac
+				summarizeBy: none
+				sourceColumn: Quarter
+
+				annotation SummarizationSetBy = Automatic
+
+			column MonthNumber
+				dataType: int64
+				formatString: 0
+				lineageTag: 18baad48-bfa3-4e85-a940-51fc148ca557
+				summarizeBy: sum
+				sourceColumn: MonthNumber
+
+				annotation SummarizationSetBy = Automatic
+
+			column MonthName
+				dataType: string
+				lineageTag: 1c408708-e003-4a44-8a44-0c18678c3118
+				summarizeBy: none
+				sourceColumn: MonthName
+				sortByColumn: MonthNumber
+
+				changedProperty = SortByColumn
+
+				annotation SummarizationSetBy = Automatic
+
+			column DayOfWeek
+				dataType: int64
+				formatString: 0
+				lineageTag: c8fcf425-b0f6-4883-bb5f-aae618174b65
+				summarizeBy: sum
+				sourceColumn: DayOfWeek
+
+				annotation SummarizationSetBy = Automatic
+
+			column IsWeekend
+				dataType: boolean
+				formatString: """TRUE"";""TRUE"";""FALSE"""
+				lineageTag: 9236096c-acdb-4d17-8da0-885bb43226a4
+				summarizeBy: none
+				sourceColumn: IsWeekend
+
+				annotation SummarizationSetBy = Automatic
+
+			column Decade
+				dataType: string
+				lineageTag: c691bfa3-7aff-4e92-991c-e1e33db3a915
+				summarizeBy: none
+				sourceColumn: Decade
+
+				annotation SummarizationSetBy = Automatic
+
+			column 'CEO Era'
+				dataType: string
+				lineageTag: b97ce93e-f333-4a39-8175-748dfd7bb51c
+				summarizeBy: none
+				sourceColumn: CEO Era
+
+				annotation SummarizationSetBy = Automatic
+
+			partition Calendar = m
+				mode: import
+				source = ```
+						let
+						    // 1. Dynamic Start and End Dates based on the dataset
+						    StartDate = List.Min(aapl_daily[Trade_Date]),
+						    EndDate = List.Max(aapl_daily[Trade_Date]),
+						    Duration = Duration.Days(EndDate - StartDate) + 1,
+						    DatesList = List.Dates(StartDate, Duration, #duration(1,0,0,0)),
+						    
+						    // 2. Base Table Creation
+						    #"Converted to Table" = Table.FromList(DatesList, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+						    #"Renamed Columns" = Table.RenameColumns(#"Converted to Table",{{"Column1", "Date"}}),
+						    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"Date", type date}}),
+						    
+						    // 3. Standard Chronological Attributes
+						    #"Inserted Year" = Table.AddColumn(#"Changed Type", "Year", each Date.Year([Date]), Int64.Type),
+						    #"Inserted Quarter" = Table.AddColumn(#"Inserted Year", "Quarter", each "Q" & Text.From(Date.QuarterOfYear([Date])), type text),
+						    #"Inserted Month" = Table.AddColumn(#"Inserted Quarter", "MonthNumber", each Date.Month([Date]), Int64.Type),
+						    #"Inserted Month Name" = Table.AddColumn(#"Inserted Month", "MonthName", each Date.MonthName([Date]), type text),
+						    #"Inserted Day of Week" = Table.AddColumn(#"Inserted Month Name", "DayOfWeek", each Date.DayOfWeek([Date], Day.Monday), Int64.Type),
+						    
+						    // 4. FINANCIAL DOMAIN ENRICHMENTS
+						    // A. Weekend Flag (Markets are closed)
+						    #"Inserted IsWeekend" = Table.AddColumn(#"Inserted Day of Week", "IsWeekend", each if [DayOfWeek] >= 5 then true else false, type logical),
+						    
+						    // B. Decade Identifier (For macro-economic cycle analysis)
+						    #"Inserted Decade" = Table.AddColumn(#"Inserted IsWeekend", "Decade", each Text.From(Number.RoundDown([Year]/10)*10) & "s", type text),
+						    
+						    // C. Apple Business Eras (Crucial for storytelling in your dashboard)
+						    #"Inserted CEO Era" = Table.AddColumn(#"Inserted Decade", "CEO Era", each 
+						        if [Date] < #date(1983, 4, 8) then "Markkula Era (Early Days)"
+						        else if [Date] < #date(1993, 6, 18) then "Sculley Era (Mac Intro)"
+						        else if [Date] < #date(1997, 7, 9) then "Spindler/Amelio Era (Struggle)"
+						        else if [Date] < #date(2011, 8, 24) then "Jobs Era (iPod/iPhone)"
+						        else "Cook Era (Services/Scale)", type text)
+						in
+						    #"Inserted CEO Era"
+						```
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		table _Measures
+			lineageTag: 616d304d-2b1c-4e8c-8050-b858652c6d1c
+
+			/// Retrieves the most recent adjusted closing price for the selected context, skipping non-trading days (weekends/holidays).
+			measure 'Latest Price' =
+					
+					CALCULATE(
+					    MAX(aapl_daily[Adj_Close]),
+					    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+					)
+				formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+				displayFolder: 01 - Absolute Performance
+				lineageTag: 256572d0-8971-456b-b034-113c7ba08963
+
+				annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+			/// Calculates the absolute percentage return from the first to the last trading day within the currently filtered time period.
+			measure 'Total Return %' = ```
+					
+					VAR StartPrice = 
+					    CALCULATE(
+					        MIN(aapl_daily[Adj_Close]), 
+					        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+					    )
+					VAR EndPrice = [Latest Price]
+					RETURN 
+					    DIVIDE(EndPrice - StartPrice, StartPrice)
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 01 - Absolute Performance
+				lineageTag: adaaa74d-c0dc-4f8d-87ca-38abc482e538
+
+			/// Compound Annual Growth Rate. Normalizes the absolute return to an annualized percentage to accurately compare performance across different time horizons.
+			measure CAGR = ```
+					
+					VAR StartPrice = 
+					    CALCULATE(
+					        MIN(aapl_daily[Adj_Close]), 
+					        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+					    )
+					VAR EndPrice = [Latest Price]
+					VAR StartDate = CALCULATE(MIN('Calendar'[Date]), aapl_daily)
+					VAR EndDate = CALCULATE(MAX('Calendar'[Date]), aapl_daily)
+					VAR Years = DIVIDE(DATEDIFF(StartDate, EndDate, DAY), 365.25)
+					
+					RETURN
+					    IF(
+					        Years > 0 && StartPrice > 0, 
+					        (EndPrice / StartPrice) ^ (1 / Years) - 1, 
+					        BLANK()
+					    )
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 01 - Absolute Performance
+				lineageTag: 517aea45-1ca9-4652-aa46-042557378a08
+
+			/// Calculates the 50-calendar-day simple moving average of the adjusted closing price. Acts as a short-to-medium-term momentum indicator.
+			measure '50-Day SMA' =
+					
+					AVERAGEX(
+					    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -50, DAY),
+					    CALCULATE(SUM(aapl_daily[Adj_Close]))
+					)
+				formatString: 0.00
+				displayFolder: 02 - Trend & Momentum
+				lineageTag: d3a958b8-b3fa-42ae-9489-8160453a72f9
+
+			/// Calculates the 200-calendar-day simple moving average. The ultimate institutional indicator for long-term bull vs. bear market phases.
+			measure '200-Day SMA' =
+					
+					AVERAGEX(
+					    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -200, DAY),
+					    CALCULATE(SUM(aapl_daily[Adj_Close]))
+					)
+				formatString: 0.00
+				displayFolder: 02 - Trend & Momentum
+				lineageTag: 7e2982cf-c937-4990-b74f-254d1dab3726
+
+			/// Identifies whether the asset is in a Golden Cross (50 SMA > 200 SMA) or Death Cross (50 SMA < 200 SMA).
+			measure 'Trend State' =
+					
+					VAR SMA50 = [50-Day SMA]
+					VAR SMA200 = [200-Day SMA]
+					RETURN
+					    IF(ISBLANK(SMA50) || ISBLANK(SMA200), BLANK(),
+					        IF(SMA50 > SMA200, "Bullish (Golden)", "Bearish (Death)")
+					    )
+				displayFolder: 02 - Trend & Momentum
+				lineageTag: 34e5ad3a-046c-4448-be80-6fd1d4b10196
+
+			/// The continuous percentage drop from the highest historical peak within the currently selected time window.
+			measure 'Daily Drawdown %' = ```
+					
+					VAR CurrentDate = MAX('Calendar'[Date])
+					VAR RollingMax = 
+					    CALCULATE(
+					        MAX(aapl_daily[Adj_Close]),
+					        FILTER(
+					            ALLSELECTED('Calendar'[Date]),
+					            'Calendar'[Date] <= CurrentDate
+					        )
+					    )
+					VAR CurrentPrice = [Latest Price]
+					RETURN
+					    DIVIDE(CurrentPrice - RollingMax, RollingMax)
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 03 - Risk & Volatility
+				lineageTag: 89b204ca-ba79-4d9b-95cc-2f46d96d9be4
+
+			/// Iterates over the selected context to find the absolute worst 'peak-to-trough' decline. The ultimate metric for downside pain tolerance.
+			measure 'Max Drawdown' = ```
+					
+					MINX(
+					    VALUES('Calendar'[Date]), 
+					    [Daily Drawdown %]
+					)
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 03 - Risk & Volatility
+				lineageTag: 163e9ef4-c78c-4bef-b706-4f6a898258d3
+
+			/// Binary flag (1 or 0) indicating if the trading volume for the day was more than double the trailing 30-day average. Useful for identifying institutional accumulation/distribution.
+			measure 'Is Volume Surge' = ```
+					
+					VAR Avg30DayVolume = 
+					    AVERAGEX(
+					        DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -30, DAY),
+					        CALCULATE(SUM(aapl_daily[Volume]))
+					    )
+					VAR CurrentVolume = CALCULATE(SUM(aapl_daily[Volume]))
+					RETURN
+					    IF(CurrentVolume > (Avg30DayVolume * 2), 1, 0)
+					```
+				formatString: 0
+				displayFolder: 02 - Trend & Momentum
+				lineageTag: d62f8bbf-4947-4db7-99a2-f376d9fdbead
+
+			/// Calculates the day-over-day percentage change in the adjusted closing price.
+			measure 'Daily Return %' = ```
+					
+					VAR CurrentDate = MAX('Calendar'[Date])
+					VAR PreviousTradingDay = 
+					    CALCULATE(
+					        MAX('Calendar'[Date]),
+					        FILTER(
+					            ALLSELECTED('Calendar'),
+					            'Calendar'[Date] < CurrentDate &&
+					            NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
+					        )
+					    )
+					VAR CurrentPrice = [Latest Price]
+					VAR PreviousPrice = 
+					    CALCULATE(
+					        [Latest Price],
+					        'Calendar'[Date] = PreviousTradingDay
+					    )
+					RETURN
+					    DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 01 - Absolute Performance
+				lineageTag: 50717c72-45aa-4d38-8a5f-d6c010ee2788
+
+			/// Standard deviation of daily returns, multiplied by the square root of 252. Represents the historical risk or standard pricing dispersion of the asset.
+			measure 'Annualized Volatility' = ```
+					
+					VAR DailyStdDev = STDEVX.P(aapl_daily, [Daily Return %])
+					RETURN 
+					    DailyStdDev * SQRT(252)
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 03 - Risk & Volatility
+				lineageTag: c9005927-a922-459b-b3b7-8c7fbfc9cebd
+
+			/// Evaluates risk-adjusted performance. A ratio greater than 1 indicates adequate compensation for the historical risk taken.
+			measure 'Sharpe Ratio' = ```
+					
+					VAR RiskFreeRate = 0.04 
+					VAR PortfolioReturn = [CAGR] 
+					VAR Volatility = [Annualized Volatility]
+					RETURN
+					    IF(
+					        NOT(ISBLANK(Volatility)) && Volatility > 0,
+					        DIVIDE(PortfolioReturn - RiskFreeRate, Volatility),
+					        BLANK()
+					    )
+					```
+				formatString: 0.00
+				displayFolder: 04 - Advanced Portfolio Analytics
+				lineageTag: 2c45cf84-2226-443b-8dac-30dff7a145c3
+
+			/// Relative Strength Index (SMA method). Oscillates from 0 to 100 to evaluate whether the stock is overbought (>70) or oversold (<30).
+			measure 'RSI (14-Day)' = ```
+					
+					VAR CurrentDate = MAX('Calendar'[Date])
+					VAR LookbackPeriod = 14
+					
+					-- Get the last 14 trading days
+					VAR ReferenceDates = 
+					    TOPN(
+					        LookbackPeriod, 
+					        FILTER(
+					            ALL('Calendar'), 
+					            'Calendar'[Date] <= CurrentDate && NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
+					        ), 
+					        'Calendar'[Date], DESC
+					    )
+					
+					-- Calculate average gains and losses over those 14 days
+					VAR GainsAndLosses = 
+					    ADDCOLUMNS(
+					        ReferenceDates,
+					        "Gain", IF([Daily Return %] > 0, [Daily Return %], 0),
+					        "Loss", IF([Daily Return %] < 0, ABS([Daily Return %]), 0)
+					    )
+					
+					VAR AvgGain = AVERAGEX(GainsAndLosses, [Gain])
+					VAR AvgLoss = AVERAGEX(GainsAndLosses, [Loss])
+					VAR RS = DIVIDE(AvgGain, AvgLoss)
+					
+					RETURN
+					    IF(
+					        ISBLANK(AvgLoss) || AvgLoss = 0, 100, -- If no losses, RSI is 100
+					        100 - DIVIDE(100, 1 + RS)
+					    )
+					```
+				formatString: 0.00
+				displayFolder: 02 - Trend & Momentum
+				lineageTag: 4383ee5d-8a7c-48e1-aed1-4fa415950dad
+
+			/// Calculates how many calendar days an investor's capital has been trapped underwater since the highest point of the portfolio.
+			measure 'Days Since ATH' = ```
+					
+					VAR CurrentDate = MAX('Calendar'[Date])
+					VAR CurrentPrice = [Latest Price]
+					
+					VAR RollingMaxPrice = 
+					    CALCULATE(
+					        MAX(aapl_daily[Adj_Close]),
+					        FILTER(
+					            ALLSELECTED('Calendar'[Date]),
+					            'Calendar'[Date] <= CurrentDate
+					        )
+					    )
+					
+					VAR DateOfMaxPrice = 
+					    CALCULATE(
+					        MAX('Calendar'[Date]),
+					        FILTER(
+					            ALLSELECTED('Calendar'[Date]),
+					            'Calendar'[Date] <= CurrentDate &&
+					            CALCULATE(MAX(aapl_daily[Adj_Close])) = RollingMaxPrice 
+					        )
+					    )
+					
+					RETURN
+					    IF(
+					        ISBLANK(CurrentPrice) || ISBLANK(RollingMaxPrice),
+					        BLANK(),
+					        IF(
+					            CurrentPrice >= RollingMaxPrice, 
+					            0,
+					            DATEDIFF(DateOfMaxPrice, CurrentDate, DAY)
+					        )
+					    )
+					```
+				formatString: 0
+				displayFolder: 03 - Risk & Volatility
+				lineageTag: 53fedaf0-8efd-4f55-83b4-2fec162b4fad
+
+			/// Retrieves the most recent closing price of the S&P 500 benchmark for the selected context.
+			measure 'SP500 Latest Price' =
+					
+					CALCULATE(
+					    MAX(sp500_daily[SP500_Close]),
+					    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(sp500_daily)))
+					)
+				formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+				displayFolder: 05 - S&P 500 Benchmark
+				lineageTag: cf401d93-3fc9-41d4-b038-3f9085e1f4c2
+
+				annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+			/// The annualized compound growth rate of the broader market, used as the baseline for calculating Jensen's Alpha.
+			measure 'SP500 CAGR' = ```
+					
+					VAR StartPrice = 
+					    CALCULATE(
+					        MIN(sp500_daily[SP500_Close]), 
+					        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(sp500_daily)))
+					    )
+					VAR EndPrice = [SP500 Latest Price]
+					VAR StartDate = CALCULATE(MIN('Calendar'[Date]), sp500_daily)
+					VAR EndDate = CALCULATE(MAX('Calendar'[Date]), sp500_daily)
+					VAR Years = DIVIDE(DATEDIFF(StartDate, EndDate, DAY), 365.25)
+					
+					RETURN
+					    IF(Years > 0 && StartPrice > 0, (EndPrice / StartPrice) ^ (1 / Years) - 1, BLANK()) 
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 05 - S&P 500 Benchmark
+				lineageTag: 564013fd-6a8d-49b7-8c74-02ec680879f9
+
+			/// Calculates the day-over-day percentage change for the broad market (S&P 500) to serve as a baseline for Beta.
+			measure 'SP500 Daily Return %' = ```
+					
+					VAR CurrentDate = MAX('Calendar'[Date])
+					VAR PreviousTradingDay = 
+					    CALCULATE(
+					        MAX('Calendar'[Date]),
+					        FILTER(
+					            ALLSELECTED('Calendar'),
+					            'Calendar'[Date] < CurrentDate && NOT(ISBLANK(CALCULATE(COUNTROWS(sp500_daily))))
+					        )
+					    )
+					VAR CurrentPrice = [SP500 Latest Price]
+					VAR PreviousPrice = CALCULATE([SP500 Latest Price], 'Calendar'[Date] = PreviousTradingDay)
+					RETURN DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+					```
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 05 - S&P 500 Benchmark
+				lineageTag: ee3e7b1f-36e2-4617-80e2-c2ae6eb00353
+
+			/// The slope of the linear regression between AAPL and S&P500 returns. A Beta > 1 means AAPL is more volatile than the market.
+			measure 'Beta (AAPL to Market)' = ```
+					
+					VAR ReturnTable = 
+					    FILTER(
+					        ADDCOLUMNS(
+					            VALUES('Calendar'[Date]),
+					            "AssetReturn", [Daily Return %],
+					            "MarketReturn", [SP500 Daily Return %]
+					        ),
+					        NOT(ISBLANK([AssetReturn])) && NOT(ISBLANK([MarketReturn]))
+					    )
+					
+					VAR RegressionTable = 
+					    LINESTX(
+					        ReturnTable, 
+					        [AssetReturn], 
+					        [MarketReturn]
+					    )
+					
+					RETURN 
+					    MAXX(RegressionTable, [Slope1])
+					```
+				formatString: 0.00
+				displayFolder: 04 - Advanced Portfolio Analytics
+				lineageTag: cd3c9bef-3451-480e-88d1-b8a88c03e11d
+
+			/// Jensen's Alpha. Measures the exact percentage of outperformance (or underperformance) that cannot be attributed to general market movements (Beta).
+			measure 'Alpha (Annualized)' =
+					
+					VAR RiskFreeRate = 0.04
+					VAR AAPLReturn = [CAGR]
+					VAR MarketReturn = [SP500 CAGR]
+					VAR AssetBeta = [Beta (AAPL to Market)]
+					
+					VAR ExpectedReturn = RiskFreeRate + AssetBeta * (MarketReturn - RiskFreeRate)
+					
+					RETURN
+					    IF(
+					        NOT(ISBLANK(AssetBeta)),
+					        AAPLReturn - ExpectedReturn,
+					        BLANK()
+					    )
+				formatString: 0.00%;-0.00%;0.00%
+				displayFolder: 04 - Advanced Portfolio Analytics
+				lineageTag: 33e6c164-23ec-4881-97ee-a80ce6803bd7
+
+			partition _Measures = m
+				mode: import
+				source =
+						let
+						    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+						    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+						    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Column1"})
+						in
+						    #"Removed Columns"
+
+			annotation PBI_ResultType = Table
+
+		table sp500_daily
+			lineageTag: c8db5395-1098-46aa-8dc3-90081b000615
+
+			column Trade_Date
+				dataType: dateTime
+				isKey
+				formatString: Long Date
+				lineageTag: 71314b44-09b9-4be7-8ddc-4cacd9343b22
+				summarizeBy: none
+				sourceColumn: Trade_Date
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation UnderlyingDateTimeDataType = Date
+
+			column Open
+				dataType: double
+				lineageTag: c2be4e20-294c-4cf1-9296-ae78d837269e
+				summarizeBy: sum
+				sourceColumn: Open
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column High
+				dataType: double
+				lineageTag: f8c4fdf5-6e6a-4d94-8e14-ca21314314bd
+				summarizeBy: sum
+				sourceColumn: High
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Low
+				dataType: double
+				lineageTag: f9516947-fe4f-4f9b-bb58-686c8fab1d26
+				summarizeBy: sum
+				sourceColumn: Low
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column SP500_Close
+				dataType: double
+				lineageTag: ceb74c1b-c86c-4593-a57c-53b0d6f1b364
+				summarizeBy: sum
+				sourceColumn: SP500_Close
+
+				annotation SummarizationSetBy = Automatic
+
+				annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+			column Volume
+				dataType: int64
+				formatString: 0
+				lineageTag: 9d2a20ac-d9c5-4e73-b14b-5bf71452b105
+				summarizeBy: sum
+				sourceColumn: Volume
+
+				annotation SummarizationSetBy = Automatic
+
+			partition sp500_daily = m
+				mode: import
+				source = ```
+						let
+						    // 1. Fetch live CSV data for S&P 500 directly from Stooq's public endpoint
+						    Source = Csv.Document(Web.Contents("https://stooq.com/q/d/l/?s=^spx&i=d"),[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+						    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+						    
+						    // 2. Set Data Types
+						    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
+						        {"Date", type date}, 
+						        {"Open", type number}, 
+						        {"High", type number}, 
+						        {"Low", type number}, 
+						        {"Close", type number}, 
+						        {"Volume", Int64.Type}
+						    }),
+						    
+						    // 3. Rename columns to match your existing naming convention
+						    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{
+						        {"Date", "Trade_Date"},
+						        {"Close", "SP500_Close"}
+						    }),
+						    
+						    // 4. Filter to match your AAPL dataset range (1980 onwards)
+						    #"Filtered Rows" = Table.SelectRows(#"Renamed Columns", each [Trade_Date] >= #date(1980, 12, 12))
+						in
+						    #"Filtered Rows"
+						```
+
+			annotation PBI_NavigationStepName = Navigation
+
+			annotation PBI_ResultType = Table
+
+		relationship 54654d8d-fd2b-9df1-012a-be6b7f5e3b7a
+			fromColumn: aapl_daily.Trade_Date
+			toColumn: Calendar.Date
+
+		relationship 12ead87c-01e5-d291-2754-1ef6cd25a24d
+			fromColumn: sp500_daily.Trade_Date
+			toColumn: Calendar.Date
+
+		cultureInfo en-US
+
+		annotation __PBI_TimeIntelligenceEnabled = 0
+
+		annotation PBI_QueryOrder = ["aapl_daily","sp500_daily","Calendar","_Measures"]
+
+		annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop"]
+

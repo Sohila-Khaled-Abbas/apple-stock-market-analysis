@@ -1,0 +1,129 @@
+table sp500_daily
+	lineageTag: c8db5395-1098-46aa-8dc3-90081b000615
+
+	column Trade_Date
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 71314b44-09b9-4be7-8ddc-4cacd9343b22
+		summarizeBy: none
+		sourceColumn: Trade_Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Open
+		dataType: double
+		lineageTag: c2be4e20-294c-4cf1-9296-ae78d837269e
+		summarizeBy: sum
+		sourceColumn: Open
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column High
+		dataType: double
+		lineageTag: f8c4fdf5-6e6a-4d94-8e14-ca21314314bd
+		summarizeBy: sum
+		sourceColumn: High
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Low
+		dataType: double
+		lineageTag: f9516947-fe4f-4f9b-bb58-686c8fab1d26
+		summarizeBy: sum
+		sourceColumn: Low
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column SP500_Close
+		dataType: double
+		lineageTag: ceb74c1b-c86c-4593-a57c-53b0d6f1b364
+		summarizeBy: sum
+		sourceColumn: SP500_Close
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Volume
+		dataType: int64
+		formatString: 0
+		lineageTag: 9d2a20ac-d9c5-4e73-b14b-5bf71452b105
+		summarizeBy: sum
+		sourceColumn: Volume
+
+		annotation SummarizationSetBy = Automatic
+
+	column Historical_SP500_Return = ```
+			
+			VAR CurrentDate = sp500_daily[Trade_Date]
+			
+			-- 1. Find the exact previous trading day for the S&P 500
+			VAR PreviousDate = 
+			    CALCULATE(
+			        MAX(sp500_daily[Trade_Date]),
+			        REMOVEFILTERS(sp500_daily),
+			        sp500_daily[Trade_Date] < CurrentDate
+			    )
+			
+			-- 2. Fetch the closing price on that specific date
+			VAR PreviousPrice = 
+			    CALCULATE(
+			        MAX(sp500_daily[SP500_Close]),
+			        REMOVEFILTERS(sp500_daily),
+			        sp500_daily[Trade_Date] = PreviousDate
+			    )
+			
+			-- 3. Calculate the return
+			RETURN 
+			    DIVIDE(sp500_daily[SP500_Close] - PreviousPrice, PreviousPrice)
+			```
+		lineageTag: 86668239-91d7-43db-94ab-cca80eec99ae
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition sp500_daily = m
+		mode: import
+		source = ```
+				let
+				    // 1. Fetch live CSV data for S&P 500 directly from Stooq's public endpoint
+				    Source = Csv.Document(Web.Contents("https://stooq.com/q/d/l/?s=^spx&i=d"),[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    
+				    // 2. Set Data Types
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
+				        {"Date", type date}, 
+				        {"Open", type number}, 
+				        {"High", type number}, 
+				        {"Low", type number}, 
+				        {"Close", type number}, 
+				        {"Volume", Int64.Type}
+				    }),
+				    
+				    // 3. Rename columns to match your existing naming convention
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{
+				        {"Date", "Trade_Date"},
+				        {"Close", "SP500_Close"}
+				    }),
+				    
+				    // 4. Filter to match your AAPL dataset range (1980 onwards)
+				    #"Filtered Rows" = Table.SelectRows(#"Renamed Columns", each [Trade_Date] >= #date(1980, 12, 12))
+				in
+				    #"Filtered Rows"
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

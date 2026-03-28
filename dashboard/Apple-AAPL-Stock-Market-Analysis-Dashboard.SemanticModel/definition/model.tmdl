@@ -1,0 +1,24 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["aapl_daily","sp500_daily","Calendar","_Measures"]
+
+annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop","DevMode"]
+
+annotation __TEdtr = 1
+
+ref table aapl_daily
+ref table Calendar
+ref table _Measures
+ref table sp500_daily
+ref table 'Data Dictionary'
+
+ref cultureInfo en-US
+

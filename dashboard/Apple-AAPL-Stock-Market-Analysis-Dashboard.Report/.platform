@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Apple-AAPL-Stock-Market-Analysis-Dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "766ea2ff-8012-4c01-93f9-f6ff9de11047"
+  }
+}

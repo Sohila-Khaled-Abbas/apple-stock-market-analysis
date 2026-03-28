@@ -1,0 +1,1699 @@
+table _Measures
+	lineageTag: 616d304d-2b1c-4e8c-8050-b858652c6d1c
+
+	/// Retrieves the most recent adjusted closing price for the selected context, skipping non-trading days (weekends/holidays).
+	measure 'Latest Price' =
+			
+			CALCULATE(
+			    MAX(aapl_daily[Adj_Close]),
+			    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: 01 - Absolute Performance
+		lineageTag: 256572d0-8971-456b-b034-113c7ba08963
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Calculates the absolute percentage return from the first to the last trading day within the currently filtered time period.
+	measure 'Total Return %' = ```
+			
+			VAR StartPrice = 
+			    CALCULATE(
+			        MIN(aapl_daily[Adj_Close]), 
+			        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+			    )
+			VAR EndPrice = [Latest Price]
+			RETURN 
+			    DIVIDE(EndPrice - StartPrice, StartPrice)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 01 - Absolute Performance
+		lineageTag: adaaa74d-c0dc-4f8d-87ca-38abc482e538
+
+	/// Compound Annual Growth Rate. Normalizes the absolute return to an annualized percentage to accurately compare performance across different time horizons.
+	measure CAGR = ```
+			
+			VAR StartPrice = 
+			    CALCULATE(
+			        MIN(aapl_daily[Adj_Close]), 
+			        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
+			    )
+			VAR EndPrice = [Latest Price]
+			VAR StartDate = CALCULATE(MIN('Calendar'[Date]), aapl_daily)
+			VAR EndDate = CALCULATE(MAX('Calendar'[Date]), aapl_daily)
+			VAR Years = DIVIDE(DATEDIFF(StartDate, EndDate, DAY), 365.25)
+			
+			RETURN
+			    IF(
+			        Years > 0 && StartPrice > 0, 
+			        (EndPrice / StartPrice) ^ (1 / Years) - 1, 
+			        BLANK()
+			    )
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 01 - Absolute Performance
+		lineageTag: 517aea45-1ca9-4652-aa46-042557378a08
+
+	/// Calculates the 50-calendar-day simple moving average of the adjusted closing price. Acts as a short-to-medium-term momentum indicator.
+	measure '50-Day SMA' =
+			
+			AVERAGEX(
+			    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -50, DAY),
+			    CALCULATE(SUM(aapl_daily[Adj_Close]))
+			)
+		formatString: 0.00
+		displayFolder: 02 - Trend & Momentum
+		lineageTag: d3a958b8-b3fa-42ae-9489-8160453a72f9
+
+	/// Calculates the 200-calendar-day simple moving average. The ultimate institutional indicator for long-term bull vs. bear market phases.
+	measure '200-Day SMA' =
+			
+			AVERAGEX(
+			    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -200, DAY),
+			    CALCULATE(SUM(aapl_daily[Adj_Close]))
+			)
+		formatString: 0.00
+		displayFolder: 02 - Trend & Momentum
+		lineageTag: 7e2982cf-c937-4990-b74f-254d1dab3726
+
+	/// Identifies whether the asset is in a Golden Cross (50 SMA > 200 SMA) or Death Cross (50 SMA < 200 SMA).
+	measure 'Trend State' =
+			
+			VAR SMA50 = [50-Day SMA]
+			VAR SMA200 = [200-Day SMA]
+			RETURN
+			    IF(ISBLANK(SMA50) || ISBLANK(SMA200), BLANK(),
+			        IF(SMA50 > SMA200, "Bullish (Golden)", "Bearish (Death)")
+			    )
+		displayFolder: 02 - Trend & Momentum
+		lineageTag: 34e5ad3a-046c-4448-be80-6fd1d4b10196
+
+	/// The continuous percentage drop from the highest historical peak within the currently selected time window.
+	measure 'Daily Drawdown %' =
+			
+			CALCULATE(MIN(aapl_daily[Historical_Drawdown]))
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 - Risk & Volatility
+		lineageTag: 89b204ca-ba79-4d9b-95cc-2f46d96d9be4
+
+	/// Iterates over the selected context to find the absolute worst 'peak-to-trough' decline. The ultimate metric for downside pain tolerance.
+	measure 'Max Drawdown' =
+			
+			CALCULATE(MIN(aapl_daily[Historical_Drawdown]))
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 - Risk & Volatility
+		lineageTag: 163e9ef4-c78c-4bef-b706-4f6a898258d3
+
+	/// Binary flag (1 or 0) indicating if the trading volume for the day was more than double the trailing 30-day average. Useful for identifying institutional accumulation/distribution.
+	measure 'Is Volume Surge' = ```
+			
+			VAR Avg30DayVolume = 
+			    AVERAGEX(
+			        DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -30, DAY),
+			        CALCULATE(SUM(aapl_daily[Volume]))
+			    )
+			VAR CurrentVolume = CALCULATE(SUM(aapl_daily[Volume]))
+			RETURN
+			    IF(CurrentVolume > (Avg30DayVolume * 2), 1, 0)
+			```
+		formatString: 0
+		displayFolder: 02 - Trend & Momentum
+		lineageTag: d62f8bbf-4947-4db7-99a2-f376d9fdbead
+
+	/// Calculates the day-over-day percentage change in the adjusted closing price.
+	measure 'Daily Return %' = ```
+			
+			VAR CurrentDate = MAX('Calendar'[Date])
+			VAR PreviousTradingDay = 
+			    CALCULATE(
+			        MAX('Calendar'[Date]),
+			        FILTER(
+			            ALLSELECTED('Calendar'),
+			            'Calendar'[Date] < CurrentDate &&
+			            NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
+			        )
+			    )
+			VAR CurrentPrice = [Latest Price]
+			VAR PreviousPrice = 
+			    CALCULATE(
+			        [Latest Price],
+			        'Calendar'[Date] = PreviousTradingDay
+			    )
+			RETURN
+			    DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 01 - Absolute Performance
+		lineageTag: 50717c72-45aa-4d38-8a5f-d6c010ee2788
+
+	/// Standard deviation of daily returns, multiplied by the square root of 252. Represents the historical risk or standard pricing dispersion of the asset.
+	measure 'Annualized Volatility' = ```
+			
+			VAR DailyStdDev = STDEV.S(aapl_daily[Historical_Daily_Return])
+			RETURN 
+			    DailyStdDev * SQRT(252)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 03 - Risk & Volatility
+		lineageTag: c9005927-a922-459b-b3b7-8c7fbfc9cebd
+
+	/// Evaluates risk-adjusted performance. A ratio greater than 1 indicates adequate compensation for the historical risk taken.
+	measure 'Sharpe Ratio' = ```
+			
+			VAR RiskFreeRate = 0.04 
+			VAR PortfolioReturn = [CAGR] 
+			VAR Volatility = [Annualized Volatility]
+			RETURN
+			    IF(
+			        NOT(ISBLANK(Volatility)) && Volatility > 0,
+			        DIVIDE(PortfolioReturn - RiskFreeRate, Volatility),
+			        BLANK()
+			    )
+			```
+		formatString: 0.00
+		displayFolder: 04 - Advanced Portfolio Analytics
+		lineageTag: 2c45cf84-2226-443b-8dac-30dff7a145c3
+
+	/// Relative Strength Index (SMA method). Oscillates from 0 to 100 to evaluate whether the stock is overbought (>70) or oversold (<30).
+	measure 'RSI (14-Day)' = ```
+			
+			VAR CurrentDate = MAX('Calendar'[Date])
+			VAR LookbackPeriod = 14
+			
+			-- Get the last 14 trading days
+			VAR ReferenceDates = 
+			    TOPN(
+			        LookbackPeriod, 
+			        FILTER(
+			            ALL('Calendar'), 
+			            'Calendar'[Date] <= CurrentDate && NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
+			        ), 
+			        'Calendar'[Date], DESC
+			    )
+			
+			-- Calculate average gains and losses over those 14 days
+			VAR GainsAndLosses = 
+			    ADDCOLUMNS(
+			        ReferenceDates,
+			        "Gain", IF([Daily Return %] > 0, [Daily Return %], 0),
+			        "Loss", IF([Daily Return %] < 0, ABS([Daily Return %]), 0)
+			    )
+			
+			VAR AvgGain = AVERAGEX(GainsAndLosses, [Gain])
+			VAR AvgLoss = AVERAGEX(GainsAndLosses, [Loss])
+			VAR RS = DIVIDE(AvgGain, AvgLoss)
+			
+			RETURN
+			    IF(
+			        ISBLANK(AvgLoss) || AvgLoss = 0, 100, -- If no losses, RSI is 100
+			        100 - DIVIDE(100, 1 + RS)
+			    )
+			```
+		formatString: 0.00
+		displayFolder: 02 - Trend & Momentum
+		lineageTag: 4383ee5d-8a7c-48e1-aed1-4fa415950dad
+
+	/// Calculates how many calendar days an investor's capital has been trapped underwater since the highest point of the portfolio.
+	measure 'Days Since ATH' = ```
+			
+			VAR CurrentDate = MAX('Calendar'[Date])
+			VAR CurrentPrice = [Latest Price]
+			
+			VAR RollingMaxPrice = 
+			    CALCULATE(
+			        MAX(aapl_daily[Adj_Close]),
+			        FILTER(
+			            ALLSELECTED('Calendar'[Date]),
+			            'Calendar'[Date] <= CurrentDate
+			        )
+			    )
+			
+			VAR DateOfMaxPrice = 
+			    CALCULATE(
+			        MAX('Calendar'[Date]),
+			        FILTER(
+			            ALLSELECTED('Calendar'[Date]),
+			            'Calendar'[Date] <= CurrentDate &&
+			            CALCULATE(MAX(aapl_daily[Adj_Close])) = RollingMaxPrice 
+			        )
+			    )
+			
+			RETURN
+			    IF(
+			        ISBLANK(CurrentPrice) || ISBLANK(RollingMaxPrice),
+			        BLANK(),
+			        IF(
+			            CurrentPrice >= RollingMaxPrice, 
+			            0,
+			            DATEDIFF(DateOfMaxPrice, CurrentDate, DAY)
+			        )
+			    )
+			```
+		formatString: 0
+		displayFolder: 03 - Risk & Volatility
+		lineageTag: 53fedaf0-8efd-4f55-83b4-2fec162b4fad
+
+	/// Retrieves the most recent closing price of the S&P 500 benchmark for the selected context.
+	measure 'SP500 Latest Price' =
+			
+			CALCULATE(
+			    MAX(sp500_daily[SP500_Close]),
+			    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(sp500_daily)))
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: 05 - S&P 500 Benchmark
+		lineageTag: cf401d93-3fc9-41d4-b038-3f9085e1f4c2
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// The annualized compound growth rate of the broader market, used as the baseline for calculating Jensen's Alpha.
+	measure 'SP500 CAGR' = ```
+			
+			VAR StartPrice = 
+			    CALCULATE(
+			        MIN(sp500_daily[SP500_Close]), 
+			        FIRSTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(sp500_daily)))
+			    )
+			VAR EndPrice = [SP500 Latest Price]
+			VAR StartDate = CALCULATE(MIN('Calendar'[Date]), sp500_daily)
+			VAR EndDate = CALCULATE(MAX('Calendar'[Date]), sp500_daily)
+			VAR Years = DIVIDE(DATEDIFF(StartDate, EndDate, DAY), 365.25)
+			
+			RETURN
+			    IF(Years > 0 && StartPrice > 0, (EndPrice / StartPrice) ^ (1 / Years) - 1, BLANK()) 
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 05 - S&P 500 Benchmark
+		lineageTag: 564013fd-6a8d-49b7-8c74-02ec680879f9
+
+	/// Calculates the day-over-day percentage change for the broad market (S&P 500) to serve as a baseline for Beta.
+	measure 'SP500 Daily Return %' = ```
+			
+			VAR CurrentDate = MAX('Calendar'[Date])
+			VAR PreviousTradingDay = 
+			    CALCULATE(
+			        MAX('Calendar'[Date]),
+			        FILTER(
+			            ALLSELECTED('Calendar'),
+			            'Calendar'[Date] < CurrentDate && NOT(ISBLANK(CALCULATE(COUNTROWS(sp500_daily))))
+			        )
+			    )
+			VAR CurrentPrice = [SP500 Latest Price]
+			VAR PreviousPrice = CALCULATE([SP500 Latest Price], 'Calendar'[Date] = PreviousTradingDay)
+			RETURN DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 05 - S&P 500 Benchmark
+		lineageTag: ee3e7b1f-36e2-4617-80e2-c2ae6eb00353
+
+	/// The slope of the linear regression between AAPL and S&P500 returns. A Beta > 1 means AAPL is more volatile than the market.
+	measure 'Beta (AAPL to Market)' = ```
+			
+			-- 1. Build a fast virtual table by extracting the materialized columns
+			VAR ReturnTable = 
+			    FILTER(
+			        ADDCOLUMNS(
+			            VALUES('Calendar'[Date]),
+			            "AssetReturn", CALCULATE(MAX(aapl_daily[Historical_Daily_Return])),
+			            "MarketReturn", CALCULATE(MAX(sp500_daily[Historical_SP500_Return]))
+			        ),
+			        NOT(ISBLANK([AssetReturn])) && NOT(ISBLANK([MarketReturn]))
+			    )
+			
+			-- 2. Execute Linear Regression (y = mx + b)
+			VAR RegressionTable = 
+			    LINESTX(
+			        ReturnTable, 
+			        [AssetReturn], 
+			        [MarketReturn]
+			    )
+			
+			-- 3. Extract the Slope (Beta)
+			RETURN 
+			    MAXX(RegressionTable, [Slope1])
+			```
+		formatString: 0.00
+		displayFolder: 04 - Advanced Portfolio Analytics
+		lineageTag: cd3c9bef-3451-480e-88d1-b8a88c03e11d
+
+	/// Jensen's Alpha. Measures the exact percentage of outperformance (or underperformance) that cannot be attributed to general market movements (Beta).
+	measure 'Alpha (Annualized)' =
+			
+			VAR RiskFreeRate = 0.04
+			VAR AAPLReturn = [CAGR]
+			VAR MarketReturn = [SP500 CAGR]
+			VAR AssetBeta = [Beta (AAPL to Market)]
+			
+			VAR ExpectedReturn = RiskFreeRate + AssetBeta * (MarketReturn - RiskFreeRate)
+			
+			RETURN
+			    IF(
+			        NOT(ISBLANK(AssetBeta)),
+			        AAPLReturn - ExpectedReturn,
+			        BLANK()
+			    )
+		formatString: 0.00%;-0.00%;0.00%
+		displayFolder: 04 - Advanced Portfolio Analytics
+		lineageTag: 33e6c164-23ec-4881-97ee-a80ce6803bd7
+
+	measure 'Landing Page HTML' = ```
+			
+			// 1. Fetch Dynamic Data from the Semantic Model for Dataset Teasers
+			VAR LastDataUpdate = [Last Refresh Date]  // Updated to use the new fact-table measure
+			VAR FirstDataDate = FORMAT(MIN('Calendar'[Date]), "MMM dd, yyyy")
+			VAR TotalTradingDays = FORMAT(COUNTROWS(aapl_daily), "#,0")
+			VAR AllTimeHigh = FORMAT(CALCULATE(MAX(aapl_daily[Adj_Close]), ALL(aapl_daily)), "$#,0.00")
+			
+			// 2. Define the HTML and Advanced CSS3 Animations
+			VAR HtmlContent = 
+			"
+			<style>
+			    /* CSS3 Animations for UI Dynamics */
+			    @keyframes fadeUp {
+			        0% { opacity: 0; transform: translateY(30px); }
+			        100% { opacity: 1; transform: translateY(0); }
+			    }
+			    @keyframes pulseGlow {
+			        0% { box-shadow: 0 0 0 0 rgba(41, 151, 255, 0.4); }
+			        70% { box-shadow: 0 0 20px 10px rgba(41, 151, 255, 0); }
+			        100% { box-shadow: 0 0 0 0 rgba(41, 151, 255, 0); }
+			    }
+			    
+			    /* Interactive Hover States */
+			    .metric-card {
+			        background: #1d1d1f; 
+			        border: 1px solid #424245; 
+			        border-radius: 12px; 
+			        padding: 15px 25px; 
+			        text-align: left;
+			        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+			    }
+			    .metric-card:hover {
+			        transform: translateY(-5px) scale(1.02);
+			        border-color: #2997ff;
+			        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+			    }
+			    
+			    .nav-link {
+			        color: #2997ff; 
+			        text-decoration: none; 
+			        transition: color 0.2s ease, transform 0.2s ease;
+			    }
+			    .nav-link:hover {
+			        color: #64d2ff;
+			        transform: translateX(3px);
+			    }
+			
+			    .cta-button {
+			        background-color: #f5f5f7;
+			        color: #000000;
+			        padding: 1.2vw 3vw;
+			        border-radius: 40px;
+			        font-size: 1.2vw;
+			        font-weight: 600;
+			        cursor: pointer;
+			        display: inline-block;
+			        transition: all 0.3s ease;
+			        box-shadow: 0 4px 14px 0 rgba(255,255,255,0.1);
+			    }
+			    .cta-button:hover {
+			        background-color: #2997ff;
+			        color: #ffffff;
+			        animation: pulseGlow 2s infinite;
+			        transform: scale(1.05);
+			    }
+			</style>
+			
+			<div style='
+			    font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif;
+			    background-color: #000000;
+			    color: #f5f5f7;
+			    width: 100%;
+			    height: 100vh;
+			    display: flex;
+			    flex-direction: column;
+			    align-items: center;
+			    justify-content: center;
+			    box-sizing: border-box;
+			    padding: 2rem;
+			    overflow: hidden;
+			    text-align: center;
+			'>
+			
+			    <svg viewBox='0 0 384 512' style='width: 50px; height: 50px; fill: #f5f5f7; margin-bottom: 20px; animation: fadeUp 0.8s ease-out forwards;'>
+			        <path d='M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z'></path>
+			    </svg>
+			
+			    <h1 style='
+			        font-size: 3.5vw;
+			        font-weight: 700;
+			        letter-spacing: -0.05em;
+			        margin: 0 0 10px 0;
+			        background: linear-gradient(90deg, #ffffff, #86868b);
+			        -webkit-background-clip: text;
+			        -webkit-text-fill-color: transparent;
+			        animation: fadeUp 1s ease-out forwards;
+			    '>
+			        Apple Stock Market Analysis
+			    </h1>
+			    <p style='color: #86868b; font-size: 1.2vw; font-weight: 400; margin: 0 0 40px 0; letter-spacing: 0.02em; animation: fadeUp 1.2s ease-out forwards;'>
+			        Institutional Grade Portfolio Analytics & Historical Pricing Data
+			    </p>
+			
+			    <div style='display: flex; gap: 20px; margin-bottom: 40px; justify-content: center; flex-wrap: wrap; animation: fadeUp 1.4s ease-out forwards;'>
+			        
+			        <div class='metric-card'>
+			            <div style='color: #86868b; font-size: 0.8vw; text-transform: uppercase; letter-spacing: 0.05em;'>Dataset Horizon</div>
+			            <div style='font-size: 1.2vw; font-weight: 600; margin-top: 5px; color: #f5f5f7;'>" & FirstDataDate & " &mdash; " & LastDataUpdate & "</div>
+			        </div>
+			
+			        <div class='metric-card'>
+			            <div style='color: #86868b; font-size: 0.8vw; text-transform: uppercase; letter-spacing: 0.05em;'>Total Trading Days</div>
+			            <div style='font-size: 1.2vw; font-weight: 600; margin-top: 5px; color: #f5f5f7;'>" & TotalTradingDays & " Rows</div>
+			        </div>
+			
+			        <div class='metric-card'>
+			            <div style='color: #86868b; font-size: 0.8vw; text-transform: uppercase; letter-spacing: 0.05em;'>Historical ATH</div>
+			            <div style='font-size: 1.2vw; font-weight: 600; margin-top: 5px; color: #30d158;'>" & AllTimeHigh & "</div>
+			        </div>
+			
+			        <div class='metric-card'>
+			            <div style='color: #86868b; font-size: 0.8vw; text-transform: uppercase; letter-spacing: 0.05em;'>Data Sources</div>
+			            <div style='font-size: 1.2vw; font-weight: 600; margin-top: 5px; color: #f5f5f7;'>Yahoo Finance & Stooq API</div>
+			        </div>
+			
+			    </div>
+			
+			    <div style='display: flex; gap: 40px; margin-bottom: 50px; animation: fadeUp 1.6s ease-out forwards;'>
+			        <a href='https://github.com/Sohila-Khaled-Abbas/apple-stock-market-analysis' target='_blank' class='nav-link' style='font-size: 1vw; display: flex; align-items: center; gap: 8px; font-weight: 500;'>
+			            <svg viewBox='0 0 24 24' style='width: 18px; height: 18px; fill: currentColor;'><path d='M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z'/></svg>
+			            GitHub Repository
+			        </a>
+			        <a href='https://docs.google.com/presentation/d/1v5ssMhSDsMxkJXG-Xy1a-X05HoXnfY5Ce7pQUGvhGaE/edit?usp=sharing' target='_blank' class='nav-link' style='font-size: 1vw; display: flex; align-items: center; gap: 8px; font-weight: 500;'>
+			            <svg viewBox='0 0 24 24' style='width: 18px; height: 18px; fill: currentColor;'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-3 5-3v6zm7-4h-5v-2h5v2zm0-4h-5V7h5v2z'/></svg>
+			            Project Presentation
+			        </a>
+			    </div>
+			
+			    <div class='cta-button' style='animation: fadeUp 1.8s ease-out forwards;'>
+			        Enter Analytics Dashboard
+			    </div>
+			
+			    <div style='margin-top: auto; font-size: 0.9vw; color: #86868b; display: flex; align-items: center; justify-content: center; gap: 10px; animation: fadeUp 2s ease-out forwards;'>
+			        Developed by <span style='color: #f5f5f7; font-weight: 600;'>Sohila Khaled</span> | Certified Data Analyst
+			        <a href='https://www.linkedin.com/in/sohilakabbas/' target='_blank' class='nav-link' style='display: flex; align-items: center;'>
+			            <svg viewBox='0 0 24 24' style='width: 20px; height: 20px; fill: currentColor; margin-left: 5px;'><path d='M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z'/></svg>
+			        </a>
+			    </div>
+			
+			</div>
+			"
+			RETURN HtmlContent
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 7f8abccd-9916-493f-8ecd-b84857f27671
+
+	measure 'Header - Macro View HTML' = ```
+			
+			// 1. Fetch Presentation Context via PiotrBartela
+			VAR RawDateContext = PiotrBartela.TitleContext.Period("", 'Calendar'[Date])
+			VAR DateContext = TRIM(RawDateContext) // Cleans leading space if prefix is blank
+			
+			VAR RawEraFilter = PiotrBartela.TitleContext.Filtered(60, FALSE(), "Era", 'Calendar'[CEO Era], "", 'Calendar'[Date], "", 'Calendar'[Date], "", 'Calendar'[Date], "", 'Calendar'[Date])
+			VAR EraContext = IF(RawEraFilter = "All Sales, Globally", "All Historical Eras", RawEraFilter)
+			
+			VAR CurrentPrice = FORMAT([Latest Price], "$#,0.00")
+			
+			// 2. Define SVG Icon (Global/Macro Grid)
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='#2997ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 32px; height: 32px; margin-right: 16px;'><circle cx='12' cy='12' r='10'></circle><line x1='2' y1='12' x2='22' y2='12'></line><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'></path></svg>"
+			
+			// 3. Build the HTML UI
+			RETURN
+			"
+			<div style='
+			    font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, sans-serif;
+			    width: 100%;
+			    display: flex;
+			    justify-content: space-between;
+			    align-items: center;
+			    padding: 16px 24px;
+			    background: linear-gradient(90deg, #151516 0%, #1d1d1f 100%);
+			    border-bottom: 1px solid #424245;
+			    border-radius: 12px 12px 0 0;
+			    box-sizing: border-box;
+			'>
+			    <div style='display: flex; align-items: center;'>
+			        " & IconSVG & "
+			        <div>
+			            <div style='font-size: 11px; color: #86868b; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 2px;'>AAPL Portfolio Analytics</div>
+			            <div style='font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;'>Executive Macro View</div>
+			        </div>
+			    </div>
+			
+			    <div style='display: flex; align-items: center; gap: 16px;'>
+			        
+			        <div style='background: rgba(134, 134, 139, 0.1); border: 1px solid #424245; border-radius: 8px; padding: 6px 12px; text-align: left;'>
+			            <div style='font-size: 10px; color: #86868b; text-transform: uppercase; letter-spacing: 0.05em;'>Active Segment</div>
+			            <div style='font-size: 13px; font-weight: 600; color: #f5f5f7; margin-top: 2px;'>" & EraContext & "</div>
+			        </div>
+			
+			        <div style='background: rgba(134, 134, 139, 0.1); border: 1px solid #424245; border-radius: 8px; padding: 6px 12px; text-align: left;'>
+			            <div style='font-size: 10px; color: #86868b; text-transform: uppercase; letter-spacing: 0.05em;'>Market Horizon</div>
+			            <div style='font-size: 13px; font-weight: 600; color: #64d2ff; margin-top: 2px;'>" & DateContext & "</div>
+			        </div>
+			
+			        <div style='background: rgba(41, 151, 255, 0.1); border: 1px solid rgba(41, 151, 255, 0.3); border-radius: 8px; padding: 6px 16px; text-align: right; margin-left: 8px;'>
+			            <div style='font-size: 10px; color: #2997ff; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;'>Latest Close</div>
+			            <div style='font-size: 16px; font-weight: 700; color: #ffffff; margin-top: 1px;'>" & CurrentPrice & "</div>
+			        </div>
+			
+			    </div>
+			</div>
+			"
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 8f5fa826-7701-4d2e-9e35-6cdd59342cbf
+
+	measure 'Header - Technical View HTML' = ```
+			
+			// 1. Fetch Presentation Context via PiotrBartela
+			VAR RawDateContext = PiotrBartela.TitleContext.Period("", 'Calendar'[Date])
+			VAR DateContext = TRIM(RawDateContext)
+			VAR Volatility = FORMAT([Annualized Volatility], "0.00%")
+			
+			// 2. Define SVG Icon (Technical Chart)
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='#ff9f0a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 32px; height: 32px; margin-right: 16px;'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><line x1='3' y1='9' x2='21' y2='9'></line><line x1='9' y1='21' x2='9' y2='9'></line><path d='M13 16l2-2 2 2'></path></svg>"
+			
+			// 3. Build the HTML UI
+			RETURN
+			"
+			<div style='
+			    font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, sans-serif;
+			    width: 100%;
+			    display: flex;
+			    justify-content: space-between;
+			    align-items: center;
+			    padding: 16px 24px;
+			    background: linear-gradient(90deg, #151516 0%, #1d1d1f 100%);
+			    border-bottom: 1px solid #424245;
+			    border-radius: 12px 12px 0 0;
+			    box-sizing: border-box;
+			'>
+			    <div style='display: flex; align-items: center;'>
+			        " & IconSVG & "
+			        <div>
+			            <div style='font-size: 11px; color: #86868b; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 2px;'>AAPL Portfolio Analytics</div>
+			            <div style='font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;'>Technical & Momentum Deep Dive</div>
+			        </div>
+			    </div>
+			
+			    <div style='display: flex; align-items: center; gap: 16px;'>
+			        
+			        <div style='background: rgba(134, 134, 139, 0.1); border: 1px solid #424245; border-radius: 8px; padding: 6px 12px; text-align: left;'>
+			            <div style='font-size: 10px; color: #86868b; text-transform: uppercase; letter-spacing: 0.05em;'>Active Trading Window</div>
+			            <div style='font-size: 13px; font-weight: 600; color: #64d2ff; margin-top: 2px;'>" & DateContext & "</div>
+			        </div>
+			
+			        <div style='background: rgba(255, 159, 10, 0.1); border: 1px solid rgba(255, 159, 10, 0.3); border-radius: 8px; padding: 6px 16px; text-align: right; margin-left: 8px;'>
+			            <div style='font-size: 10px; color: #ff9f0a; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;'>Period Volatility</div>
+			            <div style='font-size: 16px; font-weight: 700; color: #ffffff; margin-top: 1px;'>" & Volatility & "</div>
+			        </div>
+			
+			    </div>
+			</div>
+			"
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 2cf8193e-048e-4e0e-a802-b6638179df5d
+
+	measure 'Sidebar Navigation HTML' = ```
+			
+			// 1. Define the Active Page (Change this to "Home" or "Technical" for the other pages)
+			VAR ActivePage = "Macro"
+			
+			// 2. Fetch Dynamic Data Context
+			VAR LastRefresh = FORMAT(LASTDATE('Calendar'[Date]), "MMM dd, yyyy")
+			VAR TotalRows = FORMAT(COUNTROWS(aapl_daily), "#,0")
+			
+			// 3. Define the SVG Icons (Navigation & Brand)
+			VAR IconHome = "<svg viewBox='0 0 24 24' style='width: 22px; height: 22px; fill: currentColor;'><path d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z'/></svg>"
+			VAR IconMacro = "<svg viewBox='0 0 24 24' style='width: 22px; height: 22px; fill: currentColor;'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/></svg>"
+			VAR IconTech = "<svg viewBox='0 0 24 24' style='width: 22px; height: 22px; fill: currentColor;'><path d='M16 11.78L20.24 4.45 21.97 5.45 17.74 12.78 16 11.78zM7.97 5.45L9.7 4.45 13.94 11.78 12.21 12.78 7.97 5.45zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z'/></svg>"
+			VAR IconApple = "<svg viewBox='0 0 384 512' style='width: 35px; height: 35px; fill: #f5f5f7;'><path d='M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z'></path></svg>"
+			
+			// Custom API Logos
+			VAR IconYF = "<svg viewBox='0 0 24 24' style='width: 14px; height: 14px;'><circle cx='12' cy='12' r='12' fill='#720e9e'/><text x='12' y='16.5' fill='#ffffff' font-size='13' font-weight='800' font-family='Arial, sans-serif' text-anchor='middle'>Y!</text></svg>"
+			VAR IconStooq = "<svg viewBox='0 0 24 24' style='width: 14px; height: 14px;'><rect width='24' height='24' rx='4' fill='#005b9f'/><path d='M6 16l4-4 4 2 4-6' stroke='#ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>"
+			
+			// 4. Logic to inject the 'active' CSS class
+			VAR HomeClass = IF(ActivePage = "Home", "nav-item active", "nav-item")
+			VAR MacroClass = IF(ActivePage = "Macro", "nav-item active", "nav-item")
+			VAR TechClass = IF(ActivePage = "Technical", "nav-item active", "nav-item")
+			
+			// 5. Build the HTML and CSS
+			VAR HtmlContent = 
+			"
+			<style>
+			    body { margin: 0; padding: 0; overflow: hidden; }
+			    
+			    .sidebar {
+			        font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif;
+			        background-color: #1d1d1f;
+			        border-right: 1px solid #424245;
+			        width: 100%;
+			        height: 100vh;
+			        display: flex;
+			        flex-direction: column;
+			        justify-content: space-between;
+			        box-sizing: border-box;
+			        padding-top: 30px;
+			        padding-bottom: 20px;
+			    }
+			
+			    .top-section {
+			        display: flex;
+			        flex-direction: column;
+			        align-items: center;
+			        width: 100%;
+			    }
+			
+			    .brand-container {
+			        margin-bottom: 40px;
+			        display: flex;
+			        flex-direction: column;
+			        align-items: center;
+			    }
+			
+			    .brand-title {
+			        color: #f5f5f7;
+			        font-size: 14px;
+			        font-weight: 700;
+			        letter-spacing: -0.01em;
+			        margin-top: 12px;
+			        text-align: center;
+			    }
+			
+			    .brand-subtitle {
+			        color: #86868b;
+			        font-size: 10px;
+			        text-transform: uppercase;
+			        letter-spacing: 0.1em;
+			        margin-top: 4px;
+			    }
+			
+			    .nav-container {
+			        width: 100%;
+			        display: flex;
+			        flex-direction: column;
+			        gap: 10px;
+			        padding: 0 15px;
+			        box-sizing: border-box;
+			    }
+			
+			    .nav-item {
+			        display: flex;
+			        align-items: center;
+			        gap: 15px;
+			        padding: 12px 20px;
+			        border-radius: 10px;
+			        color: #86868b;
+			        background-color: transparent;
+			        font-size: 14px;
+			        font-weight: 500;
+			        letter-spacing: 0.02em;
+			        transition: all 0.2s ease;
+			        box-sizing: border-box;
+			        width: 100%;
+			    }
+			
+			    .nav-item:hover { background-color: #2c2c2e; color: #f5f5f7; }
+			    .nav-item.active { background-color: rgba(41, 151, 255, 0.15); color: #2997ff; border-left: 3px solid #2997ff; }
+			
+			    .context-panel {
+			        width: 85%;
+			        margin: 0 auto;
+			        padding: 16px;
+			        background: rgba(255, 255, 255, 0.03);
+			        border: 1px solid #424245;
+			        border-radius: 12px;
+			        box-sizing: border-box;
+			        display: flex;
+			        flex-direction: column;
+			        gap: 14px;
+			    }
+			
+			    .context-row {
+			        display: flex;
+			        flex-direction: column;
+			        gap: 6px;
+			    }
+			
+			    .context-label {
+			        font-size: 10px;
+			        color: #86868b;
+			        text-transform: uppercase;
+			        letter-spacing: 0.05em;
+			    }
+			
+			    .context-value {
+			        font-size: 13px;
+			        font-weight: 600;
+			        color: #f5f5f7;
+			    }
+			
+			    /* API Badge Grid */
+			    .source-grid {
+			        display: flex;
+			        flex-wrap: wrap;
+			        gap: 8px;
+			    }
+			
+			    .source-badge {
+			        display: flex;
+			        align-items: center;
+			        gap: 6px;
+			        background: rgba(255, 255, 255, 0.06);
+			        border: 1px solid rgba(255, 255, 255, 0.1);
+			        border-radius: 6px;
+			        padding: 5px 8px;
+			        font-size: 11px;
+			        font-weight: 600;
+			        color: #f5f5f7;
+			        box-sizing: border-box;
+			    }
+			</style>
+			
+			<div class='sidebar'>
+			    
+			    <div class='top-section'>
+			        <div class='brand-container'>
+			            " & IconApple & "
+			            <div class='brand-title'>AAPL Analytics</div>
+			            <div class='brand-subtitle'>v2.4.1</div>
+			        </div>
+			
+			        <div class='nav-container'>
+			            <div class='" & HomeClass & "'>
+			                " & IconHome & "
+			                <span>Landing Page</span>
+			            </div>
+			            <div class='" & MacroClass & "'>
+			                " & IconMacro & "
+			                <span>Macro View</span>
+			            </div>
+			            <div class='" & TechClass & "'>
+			                " & IconTech & "
+			                <span>Technical View</span>
+			            </div>
+			        </div>
+			    </div>
+			
+			    <div class='context-panel'>
+			        <div class='context-row'>
+			            <div class='context-label'>Live Data Sources</div>
+			            <div class='source-grid'>
+			                <div class='source-badge'>
+			                    " & IconYF & " <span>yFinance</span>
+			                </div>
+			                <div class='source-badge'>
+			                    " & IconStooq & " <span>Stooq</span>
+			                </div>
+			            </div>
+			        </div>
+			        <div class='context-row'>
+			            <div class='context-label'>Latest Refresh</div>
+			            <div class='context-value'>" & LastRefresh & "</div>
+			        </div>
+			        <div class='context-row'>
+			            <div class='context-label'>Total Records</div>
+			            <div class='context-value'>" & TotalRows & " Days</div>
+			        </div>
+			    </div>
+			
+			</div>
+			"
+			RETURN HtmlContent
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: f421e6fe-d45f-4a29-b3e7-9862e6dd0bda
+
+	measure 'Last Refresh Date' =
+			
+			/// Identifies the absolute latest physical trading record loaded into the model
+			FORMAT(MAX(aapl_daily[Trade_Date]), "MMMM dd, yyyy")
+		displayFolder: 00 - Metadata
+		lineageTag: 554239dc-b4d5-4294-a12d-c74a3262dbd8
+
+	measure 'Last Refresh Date Button' = ```
+			
+			VAR LatestTradeDate = MAX(aapl_daily[Trade_Date])
+			
+			RETURN 
+			    "Data Current as of: " & FORMAT(LatestTradeDate, "MMMM dd, yyyy")
+			```
+		displayFolder: 00 - Metadata
+		lineageTag: 7519d3da-f5b9-4181-81e9-f0acb93409c7
+
+	measure 'Avg Price AC' =
+			
+			AVERAGE(aapl_daily[Adj_Close])
+		displayFolder: 01 - Absolute Performance
+		lineageTag: 092bab6b-059b-4310-829e-6887561383cb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Price PY' =
+			
+			CALCULATE(
+			    [Avg Price AC],
+			    DATEADD('Calendar'[Date], -1, YEAR)
+			)
+		displayFolder: 01 - Absolute Performance
+		lineageTag: e7f3780b-f52e-40e7-a2f9-df75b52c7039
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'IBCS YoY Variance Chart' =
+			
+			PowerofBI.IBCS.BarChart.AbsoluteVariance(
+			    'Calendar'[Year],                                           // dimensionColumn: The row context
+			    [Avg Price AC],                                             // mainValueExpr: Actuals (AC)
+			    BLANK(),                                                    // secondValueExpr: Forecast (Not used here)
+			    [Avg Price PY],                                             // baseValueExpr: Comparison (PY)
+			    CALCULATE([Avg Price AC], ALLSELECTED('Calendar'[Year])),   // scaleValueExpr: For max scaling width
+			    "grey",                                                     // baseType: IBCS standard for PY
+			    NOT(ISINSCOPE('Calendar'[Year])),                           // totalRow: Detects the grand total line
+			    FORMAT([Avg Price AC] - [Avg Price PY], "+$#,0.00;-$#,0.00;$0.00"), // dataLabel: The text to display
+			    250,                                                        // imageWidth: Width in pixels
+			    35,                                                         // imageHeight: Height in pixels
+			    1                                                           // businessImpact: 1 means Positive = Green
+			)
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 6d07781c-8d49-4bc6-8a6a-1ddbe470cdd3
+		dataCategory: ImageUrl
+
+	measure 'KPI - Latest Price' =
+			
+			VAR FormatPrice = FORMAT([Latest Price], "$#,0.00")
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='#2997ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 26px; height: 26px;'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>"
+			
+			RETURN
+			"<style>
+			    .kpi-card { background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%); border: 1px solid #424245; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 18px; height: 100%; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+			    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #2997ff; }
+			    .icon-box { width: 54px; height: 54px; border-radius: 14px; background: rgba(41, 151, 255, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			</style>
+			<div class='kpi-card'>
+			    <div class='icon-box'>" & IconSVG & "</div>
+			    <div style='display: flex; flex-direction: column;'>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;'>Latest Close</div>
+			        <div style='color: #f5f5f7; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;'>" & FormatPrice & "</div>
+			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
+			    </div>
+			</div>"
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: e1adad08-3d9a-4e2c-84ce-a3bba8651f14
+
+	measure 'KPI - CAGR' =
+			
+			VAR FormatAAPL = FORMAT([CAGR], "0.00%")
+			VAR FormatSP500 = FORMAT([SP500 CAGR], "0.00%")
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='#30d158' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 26px; height: 26px;'><polyline points='23 6 13.5 15.5 8.5 10.5 1 18'></polyline><polyline points='17 6 23 6 23 12'></polyline></svg>"
+			
+			RETURN
+			"<style>
+			    .kpi-card { background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%); border: 1px solid #424245; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 18px; height: 100%; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+			    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #30d158; }
+			    .icon-box { width: 54px; height: 54px; border-radius: 14px; background: rgba(48, 209, 88, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			</style>
+			<div class='kpi-card'>
+			    <div class='icon-box'>" & IconSVG & "</div>
+			    <div style='display: flex; flex-direction: column;'>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;'>Annualized Growth</div>
+			        <div style='color: #f5f5f7; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;'>" & FormatAAPL & "</div>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 500; margin-top: 2px;'>Benchmark: <span style='color: #64d2ff;'>" & FormatSP500 & "</span></div>
+			    </div>
+			</div>"
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 56eab8e8-c993-4537-a24f-0144b60eccc7
+
+	measure 'KPI - Sharpe Ratio' =
+			
+			VAR RawSharpe = [Sharpe Ratio]
+			VAR FormatSharpe = FORMAT(RawSharpe, "0.00")
+			VAR HexColor = IF(RawSharpe >= 1.0, "#30d158", IF(RawSharpe > 0, "#ff9f0a", "#ff453a"))
+			VAR RgbaBg = IF(RawSharpe >= 1.0, "rgba(48, 209, 88, 0.12)", IF(RawSharpe > 0, "rgba(255, 159, 10, 0.12)", "rgba(255, 69, 58, 0.12)"))
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='" & HexColor & "' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 26px; height: 26px;'><circle cx='12' cy='12' r='10'></circle><circle cx='12' cy='12' r='6'></circle><circle cx='12' cy='12' r='2'></circle></svg>"
+			
+			RETURN
+			"<style>
+			    .kpi-card-sharpe { background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%); border: 1px solid #424245; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 18px; height: 100%; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: all 0.2s ease; }
+			    .kpi-card-sharpe:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: " & HexColor & "; }
+			</style>
+			<div class='kpi-card-sharpe'>
+			    <div style='width: 54px; height: 54px; border-radius: 14px; background: " & RgbaBg & "; display: flex; align-items: center; justify-content: center; flex-shrink: 0;'>" & IconSVG & "</div>
+			    <div style='display: flex; flex-direction: column;'>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;'>Risk-Adjusted (Sharpe)</div>
+			        <div style='color: " & HexColor & "; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;'>" & FormatSharpe & "</div>
+			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
+			    </div>
+			</div>"
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 772d7fc2-79c6-410e-aa81-27cceaaede61
+
+	measure 'KPI - Max Drawdown' =
+			
+			VAR FormatDD = FORMAT([Max Drawdown], "0.00%")
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='#ff453a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 26px; height: 26px;'><polyline points='23 18 13.5 8.5 8.5 13.5 1 6'></polyline><polyline points='17 18 23 18 23 12'></polyline></svg>"
+			
+			RETURN
+			"<style>
+			    .kpi-card { background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%); border: 1px solid #424245; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 18px; height: 100%; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+			    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #ff453a; }
+			    .icon-box-red { width: 54px; height: 54px; border-radius: 14px; background: rgba(255, 69, 58, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			</style>
+			<div class='kpi-card'>
+			    <div class='icon-box-red'>" & IconSVG & "</div>
+			    <div style='display: flex; flex-direction: column;'>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;'>Maximum Drawdown</div>
+			        <div style='color: #ff453a; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;'>" & FormatDD & "</div>
+			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
+			    </div>
+			</div>"
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 2fb98ea8-c397-48f6-98b7-9f08c13ac6ca
+
+	measure 'KPI - Volatility' =
+			
+			VAR FormatVol = FORMAT([Annualized Volatility], "0.00%")
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='#ff9f0a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 26px; height: 26px;'><polyline points='22 12 18 12 15 21 9 3 6 12 2 12'></polyline></svg>"
+			
+			RETURN
+			"<style>
+			    .kpi-card-vol { width: 100%; background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%); border: 1px solid #424245; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 18px; height: 100%; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+			    .kpi-card-vol:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: #ff9f0a; }
+			    .icon-box-orange { width: 54px; height: 54px; border-radius: 14px; background: rgba(255, 159, 10, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			</style>
+			<div class='kpi-card-vol'>
+			    <div class='icon-box-orange'>" & IconSVG & "</div>
+			    <div style='display: flex; flex-direction: column;'>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;'>Annualized Volatility</div>
+			        <div style='color: #f5f5f7; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;'>" & FormatVol & "</div>
+			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
+			    </div>
+			</div>"
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 1661dfbb-f9d3-4797-a1d9-7a9d679a6ea7
+
+	measure 'KPI - Trend State' = ```
+			
+			VAR State = [Trend State]
+			VAR IsBullish = SEARCH("Bullish", State, 1, 0) > 0
+			VAR HexColor = IF(IsBullish, "#30d158", IF(SEARCH("Bearish", State, 1, 0) > 0, "#ff453a", "#86868b"))
+			VAR RgbaBg = IF(IsBullish, "rgba(48, 209, 88, 0.12)", IF(SEARCH("Bearish", State, 1, 0) > 0, "rgba(255, 69, 58, 0.12)", "rgba(134, 134, 139, 0.12)"))
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='" & HexColor & "' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 26px; height: 26px;'><path d='M4 16l6-6 4 4 6-6'></path><path d='M4 8l6 6 4-4 6 6' stroke-dasharray='2 2'></path></svg>"
+			
+			RETURN
+			"<style>
+			    .kpi-card-trend { 
+			        width: 100%; 
+			        height: 100%; 
+			        background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%); 
+			        border: 1px solid #424245; 
+			        border-radius: 16px; 
+			        padding: 20px; 
+			        display: flex; 
+			        align-items: center; 
+			        gap: 18px; 
+			        box-sizing: border-box; 
+			        font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+			        transition: all 0.2s ease; 
+			    }
+			    .kpi-card-trend:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: " & HexColor & "; }
+			</style>
+			<div class='kpi-card-trend'>
+			    <div style='width: 54px; height: 54px; border-radius: 14px; background: " & RgbaBg & "; display: flex; align-items: center; justify-content: center; flex-shrink: 0;'>" & IconSVG & "</div>
+			    <div style='display: flex; flex-direction: column;'>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;'>Momentum Trend</div>
+			        <div style='color: " & HexColor & "; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;'>" & State & "</div>
+			        
+			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
+			    </div>
+			</div>"
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: dfe94c7a-d3fc-43e8-8c25-425f729de6d0
+
+	measure 'KPI - RSI' =
+			
+			VAR RawRSI = [RSI (14-Day)]
+			VAR FormatRSI = FORMAT(RawRSI, "0.0")
+			VAR StatusText = IF(RawRSI >= 70, "OVERBOUGHT", IF(RawRSI <= 30, "OVERSOLD", "NEUTRAL"))
+			VAR HexColor = IF(RawRSI >= 70, "#ff453a", IF(RawRSI <= 30, "#30d158", "#64d2ff"))
+			VAR RgbaBg = IF(RawRSI >= 70, "rgba(255, 69, 58, 0.12)", IF(RawRSI <= 30, "rgba(48, 209, 88, 0.12)", "rgba(100, 210, 255, 0.12)"))
+			VAR IconSVG = "<svg viewBox='0 0 24 24' fill='none' stroke='" & HexColor & "' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 26px; height: 26px;'><path d='M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0'></path><path d='M12 7v5l3 3'></path></svg>"
+			
+			RETURN
+			"<style>
+			    .kpi-card-rsi { width: 100%; background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%); border: 1px solid #424245; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 18px; height: 100%; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: all 0.2s ease; }
+			    .kpi-card-rsi:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: " & HexColor & "; }
+			</style>
+			<div class='kpi-card-rsi'>
+			    <div style='width: 54px; height: 54px; border-radius: 14px; background: " & RgbaBg & "; display: flex; align-items: center; justify-content: center; flex-shrink: 0;'>" & IconSVG & "</div>
+			    <div style='display: flex; flex-direction: column;'>
+			        <div style='color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;'>Relative Strength (14D)</div>
+			        <div style='display: flex; align-items: center; gap: 12px;'>
+			            <span style='color: #f5f5f7; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;'>" & FormatRSI & "</span>
+			            <span style='font-size: 11px; font-weight: 700; letter-spacing: 0.05em; padding: 4px 8px; border-radius: 6px; background-color: " & RgbaBg & "; color: " & HexColor & ";'>" & StatusText & "</span>
+			        </div>
+			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
+			    </div>
+			</div>"
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: a21c9185-5155-4d7b-a904-331dbbb0836a
+
+	measure 'Dynamic Business Recommendation' = ```
+			
+			// 1. Fetch Current States
+			VAR CurrentRSI = [RSI (14-Day)]
+			VAR CurrentTrend = [Trend State]
+			VAR CurrentDrawdown = [Daily Drawdown %]
+			VAR CurrentBeta = [Beta (AAPL to Market)]
+			
+			// 2. Define the Analytical Logic Engine (Internal Momentum)
+			VAR MarketStance = 
+			    SWITCH(
+			        TRUE(),
+			        // Scenario 1: Severe Capitulation
+			        SEARCH("Bearish", CurrentTrend, 1, 0) > 0 && CurrentRSI <= 30, 
+			        "SEVERE OVERSOLD CONDITIONS: AAPL is currently in a macro Death Cross but has reached technical exhaustion (RSI < 30). Capital preservation is prioritized, but monitor for volume surges indicating institutional accumulation at these discounted levels.",
+			        
+			        // Scenario 2: Macro Downtrend
+			        SEARCH("Bearish", CurrentTrend, 1, 0) > 0 && CurrentRSI > 30,
+			        "MACRO DOWNTREND: The 50-day SMA remains below the 200-day SMA, indicating sustained institutional distribution. Avoid heavy accumulation until a confirmed trend reversal (Golden Cross) is established.",
+			        
+			        // Scenario 3: Overextended Bull Market
+			        SEARCH("Bullish", CurrentTrend, 1, 0) > 0 && CurrentRSI >= 70,
+			        "OVERBOUGHT CONDITIONS: While the macro trend is highly favorable (Golden Cross), short-term momentum is overextended (RSI > 70). Risk of a short-term pullback is high. Hold current positions, but delay new capital deployment.",
+			        
+			        // Scenario 4: Healthy Bull Market (Default)
+			        SEARCH("Bullish", CurrentTrend, 1, 0) > 0 && CurrentRSI < 70,
+			        "FAVORABLE ACCUMULATION: The asset remains in a confirmed macro uptrend without triggering short-term overbought warnings. Risk-adjusted momentum supports continued holding or systematic accumulation.",
+			        
+			        "INSUFFICIENT DATA: Awaiting further price action to determine trend state."
+			    )
+			
+			// 3. Define the Macro Volatility Context (Beta & Drawdown)
+			VAR DrawdownContext = 
+			    IF(
+			        CurrentDrawdown < -0.15, 
+			        " The portfolio is actively facing a severe drawdown of " & FORMAT(CurrentDrawdown, "0.0%") & " from all-time highs. ", 
+			        ""
+			    )
+			
+			VAR BetaContext = 
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(CurrentBeta), "",
+			        
+			        CurrentBeta > 1.2, 
+			        "<br><br><span style='color: #ff9f0a; font-weight: 600;'>Volatility Alert:</span> The asset exhibits a High Beta (" & FORMAT(CurrentBeta, "0.00") & "), meaning it is amplifying S&P 500 movements. Expect accelerated gains during market rallies, but severe exposure during macro corrections.",
+			        
+			        CurrentBeta < 0.8, 
+			        "<br><br><span style='color: #30d158; font-weight: 600;'>Defensive Posture:</span> The asset exhibits a Low Beta (" & FORMAT(CurrentBeta, "0.00") & "), moving somewhat independently of the S&P 500. This provides excellent portfolio stabilization against broader market shocks.",
+			        
+			        "<br><br><span style='color: #64d2ff; font-weight: 600;'>Market Neutral:</span> The asset's Beta (" & FORMAT(CurrentBeta, "0.00") & ") indicates it is tracking closely with the broader S&P 500, offering baseline market exposure without outsized systemic risk."
+			    )
+			
+			// 4. Construct the HTML UI
+			RETURN
+			"
+			<div style='
+			    background: linear-gradient(145deg, rgba(41, 151, 255, 0.05) 0%, rgba(29, 29, 31, 0.8) 100%);
+			    border-left: 4px solid #2997ff;
+			    border-radius: 0 12px 12px 0;
+			    padding: 24px;
+			    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+			    box-sizing: border-box;
+			    width: 100%;
+			'>
+			    <div style='display: flex; align-items: center; gap: 12px; margin-bottom: 12px;'>
+			        <svg viewBox='0 0 24 24' fill='none' stroke='#2997ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width: 20px; height: 20px;'>
+			            <circle cx='12' cy='12' r='10'></circle>
+			            <line x1='12' y1='16' x2='12' y2='12'></line>
+			            <line x1='12' y1='8' x2='12.01' y2='8'></line>
+			        </svg>
+			        <span style='color: #f5f5f7; font-size: 16px; font-weight: 600; letter-spacing: 0.02em;'>Quantitative Advisory</span>
+			    </div>
+			    <div style='color: #86868b; font-size: 14px; line-height: 1.6; letter-spacing: 0.01em;'>
+			        <strong style='color: #ffffff;'>" & MarketStance & "</strong>" & DrawdownContext & BetaContext & "
+			    </div>
+			</div>
+			"
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 2ee8c6dd-ac12-4e78-afce-7948d4ad5118
+
+	measure 'Filter Text - CEO Era' =
+			
+			SavoryData.Selection2List.Text2List_MaxNumberOfElements_TextColumnName(
+			    'Calendar'[CEO Era],  // The column being filtered
+			    3,                    // Max items to show before adding ", ..."
+			    "All Eras"            // Text to show if nothing is filtered
+			)
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 8a36961f-44ff-4e9c-9188-c34b11e298c3
+
+	measure 'Filter Text - Dates' =
+			
+			SavoryData.Selection2List.Date2List(
+			    'Calendar'[Year],
+			    'Calendar'[MonthName],
+			    'Calendar'[Date]
+			)
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: 9bfb6088-c7e3-481e-b7bb-c8b86e328db8
+
+	measure 'SVG Sparkline - Price Trend' =
+			
+			DaxLib.SVG.Viz.Area(
+			    'Calendar'[Date],    // Axis: Granular dates
+			    [Latest Price],      // Measure: The price
+			    "#2997ff",           // Color: Apple System Blue
+			    FALSE(),             // Show Axis: False (keeps it clean for tables)
+			    160,                 // Width in pixels
+			    45                   // Height in pixels
+			)
+		displayFolder: 07 - SVG Sparklines
+		lineageTag: 4db00e43-7a4a-484e-94d9-73b22299f609
+		dataCategory: ImageUrl
+
+	measure 'SVG Boxplot - Daily Returns' =
+			
+			DaxLib.SVG.Viz.Boxplot(
+			    'Calendar'[Date],    // Axis: Granular dates
+			    [Daily Return %],    // Measure: The % change
+			    "#ff9f0a",           // Color: Apple System Orange (matches your Volatility KPI)
+			    TRUE(),              // Show Outliers: True (critical for risk analysis)
+			    160,                 // Width in pixels
+			    45                   // Height in pixels
+			)
+		displayFolder: 07 - SVG Sparklines
+		lineageTag: 8c50de15-bc17-42ff-9770-f6f6cd202cc9
+		dataCategory: ImageUrl
+
+	measure 'Button Text - Active Dates' =
+			
+			VAR DateString = [Filter Text - Dates] // Your SavoryData measure
+			RETURN
+			    "🗓️ Horizon: " & DateString
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: f6cc6703-f083-42fe-8f68-9985a24c6d87
+
+	measure 'SVG Tooltip - Drawdown Recovery' = ```
+			
+			VAR CurrentPrice = [Latest Price]
+			VAR AllTimeHigh = 
+			    CALCULATE(
+			        MAX(aapl_daily[Adj_Close]),
+			        ALLSELECTED('Calendar'),
+			        'Calendar'[Date] <= MAX('Calendar'[Date])
+			    )
+			VAR RecoveryRatio = DIVIDE(CurrentPrice, AllTimeHigh, 0)
+			
+			RETURN
+			    XU.SVG.Progress.LabeledBar(
+			        RecoveryRatio, 
+			        "#424245",    // Background: Dark Grey
+			        IF(RecoveryRatio >= 0.95, "#30d158", "#ff9f0a"), // Green if near ATH, Orange otherwise
+			        4,            // Corner Radius
+			        TRUE(), 
+			        "Recovery: " & FORMAT(RecoveryRatio, "0.0%"), 
+			        "#f5f5f7"     // Text Color
+			    )
+			```
+		displayFolder: 08 - SVG Tooltips
+		lineageTag: 08308c5e-cc64-4867-96a9-c5ef2b3ae6d7
+
+	measure 'SVG Tooltip - Volatility Donut' = ```
+			
+			VAR AAPLVol = [Annualized Volatility]
+			VAR SP500Vol = 
+			    VAR SP_DailyStdDev = STDEV.S(sp500_daily[Historical_SP500_Return])
+			    RETURN SP_DailyStdDev * SQRT(252)
+			
+			// Ratio of AAPL Volatility relative to a "Highly Volatile" threshold (e.g., 2x the market)
+			VAR VolatilityRatio = MIN(1, DIVIDE(AAPLVol, SP500Vol * 1.5, 1))
+			
+			RETURN
+			    XU.SVG.Progress.Donut(
+			        VolatilityRatio,
+			        "#424245",    // Background 
+			        "#1d1d1f",    // Inner hole background (matches dark theme)
+			        0.65,         // Hole size
+			        "#ff453a",    // Fill: System Red (indicating risk)
+			        "#1d1d1f",    // Stroke color
+			        TRUE(), 
+			        "#ffffff"     // Text color
+			    )
+			```
+		displayFolder: 08 - SVG Tooltips
+		lineageTag: 678f7e80-2655-4d0d-99d3-1dfabf039d48
+
+	measure 'SVG Tooltip - RSI Capsule' = ```
+			
+			VAR RSIRatio = DIVIDE([RSI (14-Day)], 100, 0)
+			VAR BarColor = 
+			    SWITCH(
+			        TRUE(),
+			        RSIRatio >= 0.70, "#ff453a", // Overbought (Red)
+			        RSIRatio <= 0.30, "#30d158", // Oversold (Green)
+			        "#64d2ff"                    // Neutral (Blue)
+			    )
+			
+			RETURN
+			    XU.SVG.Progress.Capsule(
+			        RSIRatio,
+			        "#424245",
+			        BarColor,
+			        TRUE(),
+			        "RSI Heat",
+			        "#ffffff"
+			    )
+			```
+		displayFolder: 08 - SVG Tooltips
+		lineageTag: 8b2999e0-60a5-437a-8f87-fd69429a6e11
+
+	measure 'HTML - Decade Summary Table' = ```
+			
+			// 1. Generate the Dynamic Title
+			VAR DynamicTitle = "Decadal Risk & Return Profile | " & [Filter Text - CEO Era]
+			
+			// 2. Generate the Aggregated Virtual Table
+			VAR TableData = 
+			    ADDCOLUMNS(
+			        VALUES('Calendar'[Decade]),
+			        "@CAGR", [CAGR],
+			        "@Sparkline", [SVG Sparkline - Price Trend],
+			        "@Vol", [Annualized Volatility],
+			        "@Boxplot", [SVG Boxplot - Daily Returns]
+			    )
+			
+			// 3. Iterate through the Virtual Table to build HTML Rows (<tr>)
+			VAR TableRows = 
+			    CONCATENATEX(
+			        TableData,
+			        // STRIP THE PREFIX TO CREATE CLEAN INLINE SVG
+			        VAR CleanSparkline = SUBSTITUTE([@Sparkline], "data:image/svg+xml;utf8,", "")
+			        VAR CleanBoxplot = SUBSTITUTE([@Boxplot], "data:image/svg+xml;utf8,", "")
+			        
+			        RETURN
+			        "<tr class='data-row'>
+			            <td class='cell-text' style='font-weight: 600; color: #ffffff;'>" & 'Calendar'[Decade] & "</td>
+			            <td class='cell-text' style='color: #30d158;'>" & FORMAT([@CAGR], "0.0%") & "</td>
+			            <td class='cell-svg'>" & CleanSparkline & "</td>
+			            <td class='cell-text' style='color: #ff9f0a;'>" & FORMAT([@Vol], "0.0%") & "</td>
+			            <td class='cell-svg'>" & CleanBoxplot & "</td>
+			        </tr>",
+			        "", 
+			        'Calendar'[Decade], 
+			        ASC
+			    )
+			
+			// 4. Define the CSS Architecture and Container Shell
+			VAR HtmlContent = 
+			"
+			<style>
+			    .card-container {
+			        width: 100%;
+			        height: 100%;
+			        display: flex;
+			        flex-direction: column;
+			        font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, sans-serif;
+			        background: linear-gradient(145deg, #1d1d1f 0%, #151516 100%);
+			        border: 1px solid #424245;
+			        border-radius: 12px;
+			        box-sizing: border-box;
+			        padding: 16px 20px;
+			    }
+			    .dynamic-title {
+			        color: #f5f5f7;
+			        font-size: 16px;
+			        font-weight: 700;
+			        letter-spacing: -0.01em;
+			        margin-bottom: 16px;
+			    }
+			    .custom-matrix {
+			        width: 100%;
+			        border-collapse: collapse;
+			        border-radius: 8px;
+			        overflow: hidden;
+			        border: 1px solid #424245;
+			    }
+			    .custom-matrix th {
+			        text-align: left;
+			        padding: 10px 16px;
+			        background-color: rgba(255, 255, 255, 0.03);
+			        border-bottom: 1px solid #424245;
+			        color: #86868b;
+			        text-transform: uppercase;
+			        font-size: 10px;
+			        font-weight: 700;
+			        letter-spacing: 0.05em;
+			    }
+			    .data-row {
+			        border-bottom: 1px solid rgba(66, 66, 69, 0.4);
+			        transition: background-color 0.2s ease;
+			    }
+			    .data-row:last-child {
+			        border-bottom: none;
+			    }
+			    .data-row:hover {
+			        background-color: rgba(41, 151, 255, 0.08); 
+			    }
+			    .cell-text {
+			        padding: 8px 16px; /* Reduced vertical padding */
+			        font-size: 13px;
+			        vertical-align: middle;
+			    }
+			    .cell-svg {
+			        padding: 4px 16px; /* Extremely tight vertical padding for SVGs */
+			        vertical-align: middle;
+			    }
+			    /* Strictly constrain the inline SVG rendering */
+			    .cell-svg svg {
+			        display: block; 
+			        max-width: 140px !important;
+			        max-height: 36px !important;
+			        width: 100%;
+			        height: auto;
+			    }
+			</style>
+			
+			<div class='card-container'>
+			    <div class='dynamic-title'>" & DynamicTitle & "</div>
+			    <table class='custom-matrix'>
+			        <thead>
+			            <tr>
+			                <th>Decade</th>
+			                <th>CAGR</th>
+			                <th>Price Trend</th>
+			                <th>Volatility</th>
+			                <th>Daily Returns Distribution</th>
+			            </tr>
+			        </thead>
+			        <tbody>
+			            " & TableRows & "
+			        </tbody>
+			    </table>
+			</div>
+			"
+			
+			RETURN HtmlContent
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: af82a886-d0d6-48e0-bdba-6c29d8ecfd27
+
+	measure 'Sidebar Navigation HTML 2' = ```
+			
+			// 1. Define the Active Page (Change this to "Home" or "Technical" for the other pages)
+			VAR ActivePage = "Technical"
+			
+			// 2. Fetch Dynamic Data Context
+			VAR LastRefresh = FORMAT(LASTDATE('Calendar'[Date]), "MMM dd, yyyy")
+			VAR TotalRows = FORMAT(COUNTROWS(aapl_daily), "#,0")
+			
+			// 3. Define the SVG Icons (Navigation & Brand)
+			VAR IconHome = "<svg viewBox='0 0 24 24' style='width: 22px; height: 22px; fill: currentColor;'><path d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z'/></svg>"
+			VAR IconMacro = "<svg viewBox='0 0 24 24' style='width: 22px; height: 22px; fill: currentColor;'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/></svg>"
+			VAR IconTech = "<svg viewBox='0 0 24 24' style='width: 22px; height: 22px; fill: currentColor;'><path d='M16 11.78L20.24 4.45 21.97 5.45 17.74 12.78 16 11.78zM7.97 5.45L9.7 4.45 13.94 11.78 12.21 12.78 7.97 5.45zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z'/></svg>"
+			VAR IconApple = "<svg viewBox='0 0 384 512' style='width: 35px; height: 35px; fill: #f5f5f7;'><path d='M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z'></path></svg>"
+			
+			// Custom API Logos
+			VAR IconYF = "<svg viewBox='0 0 24 24' style='width: 14px; height: 14px;'><circle cx='12' cy='12' r='12' fill='#720e9e'/><text x='12' y='16.5' fill='#ffffff' font-size='13' font-weight='800' font-family='Arial, sans-serif' text-anchor='middle'>Y!</text></svg>"
+			VAR IconStooq = "<svg viewBox='0 0 24 24' style='width: 14px; height: 14px;'><rect width='24' height='24' rx='4' fill='#005b9f'/><path d='M6 16l4-4 4 2 4-6' stroke='#ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>"
+			
+			// 4. Logic to inject the 'active' CSS class
+			VAR HomeClass = IF(ActivePage = "Home", "nav-item active", "nav-item")
+			VAR MacroClass = IF(ActivePage = "Macro", "nav-item active", "nav-item")
+			VAR TechClass = IF(ActivePage = "Technical", "nav-item active", "nav-item")
+			
+			// 5. Build the HTML and CSS
+			VAR HtmlContent = 
+			"
+			<style>
+			    body { margin: 0; padding: 0; overflow: hidden; }
+			    
+			    .sidebar {
+			        font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif;
+			        background-color: #1d1d1f;
+			        border-right: 1px solid #424245;
+			        width: 100%;
+			        height: 100vh;
+			        display: flex;
+			        flex-direction: column;
+			        justify-content: space-between;
+			        box-sizing: border-box;
+			        padding-top: 30px;
+			        padding-bottom: 20px;
+			    }
+			
+			    .top-section {
+			        display: flex;
+			        flex-direction: column;
+			        align-items: center;
+			        width: 100%;
+			    }
+			
+			    .brand-container {
+			        margin-bottom: 40px;
+			        display: flex;
+			        flex-direction: column;
+			        align-items: center;
+			    }
+			
+			    .brand-title {
+			        color: #f5f5f7;
+			        font-size: 14px;
+			        font-weight: 700;
+			        letter-spacing: -0.01em;
+			        margin-top: 12px;
+			        text-align: center;
+			    }
+			
+			    .brand-subtitle {
+			        color: #86868b;
+			        font-size: 10px;
+			        text-transform: uppercase;
+			        letter-spacing: 0.1em;
+			        margin-top: 4px;
+			    }
+			
+			    .nav-container {
+			        width: 100%;
+			        display: flex;
+			        flex-direction: column;
+			        gap: 10px;
+			        padding: 0 15px;
+			        box-sizing: border-box;
+			    }
+			
+			    .nav-item {
+			        display: flex;
+			        align-items: center;
+			        gap: 15px;
+			        padding: 12px 20px;
+			        border-radius: 10px;
+			        color: #86868b;
+			        background-color: transparent;
+			        font-size: 14px;
+			        font-weight: 500;
+			        letter-spacing: 0.02em;
+			        transition: all 0.2s ease;
+			        box-sizing: border-box;
+			        width: 100%;
+			    }
+			
+			    .nav-item:hover { background-color: #2c2c2e; color: #f5f5f7; }
+			    .nav-item.active { background-color: rgba(41, 151, 255, 0.15); color: #2997ff; border-left: 3px solid #2997ff; }
+			
+			    .context-panel {
+			        width: 85%;
+			        margin: 0 auto;
+			        padding: 16px;
+			        background: rgba(255, 255, 255, 0.03);
+			        border: 1px solid #424245;
+			        border-radius: 12px;
+			        box-sizing: border-box;
+			        display: flex;
+			        flex-direction: column;
+			        gap: 14px;
+			    }
+			
+			    .context-row {
+			        display: flex;
+			        flex-direction: column;
+			        gap: 6px;
+			    }
+			
+			    .context-label {
+			        font-size: 10px;
+			        color: #86868b;
+			        text-transform: uppercase;
+			        letter-spacing: 0.05em;
+			    }
+			
+			    .context-value {
+			        font-size: 13px;
+			        font-weight: 600;
+			        color: #f5f5f7;
+			    }
+			
+			    /* API Badge Grid */
+			    .source-grid {
+			        display: flex;
+			        flex-wrap: wrap;
+			        gap: 8px;
+			    }
+			
+			    .source-badge {
+			        display: flex;
+			        align-items: center;
+			        gap: 6px;
+			        background: rgba(255, 255, 255, 0.06);
+			        border: 1px solid rgba(255, 255, 255, 0.1);
+			        border-radius: 6px;
+			        padding: 5px 8px;
+			        font-size: 11px;
+			        font-weight: 600;
+			        color: #f5f5f7;
+			        box-sizing: border-box;
+			    }
+			</style>
+			
+			<div class='sidebar'>
+			    
+			    <div class='top-section'>
+			        <div class='brand-container'>
+			            " & IconApple & "
+			            <div class='brand-title'>AAPL Analytics</div>
+			            <div class='brand-subtitle'>v2.4.1</div>
+			        </div>
+			
+			        <div class='nav-container'>
+			            <div class='" & HomeClass & "'>
+			                " & IconHome & "
+			                <span>Landing Page</span>
+			            </div>
+			            <div class='" & MacroClass & "'>
+			                " & IconMacro & "
+			                <span>Macro View</span>
+			            </div>
+			            <div class='" & TechClass & "'>
+			                " & IconTech & "
+			                <span>Technical View</span>
+			            </div>
+			        </div>
+			    </div>
+			
+			    <div class='context-panel'>
+			        <div class='context-row'>
+			            <div class='context-label'>Live Data Sources</div>
+			            <div class='source-grid'>
+			                <div class='source-badge'>
+			                    " & IconYF & " <span>yFinance</span>
+			                </div>
+			                <div class='source-badge'>
+			                    " & IconStooq & " <span>Stooq</span>
+			                </div>
+			            </div>
+			        </div>
+			        <div class='context-row'>
+			            <div class='context-label'>Latest Refresh</div>
+			            <div class='context-value'>" & LastRefresh & "</div>
+			        </div>
+			        <div class='context-row'>
+			            <div class='context-label'>Total Records</div>
+			            <div class='context-value'>" & TotalRows & " Days</div>
+			        </div>
+			    </div>
+			
+			</div>
+			"
+			RETURN HtmlContent
+			```
+		displayFolder: 06 - UI & Visual Assets
+		lineageTag: f56a36a8-eb59-4d9f-901d-5283a7083caf
+
+	measure 'Title - Macro Price Chart' = ```
+			
+			// 1. Extract the active temporal bounds
+			VAR MinYear = MIN('Calendar'[Year])
+			VAR MaxYear = MAX('Calendar'[Year])
+			VAR YearDiff = MaxYear - MinYear
+			VAR CurrentYear = YEAR(TODAY())
+			
+			// 2. Define the narrative logic (ignoring exact day matching)
+			VAR PeriodText = 
+			    SWITCH(
+			        TRUE(),
+			        // Scenario 1: User filtered to the current year
+			        YearDiff = 0 && MaxYear = CurrentYear, 
+			        "YTD (" & MaxYear & ")",
+			        
+			        // Scenario 2: User filtered to a single historical year
+			        YearDiff = 0, 
+			        "(" & MaxYear & ")",
+			        
+			        // Scenario 3: User filtered to a multi-year span ending this year
+			        MaxYear = CurrentYear || MaxYear = CurrentYear - 1, 
+			        "Last " & YearDiff & " Years (" & MinYear & " - " & MaxYear & ")",
+			        
+			        // Scenario 4: User filtered to a historical multi-year span (e.g., Jobs Era)
+			        "(" & MinYear & " - " & MaxYear & " | " & YearDiff & " Years)"
+			    )
+			    
+			// 3. Output the final presentation string
+			RETURN 
+			    "Historical Price Action " & PeriodText
+			```
+		displayFolder: 09 - Dynamic Titles
+		lineageTag: f3e497c8-c1b5-49a4-8527-e2fdc5798980
+
+	measure 'Title - Tech Price Chart' =
+			
+			PiotrBartela.TitleContext.Period("Price Action & Moving Averages (50D, 200D)", 'Calendar'[Date])
+		displayFolder: 09 - Dynamic Titles
+		lineageTag: f06546bb-07e1-4569-b954-c99c013ab956
+
+	measure 'Title - Tech RSI Chart' =
+			
+			PiotrBartela.TitleContext.Period("Relative Strength Index (14-Day)", 'Calendar'[Date])
+		displayFolder: 09 - Dynamic Titles
+		lineageTag: 2f9971df-83cd-487f-8dc7-ca6c51111d9f
+
+	measure 'Title - Tech Volume Chart' =
+			
+			PiotrBartela.TitleContext.Period("Institutional Trading Volume", 'Calendar'[Date])
+		displayFolder: 09 - Dynamic Titles
+		lineageTag: cca23525-c31b-4cc6-a71d-5f8339f2884e
+
+	measure 'Title - Decade Matrix' =
+			
+			// The rows are already decades, so we just append the active CEO Era filter
+			"Decadal Risk & Return Profile | " & [Filter Text - CEO Era]
+		displayFolder: 09 - Dynamic Titles
+		lineageTag: 156e722b-d207-4738-b9a3-7ef3b10fcaf7
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+

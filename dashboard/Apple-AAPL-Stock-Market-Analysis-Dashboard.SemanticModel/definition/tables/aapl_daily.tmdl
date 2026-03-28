@@ -1,0 +1,215 @@
+table aapl_daily
+	lineageTag: fcaea2a8-d740-4e49-9b25-27d9f558ae23
+
+	column Trade_Date
+		dataType: dateTime
+		isKey
+		formatString: Short Date
+		lineageTag: ae24425f-4baa-4b5e-b857-0cef7401e2e9
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Trade_Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Adj_Close
+		dataType: double
+		isHidden
+		lineageTag: d52875c9-156c-4dcf-a5e6-96e85145ba0b
+		summarizeBy: sum
+		sourceColumn: Adj_Close
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Close_Price
+		dataType: double
+		lineageTag: 19d428e4-0016-4c09-b962-b6c50dc44014
+		summarizeBy: sum
+		sourceColumn: Close_Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column High_Price
+		dataType: double
+		lineageTag: 5c97e953-4bd9-4662-a956-1acde62d431c
+		summarizeBy: sum
+		sourceColumn: High_Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Low_Price
+		dataType: double
+		lineageTag: 2136b621-3485-4e2b-b294-2e3153f01732
+		summarizeBy: sum
+		sourceColumn: Low_Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Open_Price
+		dataType: double
+		lineageTag: cfdf1da0-603f-4513-bbd7-d893cf737661
+		summarizeBy: sum
+		sourceColumn: Open_Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Volume
+		dataType: int64
+		formatString: 0
+		lineageTag: 749e37b5-d820-437d-8459-6e38ecc25c9f
+		summarizeBy: sum
+		sourceColumn: Volume
+
+		annotation SummarizationSetBy = Automatic
+
+	column Daily_Spread_USD
+		dataType: double
+		lineageTag: 6db5de2f-131b-4158-b8f9-e6d09723597c
+		summarizeBy: sum
+		sourceColumn: Daily_Spread_USD
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Intraday_Spread_Pct
+		dataType: double
+		lineageTag: 66af5f68-c0f3-4eae-be51-332f90b05cb5
+		summarizeBy: sum
+		sourceColumn: Intraday_Spread_Pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Intraday_Return_Pct
+		dataType: double
+		lineageTag: f2f6172f-b224-489e-b8ec-64f2e05c7c0a
+		summarizeBy: sum
+		sourceColumn: Intraday_Return_Pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Candlestick_Direction
+		dataType: string
+		lineageTag: 8649a552-4e66-46cd-bd92-48b15c84dddc
+		summarizeBy: none
+		sourceColumn: Candlestick_Direction
+
+		annotation SummarizationSetBy = Automatic
+
+	column Open_Placement
+		dataType: string
+		lineageTag: 106a66c3-7db1-42c7-be78-8219751c5c9c
+		summarizeBy: none
+		sourceColumn: Open_Placement
+
+		annotation SummarizationSetBy = Automatic
+
+	column Historical_Daily_Return = ```
+			
+			VAR CurrentDate = aapl_daily[Trade_Date]
+			
+			-- 1. Find the exact previous trading day (skipping weekends/holidays)
+			VAR PreviousDate = 
+			    CALCULATE(
+			        MAX(aapl_daily[Trade_Date]),
+			        REMOVEFILTERS(aapl_daily),
+			        aapl_daily[Trade_Date] < CurrentDate
+			    )
+			
+			-- 2. Fetch the closing price on that specific date
+			VAR PreviousPrice = 
+			    CALCULATE(
+			        MAX(aapl_daily[Adj_Close]),
+			        REMOVEFILTERS(aapl_daily),
+			        aapl_daily[Trade_Date] = PreviousDate
+			    )
+			
+			-- 3. Calculate the return
+			RETURN 
+			    DIVIDE(aapl_daily[Adj_Close] - PreviousPrice, PreviousPrice)
+			```
+		lineageTag: d7f1a525-edde-437f-9cc4-044e26570ba1
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Historical_Rolling_Max =
+			
+			VAR CurrentDate = aapl_daily[Trade_Date]
+			RETURN
+			    CALCULATE(
+			        MAX(aapl_daily[Adj_Close]),
+			        ALL(aapl_daily),
+			        aapl_daily[Trade_Date] <= CurrentDate
+			    )
+		lineageTag: b6ec06bc-5b31-4d3b-8693-a808d6e934ee
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Historical_Drawdown =
+			
+			DIVIDE(
+			    aapl_daily[Adj_Close] - aapl_daily[Historical_Rolling_Max],
+			    aapl_daily[Historical_Rolling_Max]
+			)
+		lineageTag: 0a24ff45-9282-4007-aad9-b62633044788
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition aapl_daily = m
+		mode: import
+		source = ```
+				let
+				    Source = MySQL.Database("localhost", "apple_stock_db", [ReturnSingleDatabase=true]),
+				    apple_stock_db_aapl_daily = Source{[Schema="apple_stock_db",Item="aapl_daily"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(apple_stock_db_aapl_daily,{{"Trade_Date", type date}}),
+				    #"Added Intraday_Spread_Pct" = Table.AddColumn(#"Changed Type", "Intraday_Spread_Pct", each ([High_Price] - [Low_Price]) / [Open_Price]),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Added Intraday_Spread_Pct",{{"Intraday_Spread_Pct", Percentage.Type}}),
+				    #"Added Candlestick_Direction" = Table.AddColumn(#"Changed Type1", "Candlestick_Direction", each if [Close_Price] > [Open_Price] then "Bullish" 
+				else if [Close_Price] < [Open_Price] then "Bearish" 
+				else "Doji (Flat)"),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Added Candlestick_Direction",{{"Candlestick_Direction", type text}}),
+				    #"Added Intraday_Return_Pct" = Table.AddColumn(#"Changed Type2", "Intraday_Return_Pct", each ([Close_Price] - [Open_Price]) / [Open_Price]),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Added Intraday_Return_Pct",{"Trade_Date", "Adj_Close", "Close_Price", "High_Price", "Low_Price", "Open_Price", "Volume", "Intraday_Spread_Pct", "Intraday_Return_Pct", "Candlestick_Direction"}),
+				    #"Changed Type3" = Table.TransformColumnTypes(#"Reordered Columns",{{"Intraday_Return_Pct", Percentage.Type}}),
+				    #"Added Daily_Spread_USD" = Table.AddColumn(#"Changed Type3", "Daily_Spread_USD", each [High_Price] - [Low_Price]),
+				    #"Changed Type4" = Table.TransformColumnTypes(#"Added Daily_Spread_USD",{{"Daily_Spread_USD", type number}}),
+				    #"Reordered Columns1" = Table.ReorderColumns(#"Changed Type4",{"Trade_Date", "Adj_Close", "Close_Price", "High_Price", "Low_Price", "Open_Price", "Daily_Spread_USD", "Volume", "Intraday_Spread_Pct", "Intraday_Return_Pct", "Candlestick_Direction"}),
+				    #"Added Open_Placement" = Table.AddColumn(#"Reordered Columns1", "Open_Placement", each if [Open_Price] >= [High_Price] then "Gap Up / High Open"
+				else if [Open_Price] <= [Low_Price] then "Gap Down / Low Open"
+				else "Inside Range"),
+				    #"Changed Type5" = Table.TransformColumnTypes(#"Added Open_Placement",{{"Open_Placement", type text}})
+				in
+				    #"Changed Type5"
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

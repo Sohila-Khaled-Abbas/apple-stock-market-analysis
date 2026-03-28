@@ -1,0 +1,88 @@
+/// Auto-generated Data Dictionary. Do not edit manually.
+table 'Data Dictionary'
+	lineageTag: e193b818-322c-47bc-8895-4084d7efa064
+
+	column 'Table Name'
+		lineageTag: 2b9abbc4-9e5b-4c4f-80bd-ae97b0e11f59
+		isNameInferred
+		sourceColumn: [Table Name]
+
+	column 'Object Name'
+		lineageTag: 5f6c50ae-f0b8-41ca-8136-c16a2ac32c62
+		isNameInferred
+		sourceColumn: [Object Name]
+
+	column 'Object Type'
+		lineageTag: 3142b269-01ff-4eca-9975-a91b95d09511
+		isNameInferred
+		sourceColumn: [Object Type]
+
+	column 'Format String / Folder'
+		lineageTag: b65ccd72-be2f-4e19-83b6-e4441f8d8a4e
+		isNameInferred
+		sourceColumn: [Format String / Folder]
+
+	column Description
+		lineageTag: 0c75edec-9986-4bae-bef1-fd5197bf3544
+		isNameInferred
+		sourceColumn: [Description]
+
+	partition 'Data Dictionary' = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "Table Name", STRING,
+				    "Object Name", STRING,
+				    "Object Type", STRING,
+				    "Format String / Folder", STRING,
+				    "Description", STRING,
+				    {
+				        { "aapl_daily", "Trade_Date", "Column", "", "" },
+				        { "aapl_daily", "Adj_Close", "Column", "", "" },
+				        { "aapl_daily", "Close_Price", "Column", "", "" },
+				        { "aapl_daily", "High_Price", "Column", "", "" },
+				        { "aapl_daily", "Low_Price", "Column", "", "" },
+				        { "aapl_daily", "Open_Price", "Column", "", "" },
+				        { "aapl_daily", "Volume", "Column", "", "" },
+				        { "aapl_daily", "Daily_Spread_USD", "Column", "", "" },
+				        { "aapl_daily", "Intraday_Spread_Pct", "Column", "", "" },
+				        { "aapl_daily", "Intraday_Return_Pct", "Column", "", "" },
+				        { "aapl_daily", "Candlestick_Direction", "Column", "", "" },
+				        { "aapl_daily", "Open_Placement", "Column", "", "" },
+				        { "Calendar", "Date", "Column", "", "" },
+				        { "Calendar", "Year", "Column", "", "" },
+				        { "Calendar", "Quarter", "Column", "", "" },
+				        { "Calendar", "MonthNumber", "Column", "", "" },
+				        { "Calendar", "MonthName", "Column", "", "" },
+				        { "Calendar", "DayOfWeek", "Column", "", "" },
+				        { "Calendar", "IsWeekend", "Column", "", "" },
+				        { "Calendar", "Decade", "Column", "", "" },
+				        { "Calendar", "CEO Era", "Column", "", "" },
+				        { "_Measures", "Latest Price", "Measure", "01 - Absolute Performance", "Retrieves the most recent adjusted closing price for the selected context, skipping non-trading days (weekends/holidays)." },
+				        { "_Measures", "Total Return %", "Measure", "01 - Absolute Performance", "Calculates the absolute percentage return from the first to the last trading day within the currently filtered time period." },
+				        { "_Measures", "CAGR", "Measure", "01 - Absolute Performance", "Compound Annual Growth Rate. Normalizes the absolute return to an annualized percentage to accurately compare performance across different time horizons." },
+				        { "_Measures", "50-Day SMA", "Measure", "02 - Trend & Momentum", "Calculates the 50-calendar-day simple moving average of the adjusted closing price. Acts as a short-to-medium-term momentum indicator." },
+				        { "_Measures", "200-Day SMA", "Measure", "02 - Trend & Momentum", "Calculates the 200-calendar-day simple moving average. The ultimate institutional indicator for long-term bull vs. bear market phases." },
+				        { "_Measures", "Trend State", "Measure", "02 - Trend & Momentum", "Identifies whether the asset is in a Golden Cross (50 SMA > 200 SMA) or Death Cross (50 SMA < 200 SMA)." },
+				        { "_Measures", "Daily Drawdown %", "Measure", "03 - Risk & Volatility", "The continuous percentage drop from the highest historical peak within the currently selected time window." },
+				        { "_Measures", "Max Drawdown", "Measure", "03 - Risk & Volatility", "Iterates over the selected context to find the absolute worst 'peak-to-trough' decline. The ultimate metric for downside pain tolerance." },
+				        { "_Measures", "Is Volume Surge", "Measure", "02 - Trend & Momentum", "Binary flag (1 or 0) indicating if the trading volume for the day was more than double the trailing 30-day average. Useful for identifying institutional accumulation/distribution." },
+				        { "_Measures", "Daily Return %", "Measure", "01 - Absolute Performance", "Calculates the day-over-day percentage change in the adjusted closing price." },
+				        { "_Measures", "Annualized Volatility", "Measure", "03 - Risk & Volatility", "Standard deviation of daily returns, multiplied by the square root of 252. Represents the historical risk or standard pricing dispersion of the asset." },
+				        { "_Measures", "Sharpe Ratio", "Measure", "04 - Advanced Portfolio Analytics", "Evaluates risk-adjusted performance. A ratio greater than 1 indicates adequate compensation for the historical risk taken." },
+				        { "_Measures", "RSI (14-Day)", "Measure", "02 - Trend & Momentum", "Relative Strength Index (SMA method). Oscillates from 0 to 100 to evaluate whether the stock is overbought (>70) or oversold (<30)." },
+				        { "_Measures", "Days Since ATH", "Measure", "03 - Risk & Volatility", "Calculates how many calendar days an investor's capital has been trapped underwater since the highest point of the portfolio." },
+				        { "_Measures", "SP500 Latest Price", "Measure", "05 - S&P 500 Benchmark", "Retrieves the most recent closing price of the S&P 500 benchmark for the selected context." },
+				        { "_Measures", "SP500 CAGR", "Measure", "05 - S&P 500 Benchmark", "The annualized compound growth rate of the broader market, used as the baseline for calculating Jensen's Alpha." },
+				        { "_Measures", "SP500 Daily Return %", "Measure", "05 - S&P 500 Benchmark", "Calculates the day-over-day percentage change for the broad market (S&P 500) to serve as a baseline for Beta." },
+				        { "_Measures", "Beta (AAPL to Market)", "Measure", "04 - Advanced Portfolio Analytics", "The slope of the linear regression between AAPL and S&P500 returns. A Beta > 1 means AAPL is more volatile than the market." },
+				        { "_Measures", "Alpha (Annualized)", "Measure", "04 - Advanced Portfolio Analytics", "Jensen's Alpha. Measures the exact percentage of outperformance (or underperformance) that cannot be attributed to general market movements (Beta)." },
+				        { "sp500_daily", "Trade_Date", "Column", "", "" },
+				        { "sp500_daily", "Open", "Column", "", "" },
+				        { "sp500_daily", "High", "Column", "", "" },
+				        { "sp500_daily", "Low", "Column", "", "" },
+				        { "sp500_daily", "SP500_Close", "Column", "", "" },
+				        { "sp500_daily", "Volume", "Column", "", "" }
+				    }
+				)
+

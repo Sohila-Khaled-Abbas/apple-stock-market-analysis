@@ -1,0 +1,131 @@
+table Calendar
+	lineageTag: 18ee3baf-1dcf-4674-8901-95975ce3e771
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: Short Date
+		lineageTag: 7bb419ba-5eae-46f8-8879-2ec1d0f4ee95
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 28f7d1dd-f88d-41ba-81e3-665b06134884
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: string
+		lineageTag: cf11467c-7e76-4d59-83e9-88d7b9715fac
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthNumber
+		dataType: int64
+		formatString: 0
+		lineageTag: 18baad48-bfa3-4e85-a940-51fc148ca557
+		summarizeBy: sum
+		sourceColumn: MonthNumber
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthName
+		dataType: string
+		lineageTag: 1c408708-e003-4a44-8a44-0c18678c3118
+		summarizeBy: none
+		sourceColumn: MonthName
+		sortByColumn: MonthNumber
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column DayOfWeek
+		dataType: int64
+		formatString: 0
+		lineageTag: c8fcf425-b0f6-4883-bb5f-aae618174b65
+		summarizeBy: sum
+		sourceColumn: DayOfWeek
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsWeekend
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 9236096c-acdb-4d17-8da0-885bb43226a4
+		summarizeBy: none
+		sourceColumn: IsWeekend
+
+		annotation SummarizationSetBy = Automatic
+
+	column Decade
+		dataType: string
+		lineageTag: c691bfa3-7aff-4e92-991c-e1e33db3a915
+		summarizeBy: none
+		sourceColumn: Decade
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'CEO Era'
+		dataType: string
+		lineageTag: b97ce93e-f333-4a39-8175-748dfd7bb51c
+		summarizeBy: none
+		sourceColumn: CEO Era
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Calendar = m
+		mode: import
+		source = ```
+				let
+				    // 1. Dynamic Start and End Dates based on the dataset
+				    StartDate = List.Min(aapl_daily[Trade_Date]),
+				    EndDate = List.Max(aapl_daily[Trade_Date]),
+				    Duration = Duration.Days(EndDate - StartDate) + 1,
+				    DatesList = List.Dates(StartDate, Duration, #duration(1,0,0,0)),
+				    
+				    // 2. Base Table Creation
+				    #"Converted to Table" = Table.FromList(DatesList, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Renamed Columns" = Table.RenameColumns(#"Converted to Table",{{"Column1", "Date"}}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"Date", type date}}),
+				    
+				    // 3. Standard Chronological Attributes
+				    #"Inserted Year" = Table.AddColumn(#"Changed Type", "Year", each Date.Year([Date]), Int64.Type),
+				    #"Inserted Quarter" = Table.AddColumn(#"Inserted Year", "Quarter", each "Q" & Text.From(Date.QuarterOfYear([Date])), type text),
+				    #"Inserted Month" = Table.AddColumn(#"Inserted Quarter", "MonthNumber", each Date.Month([Date]), Int64.Type),
+				    #"Inserted Month Name" = Table.AddColumn(#"Inserted Month", "MonthName", each Date.MonthName([Date]), type text),
+				    #"Inserted Day of Week" = Table.AddColumn(#"Inserted Month Name", "DayOfWeek", each Date.DayOfWeek([Date], Day.Monday), Int64.Type),
+				    
+				    // 4. FINANCIAL DOMAIN ENRICHMENTS
+				    // A. Weekend Flag (Markets are closed)
+				    #"Inserted IsWeekend" = Table.AddColumn(#"Inserted Day of Week", "IsWeekend", each if [DayOfWeek] >= 5 then true else false, type logical),
+				    
+				    // B. Decade Identifier (For macro-economic cycle analysis)
+				    #"Inserted Decade" = Table.AddColumn(#"Inserted IsWeekend", "Decade", each Text.From(Number.RoundDown([Year]/10)*10) & "s", type text),
+				    
+				    // C. Apple Business Eras (Crucial for storytelling in your dashboard)
+				    #"Inserted CEO Era" = Table.AddColumn(#"Inserted Decade", "CEO Era", each 
+				        if [Date] < #date(1983, 4, 8) then "Markkula Era (Early Days)"
+				        else if [Date] < #date(1993, 6, 18) then "Sculley Era (Mac Intro)"
+				        else if [Date] < #date(1997, 7, 9) then "Spindler/Amelio Era (Struggle)"
+				        else if [Date] < #date(2011, 8, 24) then "Jobs Era (iPod/iPhone)"
+				        else "Cook Era (Services/Scale)", type text)
+				in
+				    #"Inserted CEO Era"
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
