@@ -102,21 +102,31 @@ def run_update():
             # Drop rows where market was closed (holidays/weekends) yielding NaN prices
             df.dropna(subset=['Adj_Close'], inplace=True)
 
-            # 5. INGESTION TO MYSQL
-            # Explicit type mapping ensures Pandas doesn't send Floats that MySQL truncates
-            sql_dtypes = {
-                'Trade_Date': types.DateTime,
-                'Adj_Close': types.Float(precision=53), 
-                'Close_Price': types.Float(precision=53),
-                'High_Price': types.Float(precision=53),
-                'Low_Price': types.Float(precision=53),
-                'Open_Price': types.Float(precision=53),
-                'Volume': types.BigInteger
-            }
+            # Remove duplicate dates (yfinance sometimes returns duplicate rows for the current day)
+            df.drop_duplicates(subset=['Trade_Date'], inplace=True)
+            
+            # Ensure we only keep dates strictly after the last recorded date in DB
+            if last_db_date is not None:
+                df = df[df['Trade_Date'] > pd.to_datetime(last_db_date)]
 
-            # Append data
-            df.to_sql(TABLE_NAME, con=engine, if_exists='append', index=False, dtype=sql_dtypes)
-            print(f"SUCCESS: {len(df)} new records appended to MySQL database.")
+            if df.empty:
+                print("TERMINATING: No new valid records to append after filtering existing dates.")
+            else:
+                # 5. INGESTION TO MYSQL
+                # Explicit type mapping ensures Pandas doesn't send Floats that MySQL truncates
+                sql_dtypes = {
+                    'Trade_Date': types.DateTime,
+                    'Adj_Close': types.Float(precision=53), 
+                    'Close_Price': types.Float(precision=53),
+                    'High_Price': types.Float(precision=53),
+                    'Low_Price': types.Float(precision=53),
+                    'Open_Price': types.Float(precision=53),
+                    'Volume': types.BigInteger
+                }
+
+                # Append data
+                df.to_sql(TABLE_NAME, con=engine, if_exists='append', index=False, dtype=sql_dtypes)
+                print(f"SUCCESS: {len(df)} new records appended to MySQL database.")
 
             # 6. EXPORT LATEST DATA TO CSV
             csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'processed', 'aapl_daily.csv')

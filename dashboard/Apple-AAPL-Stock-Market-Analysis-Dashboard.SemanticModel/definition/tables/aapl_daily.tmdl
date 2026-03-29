@@ -153,6 +153,7 @@ table aapl_daily
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// Python pipeline artifact — rolling max used to derive Historical_Drawdown. No DAX measure references this column directly. Hidden to declutter field list.
 	column Historical_Rolling_Max =
 			
 			VAR CurrentDate = aapl_daily[Trade_Date]
@@ -162,6 +163,7 @@ table aapl_daily
 			        ALL(aapl_daily),
 			        aapl_daily[Trade_Date] <= CurrentDate
 			    )
+		isHidden
 		lineageTag: b6ec06bc-5b31-4d3b-8693-a808d6e934ee
 		summarizeBy: sum
 

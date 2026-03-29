@@ -1,8 +1,10 @@
 relationship 54654d8d-fd2b-9df1-012a-be6b7f5e3b7a
+	relyOnReferentialIntegrity
 	fromColumn: aapl_daily.Trade_Date
 	toColumn: Calendar.Date
 
 relationship 12ead87c-01e5-d291-2754-1ef6cd25a24d
+	relyOnReferentialIntegrity
 	fromColumn: sp500_daily.Trade_Date
 	toColumn: Calendar.Date
 

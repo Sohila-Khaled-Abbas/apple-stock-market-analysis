@@ -13,8 +13,10 @@ table sp500_daily
 
 		annotation UnderlyingDateTimeDataType = Date
 
+	/// Unused in DAX measures — hidden to reduce field list noise and VertiPaq overhead.
 	column Open
 		dataType: double
+		isHidden
 		lineageTag: c2be4e20-294c-4cf1-9296-ae78d837269e
 		summarizeBy: sum
 		sourceColumn: Open
@@ -23,8 +25,10 @@ table sp500_daily
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// Unused in DAX measures — hidden to reduce field list noise and VertiPaq overhead.
 	column High
 		dataType: double
+		isHidden
 		lineageTag: f8c4fdf5-6e6a-4d94-8e14-ca21314314bd
 		summarizeBy: sum
 		sourceColumn: High
@@ -33,8 +37,10 @@ table sp500_daily
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// Unused in DAX measures — hidden to reduce field list noise and VertiPaq overhead.
 	column Low
 		dataType: double
+		isHidden
 		lineageTag: f9516947-fe4f-4f9b-bb58-686c8fab1d26
 		summarizeBy: sum
 		sourceColumn: Low
@@ -53,8 +59,10 @@ table sp500_daily
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	/// Unused in DAX measures — hidden to reduce field list noise and VertiPaq overhead.
 	column Volume
 		dataType: int64
+		isHidden
 		formatString: 0
 		lineageTag: 9d2a20ac-d9c5-4e73-b14b-5bf71452b105
 		summarizeBy: sum
