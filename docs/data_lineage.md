@@ -21,7 +21,7 @@ Raw data is extracted and prepared for database insertion using Python scripts a
 - **Initial Profiling (`notebooks/01_data_profiling.ipynb`)**
   - Conducts Exploratory Data Analysis (EDA) on the static Excel source to verify schema, handle null values, and ensure logical consistency (e.g., `High >= Low`).
   
-- **Incremental Fetching & Cleaning (`notebooks/02_data_loading.ipynb` / `yf_update.py`)**
+- **Incremental Fetching & Cleaning (`notebooks/02_data_loading.ipynb` / `scripts/yf_update.py`)**
   - Connects to the Yahoo Finance API.
   - Flattens multi-level indexes returned by `yfinance`.
   - Normalizes column names to match the target database schema structure.

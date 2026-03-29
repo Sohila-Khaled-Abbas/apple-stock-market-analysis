@@ -6,9 +6,10 @@ A financial dashboard must go beyond being a mere "database GUI"; it must presen
 
 To enable proper source control and separation of the data model from the UI layer, this project utilizes the **Power BI Project (.pbip)** format rather than a monolithic `.pbix` file.
 
-1. **Dashboard Repository Structure:** The `dashboard/` directory contains the `.pbip` file alongside two main folders:
+1. **Dashboard Repository Structure:** The `dashboard/` directory contains the `.pbip` and `.pbix` files alongside three main folders:
     * `Apple-AAPL-Stock-Market-Analysis-Dashboard.SemanticModel/`: Contains the DAX measures, table definitions, and relationships (the backend).
     * `Apple-AAPL-Stock-Market-Analysis-Dashboard.Report/`: Contains the JSON-based visual canvas, pages, and interactive elements (the frontend).
+    * `theme/`: Contains the custom JSON themes and assets for the UI layer.
 2. **Development Workflow:** Always open the `.pbip` file to edit the project. Changes will be saved as human-readable text files in their respective folders, enabling strict Git version control.
 
 ## Phase 1: The Environment & Foundation

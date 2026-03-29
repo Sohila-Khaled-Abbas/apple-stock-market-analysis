@@ -190,6 +190,7 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   ├── 02_data_loading.ipynb    # Incremental data pipeline via yfinance
 │   └── 03_data_validation.ipynb # Automated data quality & API cross-validation
 ├── scripts/               # Automation scripts
+│   ├── test_duplicate.py        # Utility script testing yfinance duplicate handling
 │   └── yf_update.py             # Python daemon script for incremental updates and CSV export
 ├── sql/                   # MySQL scripts for ELT
 │   ├── 01_data_ingestion.sql    # Schema initialization and CSV bulk loading
