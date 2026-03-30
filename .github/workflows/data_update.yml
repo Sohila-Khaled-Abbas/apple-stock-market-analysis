@@ -1,0 +1,47 @@
+name: Automated Daily Data Enrichment
+
+on:
+  schedule:
+    # Run at 22:00 UTC (around 18:00 EST / Market Close) every weekday (Monday-Friday)
+    - cron: '0 22 * * 1-5'
+  workflow_dispatch: # Allow manual triggers from the Actions tab
+
+permissions:
+  contents: write # Essential permission to push commits back to the repo
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Serverless Data Enrichment Script
+        run: python scripts/gh_update_csv.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          # Only stage the specific file we want updated
+          git add data/processed/aapl_daily.csv
+          
+          # Check if there are actual modifications before trying to commit (prevents errors)
+          if git diff --staged --quiet; then
+            echo "No new data to commit. Exiting smoothly."
+          else
+            git commit -m "Automated Data Enrichment: $(date +'%Y-%m-%d') [bot]"
+            git push
+          fi

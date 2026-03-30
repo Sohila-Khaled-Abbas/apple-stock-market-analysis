@@ -43,6 +43,13 @@
                   "Value": "true"
                 }
               }
+            },
+            "hyperlinks": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
             }
           }
         }

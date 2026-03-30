@@ -1,0 +1,140 @@
+<mxfile host="Electron" modified="2024-03-30T13:00:00.000Z" agent="Mozilla/5.0" version="24.0.0" type="device">
+  <diagram id="data_lineage_modern_v2" name="Modern Data Lineage">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Swimlanes with modern sleek colors -->
+        <mxCell id="layer_source" value="Source Systems" style="swimlane;whiteSpace=wrap;html=1;fontColor=#333333;startSize=40;fillColor=#f8f9fa;strokeColor=#dee2e6;rounded=1;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="280" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="layer_ingest" value="Ingestion &amp; Processing" style="swimlane;whiteSpace=wrap;html=1;fontColor=#333333;startSize=40;fillColor=#e7f1ff;strokeColor=#b6d4fe;rounded=1;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="280" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="layer_storage" value="Data Storage" style="swimlane;whiteSpace=wrap;html=1;fontColor=#333333;startSize=40;fillColor=#d1e7dd;strokeColor=#a3cfbb;rounded=1;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="680" y="40" width="280" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="layer_bi" value="BI &amp; Analytics" style="swimlane;whiteSpace=wrap;html=1;fontColor=#333333;startSize=40;fillColor=#fff3cd;strokeColor=#ffe69c;rounded=1;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="40" width="280" height="520" as="geometry" />
+        </mxCell>
+
+        <!-- Components (Modern Cards) -->
+        <mxCell id="excel" value="Excel Historical&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;(1980-2025 Data)&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/microsoft-excel-2019.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_source">
+          <mxGeometry x="30" y="100" width="220" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="yfinance" value="Yahoo Finance&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;(Daily API Live)&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/yahoo.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_source">
+          <mxGeometry x="30" y="340" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Ingestion -->
+        <mxCell id="python_init" value="Initial Load Jupyter&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;Data Cleaning&lt;/span&gt;" style="shape=label;image=https://upload.wikimedia.org/wikipedia/commons/3/38/Jupyter_logo.svg;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_ingest">
+          <mxGeometry x="30" y="100" width="220" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="python_daemon" value="Python Daemon (Local)&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;(yf_update.py)&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/python.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_ingest">
+          <mxGeometry x="30" y="260" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="github_actions" value="GitHub Actions&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;(gh_update_csv.py)&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/github--v1.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_ingest">
+          <mxGeometry x="30" y="420" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Storage -->
+        <mxCell id="mysql" value="MySQL Database&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;Fact &amp;amp; Dimension Tables&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/mysql-logo.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_storage">
+          <mxGeometry x="30" y="180" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="csv_repo" value="GitHub Repository&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;(aapl_daily.csv)&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/csv.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_storage">
+          <mxGeometry x="30" y="420" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- BI -->
+        <mxCell id="gateway" value="Power BI Gateway&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;On-premises Sync&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/server.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_bi">
+          <mxGeometry x="30" y="100" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="powerbi" value="PowerBI Dashboard&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;(Cloud Connects to Local)&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/power-bi.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_bi">
+          <mxGeometry x="30" y="260" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="powerbi_web" value="PowerBI Dashboard&lt;br&gt;&lt;span style=&quot;font-weight: normal; font-size: 11px; color: #666;&quot;&gt;(Direct to GitHub Web)&lt;/span&gt;" style="shape=label;image=https://img.icons8.com/color/512/power-bi.png;imageWidth=44;imageHeight=44;spacingLeft=56;align=left;fillColor=#ffffff;strokeColor=#d4d4d4;rounded=1;shadow=0;fontColor=#1a1a1a;whiteSpace=wrap;html=1;fontStyle=1;spacingRight=10;" vertex="1" parent="layer_bi">
+          <mxGeometry x="30" y="420" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Connectors -->
+        <mxCell id="c1" edge="1" parent="1" source="excel" target="python_init" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c2a" edge="1" parent="1" source="yfinance" target="python_daemon" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="375" />
+              <mxPoint x="340" y="295" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c2b" edge="1" parent="1" source="yfinance" target="github_actions" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="375" />
+              <mxPoint x="340" y="455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="c3" edge="1" parent="1" source="python_init" target="mysql" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="175" />
+              <mxPoint x="660" y="215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c4" edge="1" parent="1" source="python_daemon" target="mysql" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="295" />
+              <mxPoint x="660" y="215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="c8" edge="1" parent="1" source="github_actions" target="csv_repo" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c5" edge="1" parent="1" source="mysql" target="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+             <Array as="points">
+              <mxPoint x="980" y="215" />
+              <mxPoint x="980" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c6" edge="1" parent="1" source="mysql" target="powerbi" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+             <Array as="points">
+              <mxPoint x="980" y="215" />
+              <mxPoint x="980" y="295" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="c9" edge="1" parent="1" source="csv_repo" target="powerbi_web" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#28a745;strokeWidth=2;endArrow=block;endFill=1;dashed=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c7" edge="1" parent="1" source="gateway" target="powerbi" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#b85450;strokeWidth=2;endArrow=block;endFill=1;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+             <Array as="points">
+              <mxPoint x="1140" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

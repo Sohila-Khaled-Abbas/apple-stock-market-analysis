@@ -5,8 +5,9 @@
     "x": 1104,
     "y": 0,
     "z": 2000,
-    "height": 136.74796747967474,
-    "width": 528
+    "height": 137.69105691056905,
+    "width": 528,
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "htmlContent443BE3AD55E043BF878BED274D3A6855",
@@ -110,23 +111,5 @@
     },
     "drillFilterOtherVisuals": true
   },
-  "parentGroupName": "7f35d83d9848e092a182",
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "31d721328691b207a3c4",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "_Measures"
-              }
-            },
-            "Property": "KPI - Trend State"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
-  }
+  "parentGroupName": "7f35d83d9848e092a182"
 }

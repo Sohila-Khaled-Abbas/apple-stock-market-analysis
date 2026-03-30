@@ -1,59 +1,37 @@
 table sp500_daily
 	lineageTag: c8db5395-1098-46aa-8dc3-90081b000615
 
-	column Trade_Date
-		dataType: dateTime
-		isKey
-		formatString: Long Date
-		lineageTag: 71314b44-09b9-4be7-8ddc-4cacd9343b22
-		summarizeBy: none
-		sourceColumn: Trade_Date
-
-		annotation SummarizationSetBy = Automatic
-
-		annotation UnderlyingDateTimeDataType = Date
-
 	/// Unused in DAX measures — hidden to reduce field list noise and VertiPaq overhead.
-	column Open
+	column Open_Price
 		dataType: double
 		isHidden
 		lineageTag: c2be4e20-294c-4cf1-9296-ae78d837269e
 		summarizeBy: sum
-		sourceColumn: Open
+		sourceColumn: Open_Price
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	/// Unused in DAX measures — hidden to reduce field list noise and VertiPaq overhead.
-	column High
+	column High_Price
 		dataType: double
 		isHidden
 		lineageTag: f8c4fdf5-6e6a-4d94-8e14-ca21314314bd
 		summarizeBy: sum
-		sourceColumn: High
+		sourceColumn: High_Price
 
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
 	/// Unused in DAX measures — hidden to reduce field list noise and VertiPaq overhead.
-	column Low
+	column Low_Price
 		dataType: double
 		isHidden
 		lineageTag: f9516947-fe4f-4f9b-bb58-686c8fab1d26
 		summarizeBy: sum
-		sourceColumn: Low
-
-		annotation SummarizationSetBy = Automatic
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
-	column SP500_Close
-		dataType: double
-		lineageTag: ceb74c1b-c86c-4593-a57c-53b0d6f1b364
-		summarizeBy: sum
-		sourceColumn: SP500_Close
+		sourceColumn: Low_Price
 
 		annotation SummarizationSetBy = Automatic
 
@@ -101,34 +79,50 @@ table sp500_daily
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column Trade_Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 22035fdb-4893-4659-8386-3f47c166ad89
+		summarizeBy: none
+		sourceColumn: Trade_Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column SP500_Close
+		dataType: double
+		lineageTag: d7597e5a-ed5e-421b-acc4-51c110f80be6
+		summarizeBy: sum
+		sourceColumn: SP500_Close
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	partition sp500_daily = m
 		mode: import
 		source = ```
 				let
-				    // 1. Fetch live CSV data for S&P 500 directly from Stooq's public endpoint
-				    Source = Csv.Document(Web.Contents("https://stooq.com/q/d/l/?s=^spx&i=d"),[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
-				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    // 1. Invoke Python to bypass Yahoo's security and fetch the dataframe
+				    Source = Python.Execute("import yfinance as yf#(lf)import pandas as pd#(lf)#(lf)# Fetch S&P 500 data from 1980#(lf)df = yf.download('^GSPC', start='1980-12-12', progress=False)#(lf)#(lf)# Reset index to make Date a column#(lf)df.reset_index(inplace=True)#(lf)#(lf)# Strip timezone data so Power BI can parse it as a standard Date#(lf)df['Date'] = pd.to_datetime(df['Date']).dt.tz_localize(None)#(lf)#(lf)# Rename columns to match your exact dashboard schema#(lf)df.rename(columns={'Date': 'Trade_Date', 'Close': 'SP500_Close'}, inplace=True)#(lf)#(lf)# Select only the required columns and drop Adj Close#(lf)df = df[['Trade_Date', 'Open', 'High', 'Low', 'SP500_Close', 'Volume']]"),
 				    
-				    // 2. Set Data Types
-				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
-				        {"Date", type date}, 
+				    // 2. Expand the Python dictionary to extract the pandas DataFrame named 'df'
+				    df1 = Source{[Name="df"]}[Value],
+				    
+				    // 3. Enforce strict Power BI Data Types
+				    #"Changed Type" = Table.TransformColumnTypes(df1,{
+				        {"Trade_Date", type date}, 
 				        {"Open", type number}, 
 				        {"High", type number}, 
 				        {"Low", type number}, 
-				        {"Close", type number}, 
+				        {"SP500_Close", type number}, 
 				        {"Volume", Int64.Type}
 				    }),
-				    
-				    // 3. Rename columns to match your existing naming convention
-				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{
-				        {"Date", "Trade_Date"},
-				        {"Close", "SP500_Close"}
-				    }),
-				    
-				    // 4. Filter to match your AAPL dataset range (1980 onwards)
-				    #"Filtered Rows" = Table.SelectRows(#"Renamed Columns", each [Trade_Date] >= #date(1980, 12, 12))
+				    #"Removed Errors" = Table.RemoveRowsWithErrors(#"Changed Type"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Errors",{{"Open", "Open_Price"}, {"High", "High_Price"}, {"Low", "Low_Price"}})
 				in
-				    #"Filtered Rows"
+				    #"Renamed Columns"
 				```
 
 	annotation PBI_NavigationStepName = Navigation
