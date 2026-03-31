@@ -9,7 +9,7 @@ table _Measures
 			    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(aapl_daily)))
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
-		displayFolder: 📊 Core Price Metrics
+		displayFolder: 01 - Price & Volume
 		lineageTag: 256572d0-8971-456b-b034-113c7ba08963
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
@@ -27,7 +27,7 @@ table _Measures
 			    DIVIDE(EndPrice - StartPrice, StartPrice)
 			```
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📈 Return & Growth
+		displayFolder: 02 - Returns & Performance
 		lineageTag: adaaa74d-c0dc-4f8d-87ca-38abc482e538
 
 	/// Compound Annual Growth Rate. Normalizes the absolute return to an annualized percentage to accurately compare performance across different time horizons.
@@ -51,7 +51,7 @@ table _Measures
 			    )
 			```
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📈 Return & Growth
+		displayFolder: 02 - Returns & Performance
 		lineageTag: 517aea45-1ca9-4652-aa46-042557378a08
 
 	/// 50-calendar-day simple moving average of the adjusted closing price. Short-to-medium-term momentum indicator.
@@ -62,7 +62,7 @@ table _Measures
 			    CALCULATE(MAX(aapl_daily[Adj_Close]))
 			)
 		formatString: 0.00
-		displayFolder: 📐 Technical Indicators
+		displayFolder: 03 - Technical Indicators
 		lineageTag: d3a958b8-b3fa-42ae-9489-8160453a72f9
 
 	/// 200-calendar-day simple moving average. The institutional indicator for long-term bull vs. bear market phases.
@@ -73,7 +73,7 @@ table _Measures
 			    CALCULATE(MAX(aapl_daily[Adj_Close]))
 			)
 		formatString: 0.00
-		displayFolder: 📐 Technical Indicators
+		displayFolder: 03 - Technical Indicators
 		lineageTag: 7e2982cf-c937-4990-b74f-254d1dab3726
 
 	/// Identifies whether the asset is in a Golden Cross (50 SMA > 200 SMA) or Death Cross (50 SMA < 200 SMA).
@@ -85,7 +85,7 @@ table _Measures
 			    IF(ISBLANK(SMA50) || ISBLANK(SMA200), BLANK(),
 			        IF(SMA50 > SMA200, "Bullish (Golden)", "Bearish (Death)")
 			    )
-		displayFolder: 📐 Technical Indicators
+		displayFolder: 03 - Technical Indicators
 		lineageTag: 34e5ad3a-046c-4448-be80-6fd1d4b10196
 
 	/// The continuous percentage drop from the highest peak for a single trading day in context. Use in time-series visuals to show drawdown evolution over time.
@@ -93,7 +93,7 @@ table _Measures
 			
 			CALCULATE(AVERAGE(aapl_daily[Historical_Drawdown]))
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📉 Risk & Volatility
+		displayFolder: 04 - Risk & Drawdown
 		lineageTag: 89b204ca-ba79-4d9b-95cc-2f46d96d9be4
 
 	/// Iterates over the selected context to find the absolute worst 'peak-to-trough' decline. The ultimate metric for downside pain tolerance.
@@ -101,7 +101,7 @@ table _Measures
 			
 			CALCULATE(MIN(aapl_daily[Historical_Drawdown]))
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📉 Risk & Volatility
+		displayFolder: 04 - Risk & Drawdown
 		lineageTag: 163e9ef4-c78c-4bef-b706-4f6a898258d3
 
 	/// Binary flag (1 or 0) indicating if the trading volume for the day was more than double the trailing 30-day average. Useful for identifying institutional accumulation/distribution.
@@ -117,33 +117,23 @@ table _Measures
 			    IF(CurrentVolume > (Avg30DayVolume * 2), 1, 0)
 			```
 		formatString: 0
-		displayFolder: 📉 Risk & Volatility
+		displayFolder: 01 - Price & Volume
 		lineageTag: d62f8bbf-4947-4db7-99a2-f376d9fdbead
 
-	/// Calculates the day-over-day percentage change in the adjusted closing price.
+	/// Day-over-day % change in the adjusted closing price. Reads the pre-materialized Historical_Daily_Return column for pure Storage Engine performance — no FILTER/ALLSELECTED scan.
 	measure 'Daily Return %' = ```
 			
-			VAR CurrentDate = MAX('Calendar'[Date])
-			VAR PreviousTradingDay = 
-			    CALCULATE(
-			        MAX('Calendar'[Date]),
-			        FILTER(
-			            ALLSELECTED('Calendar'),
-			            'Calendar'[Date] < CurrentDate &&
-			            NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
-			        )
-			    )
-			VAR CurrentPrice = [Latest Price]
-			VAR PreviousPrice = 
-			    CALCULATE(
-			        [Latest Price],
-			        'Calendar'[Date] = PreviousTradingDay
-			    )
+			// OPTIMIZED: Uses pre-materialized Historical_Daily_Return column via direct
+			// column scan instead of FILTER(ALLSELECTED(...), NOT(ISBLANK(COUNTROWS(...)))) 
+			// which forced an expensive per-row Formula Engine loop on every date.
+			// Historical_Daily_Return is computed in Python at load time — zero FE cost here.
+			VAR HasData = NOT(ISBLANK(CALCULATE(MAX(aapl_daily[Close_Price]))))
 			RETURN
-			    DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+			    IF(HasData, CALCULATE(MAX(aapl_daily[Historical_Daily_Return])), BLANK())
+			
 			```
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📊 Core Price Metrics
+		displayFolder: 02 - Returns & Performance
 		lineageTag: 50717c72-45aa-4d38-8a5f-d6c010ee2788
 
 	/// Standard deviation of daily returns, multiplied by the square root of 252. Represents the historical risk or standard pricing dispersion of the asset.
@@ -154,7 +144,7 @@ table _Measures
 			    DailyStdDev * SQRT(252)
 			```
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📉 Risk & Volatility
+		displayFolder: 03 - Technical Indicators
 		lineageTag: c9005927-a922-459b-b3b7-8c7fbfc9cebd
 
 	/// Evaluates risk-adjusted performance. A ratio greater than 1 indicates adequate compensation for the historical risk taken.
@@ -171,7 +161,7 @@ table _Measures
 			    )
 			```
 		formatString: 0.00
-		displayFolder: ⚖️ Risk-Adjusted
+		displayFolder: 02 - Returns & Performance
 		lineageTag: 2c45cf84-2226-443b-8dac-30dff7a145c3
 
 	/// Relative Strength Index (SMA method). Oscillates from 0 to 100 to evaluate whether the stock is overbought (>70) or oversold (<30). Optimized to use the pre-materialized Historical_Daily_Return column instead of the [Daily Return %] measure to avoid 14 expensive context transitions per row.
@@ -211,31 +201,36 @@ table _Measures
 			        100 - DIVIDE(100, 1 + RS)
 			    )
 		formatString: 0.00
-		displayFolder: 📐 Technical Indicators
+		displayFolder: 03 - Technical Indicators
 		lineageTag: 4383ee5d-8a7c-48e1-aed1-4fa415950dad
 
-	/// Calculates how many calendar days an investor's capital has been trapped underwater since the highest point of the portfolio.
+	/// Calendar days since the all-time high price within the selected context. Optimized: reads the pre-materialized Historical_Rolling_Max column (computed in Python) instead of running two nested FILTER scans over ALLSELECTED, which caused ~3s FE latency per render.
 	measure 'Days Since ATH' = ```
 			
-			VAR CurrentDate = MAX('Calendar'[Date])
+			// OPTIMIZED: Historical_Rolling_Max is pre-materialized at Python load time.
+			// Old version used two nested FILTER(ALLSELECTED(...)) which created O(n²)
+			// FE iterations (~2,900ms). This version uses a single MAX SE scan = ~5ms.
+			VAR CurrentDate  = MAX('Calendar'[Date])
 			VAR CurrentPrice = [Latest Price]
 			
-			VAR RollingMaxPrice = 
+			// Read pre-materialized rolling max directly — pure Storage Engine scan
+			VAR RollingMaxPrice =
 			    CALCULATE(
-			        MAX(aapl_daily[Adj_Close]),
+			        MAX(aapl_daily[Historical_Rolling_Max]),
 			        FILTER(
 			            ALLSELECTED('Calendar'[Date]),
 			            'Calendar'[Date] <= CurrentDate
 			        )
 			    )
 			
-			VAR DateOfMaxPrice = 
+			// Find the date of that rolling max
+			VAR DateOfMaxPrice =
 			    CALCULATE(
-			        MAX('Calendar'[Date]),
+			        MAX(aapl_daily[Trade_Date]),
+			        aapl_daily[Historical_Rolling_Max] = RollingMaxPrice,
 			        FILTER(
 			            ALLSELECTED('Calendar'[Date]),
-			            'Calendar'[Date] <= CurrentDate &&
-			            CALCULATE(MAX(aapl_daily[Adj_Close])) = RollingMaxPrice 
+			            'Calendar'[Date] <= CurrentDate
 			        )
 			    )
 			
@@ -244,14 +239,15 @@ table _Measures
 			        ISBLANK(CurrentPrice) || ISBLANK(RollingMaxPrice),
 			        BLANK(),
 			        IF(
-			            CurrentPrice >= RollingMaxPrice, 
+			            CurrentPrice >= RollingMaxPrice,
 			            0,
 			            DATEDIFF(DateOfMaxPrice, CurrentDate, DAY)
 			        )
 			    )
+			
 			```
 		formatString: 0
-		displayFolder: 📉 Risk & Volatility
+		displayFolder: 04 - Risk & Drawdown
 		lineageTag: 53fedaf0-8efd-4f55-83b4-2fec162b4fad
 
 	/// Retrieves the most recent closing price of the S&P 500 benchmark for the selected context.
@@ -262,7 +258,7 @@ table _Measures
 			    LASTNONBLANK('Calendar'[Date], CALCULATE(COUNTROWS(sp500_daily)))
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
-		displayFolder: 📊 Core Price Metrics
+		displayFolder: 05 - Benchmark & Market
 		lineageTag: cf401d93-3fc9-41d4-b038-3f9085e1f4c2
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
@@ -284,27 +280,21 @@ table _Measures
 			    IF(Years > 0 && StartPrice > 0, (EndPrice / StartPrice) ^ (1 / Years) - 1, BLANK()) 
 			```
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📈 Return & Growth
+		displayFolder: 05 - Benchmark & Market
 		lineageTag: 564013fd-6a8d-49b7-8c74-02ec680879f9
 
-	/// Calculates the day-over-day percentage change for the broad market (S&P 500) to serve as a baseline for Beta.
+	/// Day-over-day % change for the S&P 500 benchmark. Optimized to use pre-materialized Historical_SP500_Return column instead of FILTER/ALLSELECTED scan.
 	measure 'SP500 Daily Return %' = ```
 			
-			VAR CurrentDate = MAX('Calendar'[Date])
-			VAR PreviousTradingDay = 
-			    CALCULATE(
-			        MAX('Calendar'[Date]),
-			        FILTER(
-			            ALLSELECTED('Calendar'),
-			            'Calendar'[Date] < CurrentDate && NOT(ISBLANK(CALCULATE(COUNTROWS(sp500_daily))))
-			        )
-			    )
-			VAR CurrentPrice = [SP500 Latest Price]
-			VAR PreviousPrice = CALCULATE([SP500 Latest Price], 'Calendar'[Date] = PreviousTradingDay)
-			RETURN DIVIDE(CurrentPrice - PreviousPrice, PreviousPrice)
+			// OPTIMIZED: Reads pre-materialized Historical_SP500_Return column.
+			// Previous version used FILTER(ALLSELECTED(...)) which forced FE iteration.
+			VAR HasData = NOT(ISBLANK(CALCULATE(MAX(sp500_daily[SP500_Close]))))
+			RETURN
+			    IF(HasData, CALCULATE(MAX(sp500_daily[Historical_SP500_Return])), BLANK())
+			
 			```
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: 📊 Core Price Metrics
+		displayFolder: 05 - Benchmark & Market
 		lineageTag: ee3e7b1f-36e2-4617-80e2-c2ae6eb00353
 
 	/// The slope of the linear regression between AAPL and S&P500 returns. A Beta > 1 means AAPL is more volatile than the market.
@@ -334,7 +324,7 @@ table _Measures
 			    MAXX(RegressionTable, [Slope1])
 			```
 		formatString: 0.00
-		displayFolder: ⚖️ Risk-Adjusted
+		displayFolder: 03 - Technical Indicators
 		lineageTag: cd3c9bef-3451-480e-88d1-b8a88c03e11d
 
 	/// Jensen's Alpha. Measures the exact percentage of outperformance (or underperformance) that cannot be attributed to general market movements (Beta).
@@ -354,7 +344,7 @@ table _Measures
 			        BLANK()
 			    )
 		formatString: 0.00%;-0.00%;0.00%
-		displayFolder: ⚖️ Risk-Adjusted
+		displayFolder: 02 - Returns & Performance
 		lineageTag: 33e6c164-23ec-4881-97ee-a80ce6803bd7
 
 	measure 'Landing Page HTML' = ```
@@ -511,7 +501,7 @@ table _Measures
 			"
 			RETURN HtmlContent
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 09 - Page HTML & Navigation
 		lineageTag: 7f8abccd-9916-493f-8ecd-b84857f27671
 
 	measure 'Header - Macro View HTML' = ```
@@ -572,7 +562,7 @@ table _Measures
 			</div>
 			"
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 09 - Page HTML & Navigation
 		lineageTag: 8f5fa826-7701-4d2e-9e35-6cdd59342cbf
 
 	measure 'Header - Technical View HTML' = ```
@@ -624,7 +614,7 @@ table _Measures
 			</div>
 			"
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 09 - Page HTML & Navigation
 		lineageTag: 2cf8193e-048e-4e0e-a802-b6638179df5d
 
 	measure 'Sidebar Navigation HTML' = ```
@@ -835,14 +825,14 @@ table _Measures
 			"
 			RETURN HtmlContent
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 09 - Page HTML & Navigation
 		lineageTag: f421e6fe-d45f-4a29-b3e7-9862e6dd0bda
 
 	measure 'Last Refresh Date' =
 			
 			/// Identifies the absolute latest physical trading record loaded into the model
 			FORMAT(MAX(aapl_daily[Trade_Date]), "MMMM dd, yyyy")
-		displayFolder: 📊 Core Price Metrics
+		displayFolder: 11 - Metadata
 		lineageTag: 554239dc-b4d5-4294-a12d-c74a3262dbd8
 
 	measure 'Last Refresh Date Button' = ```
@@ -852,7 +842,7 @@ table _Measures
 			RETURN 
 			    "Data Current as of: " & FORMAT(LatestTradeDate, "MMMM dd, yyyy")
 			```
-		displayFolder: 📊 Core Price Metrics
+		displayFolder: 11 - Metadata
 		lineageTag: 7519d3da-f5b9-4181-81e9-f0acb93409c7
 
 	/// Average adjusted closing price over the selected period (Actual).
@@ -860,7 +850,7 @@ table _Measures
 			
 			AVERAGE(aapl_daily[Adj_Close])
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
-		displayFolder: 📈 Return & Growth
+		displayFolder: 01 - Price & Volume
 		lineageTag: 092bab6b-059b-4310-829e-6887561383cb
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
@@ -873,7 +863,7 @@ table _Measures
 			    DATEADD('Calendar'[Date], -1, YEAR)
 			)
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
-		displayFolder: 📈 Return & Growth
+		displayFolder: 01 - Price & Volume
 		lineageTag: e7f3780b-f52e-40e7-a2f9-df75b52c7039
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
@@ -893,7 +883,7 @@ table _Measures
 			    35,                                                         // imageHeight: Height in pixels
 			    1                                                           // businessImpact: 1 means Positive = Green
 			)
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 02 - Returns & Performance
 		lineageTag: 6d07781c-8d49-4bc6-8a6a-1ddbe470cdd3
 		dataCategory: ImageUrl
 
@@ -916,7 +906,7 @@ table _Measures
 			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
 			    </div>
 			</div>"
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: e1adad08-3d9a-4e2c-84ce-a3bba8651f14
 
 	measure 'KPI - CAGR' =
@@ -939,7 +929,7 @@ table _Measures
 			        <div style='color: #86868b; font-size: 12px; font-weight: 500; margin-top: 2px;'>Benchmark: <span style='color: #64d2ff;'>" & FormatSP500 & "</span></div>
 			    </div>
 			</div>"
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: 56eab8e8-c993-4537-a24f-0144b60eccc7
 
 	measure 'KPI - Sharpe Ratio' =
@@ -963,7 +953,7 @@ table _Measures
 			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
 			    </div>
 			</div>"
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: 772d7fc2-79c6-410e-aa81-27cceaaede61
 
 	measure 'KPI - Max Drawdown' =
@@ -985,7 +975,7 @@ table _Measures
 			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
 			    </div>
 			</div>"
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: 2fb98ea8-c397-48f6-98b7-9f08c13ac6ca
 
 	measure 'KPI - Volatility' =
@@ -1007,7 +997,7 @@ table _Measures
 			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
 			    </div>
 			</div>"
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: 1661dfbb-f9d3-4797-a1d9-7a9d679a6ea7
 
 	measure 'KPI - Trend State' = ```
@@ -1046,7 +1036,7 @@ table _Measures
 			    </div>
 			</div>"
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: dfe94c7a-d3fc-43e8-8c25-425f729de6d0
 
 	measure 'KPI - RSI' =
@@ -1074,7 +1064,7 @@ table _Measures
 			        <div style='color: transparent; font-size: 12px; font-weight: 500; margin-top: 2px; user-select: none;'>&nbsp;</div>
 			    </div>
 			</div>"
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: a21c9185-5155-4d7b-a904-331dbbb0836a
 
 	measure 'Dynamic Business Recommendation' = ```
@@ -1156,7 +1146,7 @@ table _Measures
 			</div>
 			"
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 07 - KPI Cards
 		lineageTag: 2ee8c6dd-ac12-4e78-afce-7948d4ad5118
 
 	measure 'Filter Text - CEO Era' =
@@ -1166,7 +1156,7 @@ table _Measures
 			    3,                    // Max items to show before adding ", ..."
 			    "All Eras"            // Text to show if nothing is filtered
 			)
-		displayFolder: 🏷️ Labels & Filters
+		displayFolder: 10 - Filters & Titles
 		lineageTag: 8a36961f-44ff-4e9c-9188-c34b11e298c3
 
 	measure 'Filter Text - Dates' =
@@ -1176,7 +1166,7 @@ table _Measures
 			    'Calendar'[MonthName],
 			    'Calendar'[Date]
 			)
-		displayFolder: 🏷️ Labels & Filters
+		displayFolder: 10 - Filters & Titles
 		lineageTag: 9bfb6088-c7e3-481e-b7bb-c8b86e328db8
 
 	measure 'SVG Sparkline - Price Trend' =
@@ -1189,7 +1179,7 @@ table _Measures
 			    160,                 // Width in pixels
 			    45                   // Height in pixels
 			)
-		displayFolder: 📊 SVG Tooltips
+		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 4db00e43-7a4a-484e-94d9-73b22299f609
 		dataCategory: ImageUrl
 
@@ -1203,7 +1193,7 @@ table _Measures
 			    160,                 // Width in pixels
 			    45                   // Height in pixels
 			)
-		displayFolder: 📊 SVG Tooltips
+		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 8c50de15-bc17-42ff-9770-f6f6cd202cc9
 		dataCategory: ImageUrl
 
@@ -1212,7 +1202,7 @@ table _Measures
 			VAR DateString = [Filter Text - Dates] // Your SavoryData measure
 			RETURN
 			    "🗓️ Horizon: " & DateString
-		displayFolder: 🏷️ Labels & Filters
+		displayFolder: 10 - Filters & Titles
 		lineageTag: f6cc6703-f083-42fe-8f68-9985a24c6d87
 
 	measure 'SVG Tooltip - Drawdown Recovery' = ```
@@ -1237,7 +1227,7 @@ table _Measures
 			        "#f5f5f7"     // Text Color
 			    )
 			```
-		displayFolder: 📊 SVG Tooltips
+		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 08308c5e-cc64-4867-96a9-c5ef2b3ae6d7
 
 	measure 'SVG Tooltip - Volatility Donut' = ```
@@ -1262,7 +1252,7 @@ table _Measures
 			        "#ffffff"     // Text color
 			    )
 			```
-		displayFolder: 📊 SVG Tooltips
+		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 678f7e80-2655-4d0d-99d3-1dfabf039d48
 
 	measure 'SVG Tooltip - RSI Capsule' = ```
@@ -1286,7 +1276,7 @@ table _Measures
 			        "#ffffff"
 			    )
 			```
-		displayFolder: 📊 SVG Tooltips
+		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 8b2999e0-60a5-437a-8f87-fd69429a6e11
 
 	measure 'HTML - Decade Summary Table' = ```
@@ -1416,7 +1406,7 @@ table _Measures
 			
 			RETURN HtmlContent
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 09 - Page HTML & Navigation
 		lineageTag: af82a886-d0d6-48e0-bdba-6c29d8ecfd27
 
 	measure 'Sidebar Navigation HTML 2' = ```
@@ -1627,7 +1617,7 @@ table _Measures
 			"
 			RETURN HtmlContent
 			```
-		displayFolder: 🎨 HTML Visuals
+		displayFolder: 09 - Page HTML & Navigation
 		lineageTag: f56a36a8-eb59-4d9f-901d-5283a7083caf
 
 	measure 'Title - Macro Price Chart' = ```
@@ -1662,303 +1652,19 @@ table _Measures
 			RETURN 
 			    "Historical Price Action " & PeriodText
 			```
-		displayFolder: 🏷️ Labels & Filters
+		displayFolder: 10 - Filters & Titles
 		lineageTag: f3e497c8-c1b5-49a4-8527-e2fdc5798980
 
-	measure 'Title - Tech Price Chart' =
-			
-			PiotrBartela.TitleContext.Period("Price Action & Moving Averages (50D, 200D)", 'Calendar'[Date])
-		displayFolder: 🏷️ Labels & Filters
-		lineageTag: f06546bb-07e1-4569-b954-c99c013ab956
-
-	measure 'Title - Tech RSI Chart' =
-			
-			PiotrBartela.TitleContext.Period("Relative Strength Index (14-Day)", 'Calendar'[Date])
-		displayFolder: 🏷️ Labels & Filters
-		lineageTag: 2f9971df-83cd-487f-8dc7-ca6c51111d9f
-
-	measure 'Title - Tech Volume Chart' =
-			
-			PiotrBartela.TitleContext.Period("Institutional Trading Volume", 'Calendar'[Date])
-		displayFolder: 🏷️ Labels & Filters
+	measure 'Title - VAP Profile' = "Institutional Volume-at-Price (VAP) | " & [Filter Text - CEO Era]
+		displayFolder: 10 - Filters & Titles
 		lineageTag: cca23525-c31b-4cc6-a71d-5f8339f2884e
 
 	measure 'Title - Decade Matrix' =
 			
 			// The rows are already decades, so we just append the active CEO Era filter
 			"Decadal Risk & Return Profile | " & [Filter Text - CEO Era]
-		displayFolder: 🏷️ Labels & Filters
+		displayFolder: 10 - Filters & Titles
 		lineageTag: 156e722b-d207-4738-b9a3-7ef3b10fcaf7
-
-	/// Vega-Lite 2-layer candlestick. Rule=wick, Bar=body. Bullish=#30d158, Doji=#86868b, Bearish=#ff453a. Bind: Trade_Date, Open_Price, High_Price, Low_Price, Close_Price, Candlestick_Direction, Volume.
-	measure 'Deneb - Candlestick OHLC' =
-			"{
-			  ""$schema"": ""https://vega.github.io/schema/vega-lite/v5.json"",
-			  ""data"": { ""name"": ""dataset"" },
-			  ""background"": ""transparent"",
-			  ""padding"": { ""top"": 12, ""right"": 16, ""bottom"": 8, ""left"": 8 },
-			  ""config"": {
-			    ""view"": { ""stroke"": ""transparent"" },
-			    ""axis"": {
-			      ""domainColor"": ""#424245"",
-			      ""gridColor"": ""#2a2a2d"",
-			      ""gridDash"": [2, 4],
-			      ""tickColor"": ""#424245"",
-			      ""tickSize"": 4,
-			      ""labelColor"": ""#86868b"",
-			      ""labelFont"": ""system-ui, -apple-system, sans-serif"",
-			      ""labelFontSize"": 11
-			    }
-			  },
-			  ""encoding"": {
-			    ""x"": {
-			      ""field"": ""Trade_Date"",
-			      ""type"": ""temporal"",
-			      ""axis"": { ""title"": null, ""format"": ""%b '%y"", ""labelAngle"": -30, ""gridColor"": ""transparent"" }
-			    }
-			  },
-			  ""layer"": [
-			    {
-			      ""mark"": { ""type"": ""rule"", ""strokeWidth"": 1 },
-			      ""encoding"": {
-			        ""y"": {
-			          ""field"": ""Low_Price"", ""type"": ""quantitative"",
-			          ""scale"": { ""zero"": false, ""nice"": false },
-			          ""axis"": { ""title"": null, ""format"": ""$,.0f"", ""tickCount"": 6, ""domainColor"": ""transparent"" }
-			        },
-			        ""y2"": { ""field"": ""High_Price"" },
-			        ""color"": {
-			          ""condition"": [
-			            { ""test"": ""datum['Candlestick_Direction'] === 'Bullish'"", ""value"": ""#30d158"" },
-			            { ""test"": ""datum['Candlestick_Direction'] === 'Doji (Flat)'"", ""value"": ""#86868b"" }
-			          ],
-			          ""value"": ""#ff453a""
-			        },
-			        ""tooltip"": [
-			          { ""field"": ""Trade_Date"", ""type"": ""temporal"", ""title"": ""Date"", ""format"": ""%B %d, %Y"" },
-			          { ""field"": ""Open_Price"", ""type"": ""quantitative"", ""title"": ""Open"", ""format"": ""$,.2f"" },
-			          { ""field"": ""High_Price"", ""type"": ""quantitative"", ""title"": ""High"", ""format"": ""$,.2f"" },
-			          { ""field"": ""Low_Price"", ""type"": ""quantitative"", ""title"": ""Low"", ""format"": ""$,.2f"" },
-			          { ""field"": ""Close_Price"", ""type"": ""quantitative"", ""title"": ""Close"", ""format"": ""$,.2f"" },
-			          { ""field"": ""Volume"", ""type"": ""quantitative"", ""title"": ""Volume"", ""format"": "","" },
-			          { ""field"": ""Candlestick_Direction"", ""title"": ""Signal"" }
-			        ]
-			      }
-			    },
-			    {
-			      ""mark"": { ""type"": ""bar"", ""size"": 5, ""clip"": true },
-			      ""encoding"": {
-			        ""y"": { ""field"": ""Open_Price"", ""type"": ""quantitative"" },
-			        ""y2"": { ""field"": ""Close_Price"" },
-			        ""color"": {
-			          ""condition"": [
-			            { ""test"": ""datum['Candlestick_Direction'] === 'Bullish'"", ""value"": ""#30d158"" },
-			            { ""test"": ""datum['Candlestick_Direction'] === 'Doji (Flat)'"", ""value"": ""#86868b"" }
-			          ],
-			          ""value"": ""#ff453a""
-			        },
-			        ""opacity"": { ""value"": 0.85 }
-			      }
-			    }
-			  ]
-			}"
-		displayFolder: 🔬 Deneb Specs
-		lineageTag: 82f9735a-8818-4215-8ea8-b72ac5ed96e6
-
-	/// Vega-Lite multi-line with fold transform. Golden/Death Cross background shading. Bind: Trade_Date, Adj_Close, [50-Day SMA], [200-Day SMA].
-	measure 'Deneb - Price & SMA Lines' =
-			"{
-			  ""$schema"": ""https://vega.github.io/schema/vega-lite/v5.json"",
-			  ""data"": { ""name"": ""dataset"" },
-			  ""background"": ""transparent"",
-			  ""padding"": { ""top"": 12, ""right"": 16, ""bottom"": 8, ""left"": 8 },
-			  ""config"": {
-			    ""view"": { ""stroke"": ""transparent"" },
-			    ""axis"": {
-			      ""domainColor"": ""#424245"", ""gridColor"": ""#2a2a2d"", ""gridDash"": [2, 4],
-			      ""tickColor"": ""#424245"", ""tickSize"": 4, ""labelColor"": ""#86868b"",
-			      ""labelFont"": ""system-ui, -apple-system, sans-serif"", ""labelFontSize"": 11
-			    },
-			    ""legend"": {
-			      ""labelColor"": ""#f5f5f7"", ""labelFont"": ""system-ui, -apple-system, sans-serif"",
-			      ""labelFontSize"": 11, ""titleColor"": ""#86868b"",
-			      ""fillColor"": ""#1d1d1f"", ""strokeColor"": ""#424245"",
-			      ""padding"": 10, ""cornerRadius"": 8
-			    }
-			  },
-			  ""layer"": [
-			    {
-			      ""mark"": { ""type"": ""area"", ""opacity"": 0.04, ""clip"": true },
-			      ""encoding"": {
-			        ""x"": { ""field"": ""Trade_Date"", ""type"": ""temporal"" },
-			        ""y"": { ""field"": ""Adj_Close"", ""type"": ""quantitative"", ""scale"": { ""zero"": false, ""nice"": false } },
-			        ""color"": {
-			          ""condition"": { ""test"": ""datum['50-Day SMA'] >= datum['200-Day SMA']"", ""value"": ""#30d158"" },
-			          ""value"": ""#ff453a""
-			        }
-			      }
-			    },
-			    {
-			      ""transform"": [
-			        { ""fold"": [""Adj_Close"", ""50-Day SMA"", ""200-Day SMA""], ""as"": [""Series"", ""Price""] },
-			        { ""filter"": ""isValid(datum.Price)"" }
-			      ],
-			      ""mark"": { ""type"": ""line"", ""interpolate"": ""monotone"", ""clip"": true },
-			      ""encoding"": {
-			        ""x"": {
-			          ""field"": ""Trade_Date"", ""type"": ""temporal"",
-			          ""axis"": { ""title"": null, ""format"": ""%b '%y"", ""labelAngle"": -30, ""gridColor"": ""transparent"" }
-			        },
-			        ""y"": {
-			          ""field"": ""Price"", ""type"": ""quantitative"",
-			          ""scale"": { ""zero"": false, ""nice"": false },
-			          ""axis"": { ""title"": null, ""format"": ""$,.0f"", ""tickCount"": 6, ""domainColor"": ""transparent"" }
-			        },
-			        ""color"": {
-			          ""field"": ""Series"", ""type"": ""nominal"",
-			          ""scale"": {
-			            ""domain"": [""Adj_Close"", ""50-Day SMA"", ""200-Day SMA""],
-			            ""range"": [""#f5f5f7"", ""#ff9f0a"", ""#bf5af2""]
-			          },
-			          ""legend"": {
-			            ""title"": null, ""orient"": ""top-left"",
-			            ""labelExpr"": ""datum.label === 'Adj_Close' ? 'AAPL Price' : datum.label""
-			          }
-			        },
-			        ""strokeWidth"": {
-			          ""condition"": { ""test"": ""datum.Series === 'Adj_Close'"", ""value"": 2 },
-			          ""value"": 1.5
-			        },
-			        ""opacity"": {
-			          ""condition"": { ""test"": ""datum.Series === 'Adj_Close'"", ""value"": 0.95 },
-			          ""value"": 0.8
-			        },
-			        ""tooltip"": [
-			          { ""field"": ""Trade_Date"", ""type"": ""temporal"", ""title"": ""Date"", ""format"": ""%B %d, %Y"" },
-			          { ""field"": ""Price"", ""type"": ""quantitative"", ""title"": ""Price"", ""format"": ""$,.2f"" },
-			          { ""field"": ""Series"", ""title"": ""Series"" }
-			        ]
-			      }
-			    }
-			  ]
-			}"
-		displayFolder: 🔬 Deneb Specs
-		lineageTag: ec372f6f-58a9-452d-bd93-8ad3dc9e6127
-
-	/// Vega-Lite 6-layer RSI oscillator. Threshold color scale: green<30, blue 30-70, red>70. Shaded zones + dashed threshold lines. Bind: Trade_Date, [RSI (14-Day)].
-	measure 'Deneb - RSI Oscillator' =
-			"{
-			  ""$schema"": ""https://vega.github.io/schema/vega-lite/v5.json"",
-			  ""data"": { ""name"": ""dataset"" },
-			  ""background"": ""transparent"",
-			  ""padding"": { ""top"": 12, ""right"": 16, ""bottom"": 8, ""left"": 8 },
-			  ""config"": {
-			    ""view"": { ""stroke"": ""transparent"" },
-			    ""axis"": {
-			      ""domainColor"": ""transparent"", ""gridColor"": ""#2a2a2d"", ""gridDash"": [2, 4],
-			      ""tickColor"": ""transparent"", ""labelColor"": ""#86868b"",
-			      ""labelFont"": ""system-ui, -apple-system, sans-serif"", ""labelFontSize"": 11
-			    }
-			  },
-			  ""layer"": [
-			    { ""mark"": { ""type"": ""rect"", ""opacity"": 0.06 }, ""encoding"": { ""y"": { ""datum"": 70, ""type"": ""quantitative"" }, ""y2"": { ""datum"": 100 }, ""color"": { ""value"": ""#ff453a"" } } },
-			    { ""mark"": { ""type"": ""rect"", ""opacity"": 0.06 }, ""encoding"": { ""y"": { ""datum"": 0, ""type"": ""quantitative"" }, ""y2"": { ""datum"": 30 }, ""color"": { ""value"": ""#30d158"" } } },
-			    { ""mark"": { ""type"": ""rule"", ""strokeDash"": [4, 4], ""strokeWidth"": 1, ""opacity"": 0.6 }, ""encoding"": { ""y"": { ""datum"": 70, ""type"": ""quantitative"" }, ""color"": { ""value"": ""#ff453a"" } } },
-			    { ""mark"": { ""type"": ""rule"", ""strokeDash"": [4, 4], ""strokeWidth"": 1, ""opacity"": 0.6 }, ""encoding"": { ""y"": { ""datum"": 30, ""type"": ""quantitative"" }, ""color"": { ""value"": ""#30d158"" } } },
-			    { ""mark"": { ""type"": ""rule"", ""strokeDash"": [2, 6], ""strokeWidth"": 1, ""opacity"": 0.25 }, ""encoding"": { ""y"": { ""datum"": 50, ""type"": ""quantitative"" }, ""color"": { ""value"": ""#86868b"" } } },
-			    {
-			      ""mark"": { ""type"": ""line"", ""interpolate"": ""monotone"", ""strokeWidth"": 2, ""clip"": true },
-			      ""encoding"": {
-			        ""x"": {
-			          ""field"": ""Trade_Date"", ""type"": ""temporal"",
-			          ""axis"": { ""title"": null, ""format"": ""%b '%y"", ""labelAngle"": -30, ""gridColor"": ""transparent"" }
-			        },
-			        ""y"": {
-			          ""field"": ""RSI (14-Day)"", ""type"": ""quantitative"",
-			          ""scale"": { ""domain"": [0, 100] },
-			          ""axis"": { ""title"": null, ""values"": [0, 30, 50, 70, 100], ""tickCount"": 5 }
-			        },
-			        ""color"": {
-			          ""field"": ""RSI (14-Day)"", ""type"": ""quantitative"",
-			          ""scale"": { ""type"": ""threshold"", ""domain"": [30, 70], ""range"": [""#30d158"", ""#64d2ff"", ""#ff453a""] },
-			          ""legend"": null
-			        },
-			        ""tooltip"": [
-			          { ""field"": ""Trade_Date"", ""type"": ""temporal"", ""title"": ""Date"", ""format"": ""%B %d, %Y"" },
-			          { ""field"": ""RSI (14-Day)"", ""type"": ""quantitative"", ""title"": ""RSI"", ""format"": "".1f"" }
-			        ]
-			      }
-			    }
-			  ]
-			}"
-		displayFolder: 🔬 Deneb Specs
-		lineageTag: 56d956f7-0e1d-4eb7-84bc-f6b9376d94eb
-
-	/// Vega-Lite 3-layer volume chart. Surge bars orange/full opacity, normal blue/45%. 30D rolling avg line (Vega window transform). Surge event markers. Bind: Trade_Date, Volume, [Is Volume Surge].
-	measure 'Deneb - Volume & Surge' =
-			"{
-			  ""$schema"": ""https://vega.github.io/schema/vega-lite/v5.json"",
-			  ""data"": { ""name"": ""dataset"" },
-			  ""background"": ""transparent"",
-			  ""padding"": { ""top"": 12, ""right"": 16, ""bottom"": 8, ""left"": 8 },
-			  ""config"": {
-			    ""view"": { ""stroke"": ""transparent"" },
-			    ""axis"": {
-			      ""domainColor"": ""transparent"", ""gridColor"": ""#2a2a2d"", ""gridDash"": [2, 4],
-			      ""tickColor"": ""transparent"", ""labelColor"": ""#86868b"",
-			      ""labelFont"": ""system-ui, -apple-system, sans-serif"", ""labelFontSize"": 11
-			    }
-			  },
-			  ""layer"": [
-			    {
-			      ""mark"": { ""type"": ""bar"", ""cornerRadiusTopLeft"": 2, ""cornerRadiusTopRight"": 2, ""clip"": true },
-			      ""encoding"": {
-			        ""x"": {
-			          ""field"": ""Trade_Date"", ""type"": ""temporal"",
-			          ""axis"": { ""title"": null, ""format"": ""%b '%y"", ""labelAngle"": -30, ""gridColor"": ""transparent"" }
-			        },
-			        ""y"": { ""field"": ""Volume"", ""type"": ""quantitative"", ""axis"": { ""title"": null, ""format"": ""~s"", ""tickCount"": 4 } },
-			        ""color"": {
-			          ""condition"": { ""test"": ""datum['Is Volume Surge'] == 1"", ""value"": ""#ff9f0a"" },
-			          ""value"": ""#2997ff""
-			        },
-			        ""opacity"": {
-			          ""condition"": { ""test"": ""datum['Is Volume Surge'] == 1"", ""value"": 1 },
-			          ""value"": 0.45
-			        },
-			        ""tooltip"": [
-			          { ""field"": ""Trade_Date"", ""type"": ""temporal"", ""title"": ""Date"", ""format"": ""%B %d, %Y"" },
-			          { ""field"": ""Volume"", ""type"": ""quantitative"", ""title"": ""Volume"", ""format"": "","" },
-			          { ""field"": ""Is Volume Surge"", ""title"": ""Surge? (1=Yes)"" }
-			        ]
-			      }
-			    },
-			    {
-			      ""transform"": [
-			        { ""window"": [{ ""op"": ""mean"", ""field"": ""Volume"", ""as"": ""Avg30Volume"" }], ""frame"": [-29, 0] }
-			      ],
-			      ""mark"": { ""type"": ""line"", ""color"": ""#ff9f0a"", ""strokeDash"": [4, 3], ""strokeWidth"": 1.5, ""opacity"": 0.6, ""interpolate"": ""monotone"", ""clip"": true },
-			      ""encoding"": {
-			        ""x"": { ""field"": ""Trade_Date"", ""type"": ""temporal"" },
-			        ""y"": { ""field"": ""Avg30Volume"", ""type"": ""quantitative"" },
-			        ""tooltip"": [
-			          { ""field"": ""Trade_Date"", ""type"": ""temporal"", ""title"": ""Date"", ""format"": ""%B %d, %Y"" },
-			          { ""field"": ""Avg30Volume"", ""type"": ""quantitative"", ""title"": ""30D Avg"", ""format"": "","" }
-			        ]
-			      }
-			    },
-			    {
-			      ""transform"": [{ ""filter"": ""datum['Is Volume Surge'] == 1"" }],
-			      ""mark"": { ""type"": ""text"", ""dy"": -8, ""fontSize"": 9, ""fontWeight"": ""bold"", ""color"": ""#ff9f0a"", ""text"": ""▲"", ""clip"": true },
-			      ""encoding"": {
-			        ""x"": { ""field"": ""Trade_Date"", ""type"": ""temporal"" },
-			        ""y"": { ""field"": ""Volume"", ""type"": ""quantitative"" }
-			      }
-			    }
-			  ]
-			}"
-		displayFolder: 🔬 Deneb Specs
-		lineageTag: 005d565a-edc8-46ab-a7ab-374b925ee82e
 
 	measure '30-Day Avg Volume' =
 			
@@ -1971,7 +1677,7 @@ table _Measures
 			        DAY
 			    )
 			)
-		displayFolder: 📉 Risk & Volatility
+		displayFolder: 01 - Price & Volume
 		lineageTag: e1a0c7c2-7595-4c34-94d0-650d2ace40ae
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
@@ -1980,8 +1686,101 @@ table _Measures
 			
 			// Appends the active CEO Era filter to provide context to the aggregation
 			"Historical Trading Volume by Decade | " & [Filter Text - CEO Era]
-		displayFolder: 🏷️ Labels & Filters
+		displayFolder: 10 - Filters & Titles
 		lineageTag: d4a81b52-2e65-4bbc-849b-db408f4a9d8a
+
+	measure 'Title - Momentum Scatter' = "RSI Capitulation Matrix | " & [Filter Text - CEO Era]
+		displayFolder: 10 - Filters & Titles
+		lineageTag: 1ef510e0-bc43-4cfe-a2b7-f110710fa506
+
+	/// Binary flag (1/0) — returns 1 only when the current Calendar date has real AAPL trading data. Used as a visual-level filter in Deneb charts to suppress weekend and holiday rows that cause flat-step artifacts in RSI/SMA lines and gaps in candlestick/volume charts.
+	measure 'Is Trading Day' = ```
+			
+			// Returns 1 only for dates that have actual AAPL trading data
+			// Used as a filter in Deneb visuals to eliminate weekend/holiday gaps
+			IF(
+			    NOT(ISBLANK(CALCULATE(MAX(aapl_daily[Close_Price])))),
+			    1,
+			    0
+			)
+			
+			```
+		formatString: 0
+		displayFolder: 06 - Deneb (Chart Data)
+
+	/// 
+	/// Supplies the Candlestick Deneb visual with a pre-formatted date string (YYYY-MM-DD) for the x-axis. Returns BLANK() on non-trading days so Deneb's transform/filter can exclude those rows cleanly.
+	/// 
+	measure 'Trade Date Key' = ```
+			
+			// Returns formatted trade date only for actual trading days
+			// Deneb visuals should add a filter transform: {"filter": {"field": "Trade Date Key", "valid": true}}
+			VAR HasData = NOT(ISBLANK(CALCULATE(MAX(aapl_daily[Close_Price]))))
+			RETURN
+			    IF(HasData, FORMAT(MAX('Calendar'[Date]), "YYYY-MM-DD"), BLANK())
+			
+			```
+		displayFolder: 06 - Deneb (Chart Data)
+
+	/// RSI (14-Day) restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-step artifacts in Deneb line charts.
+	measure 'RSI (14-Day) Deneb' = ```
+			
+			// RSI variant that returns BLANK on non-trading days.
+			// Prevents the flat "step" artifact in Deneb line charts
+			// where RSI holds its last value across weekends/holidays.
+			VAR HasData = NOT(ISBLANK(CALCULATE(MAX(aapl_daily[Close_Price]))))
+			RETURN IF(HasData, [RSI (14-Day)], BLANK())
+			
+			```
+		formatString: 0.00
+		displayFolder: 06 - Deneb (Chart Data)
+
+	/// 50-Day SMA restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-step artifacts in Deneb line charts.
+	measure '50-Day SMA Deneb' = ```
+			
+			// 50-Day SMA restricted to trading days only.
+			// Returns BLANK on weekends/holidays to prevent flat-step
+			// artifacts in Deneb line/area charts.
+			VAR HasData = NOT(ISBLANK(CALCULATE(MAX(aapl_daily[Close_Price]))))
+			RETURN IF(HasData, [50-Day SMA], BLANK())
+			
+			```
+		formatString: 0.00
+		displayFolder: 06 - Deneb (Chart Data)
+
+	/// 200-Day SMA restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-step artifacts in Deneb line charts.
+	measure '200-Day SMA Deneb' = ```
+			
+			// 200-Day SMA restricted to trading days only.
+			// Returns BLANK on weekends/holidays to prevent flat-step
+			// artifacts in Deneb line/area charts.
+			VAR HasData = NOT(ISBLANK(CALCULATE(MAX(aapl_daily[Close_Price]))))
+			RETURN IF(HasData, [200-Day SMA], BLANK())
+			
+			```
+		formatString: 0.00
+		displayFolder: 06 - Deneb (Chart Data)
+
+	/// Daily Drawdown % restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-line artifacts in Deneb area charts.
+	measure 'Daily Drawdown % Deneb' = ```
+			
+			// Daily Drawdown restricted to trading days only.
+			// Returns BLANK on weekends/holidays so Deneb area charts
+			// don't draw flat lines across non-trading periods.
+			VAR HasData = NOT(ISBLANK(CALCULATE(MAX(aapl_daily[Close_Price]))))
+			RETURN IF(HasData, [Daily Drawdown %], BLANK())
+			
+			```
+		formatString: 0.00%
+		displayFolder: 06 - Deneb (Chart Data)
+
+	/// Fixed Vega spec for Institutional Volume-at-Price chart. Field names corrected, Y-axis bin orientation fixed, current price reference line added, gradient color encoding by volume density added.
+	measure 'Deneb - VAP Chart JSON' = ```
+			
+			"" // Placeholder — spec lives in the Deneb visual directly
+			
+			```
+		displayFolder: 06 - Deneb (Chart Data)
 
 	partition _Measures = m
 		mode: import

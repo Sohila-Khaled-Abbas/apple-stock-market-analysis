@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "fad2d3b785d22a4bffb9",
+  "name": "9457681bfa2cc32c76d1",
   "position": {
-    "x": 648,
-    "y": 312,
-    "z": 9000,
+    "x": 1104,
+    "y": 600,
+    "z": 11000,
     "height": 264,
-    "width": 1248,
-    "tabOrder": 9000
+    "width": 792,
+    "tabOrder": 11000
   },
   "visual": {
     "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
@@ -20,14 +20,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Calendar"
+                      "Entity": "aapl_daily"
                     }
                   },
-                  "Property": "Decade"
+                  "Property": "Trade_Date"
                 }
               },
-              "queryRef": "Calendar.Decade",
-              "nativeQueryRef": "Decade"
+              "queryRef": "aapl_daily.Trade_Date",
+              "nativeQueryRef": "Trade_Date"
             },
             {
               "field": {
@@ -42,11 +42,40 @@
               },
               "queryRef": "aapl_daily.Volume",
               "nativeQueryRef": "Volume"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "RSI (14-Day) Deneb"
+                }
+              },
+              "queryRef": "_Measures.RSI (14-Day) Deneb",
+              "nativeQueryRef": "RSI (14-Day) Deneb"
             }
           ]
         }
       },
       "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "aapl_daily"
+                  }
+                },
+                "Property": "Trade_Date"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
         "isDefaultSort": true
       }
     },
@@ -64,7 +93,7 @@
             "jsonSpec": {
               "expr": {
                 "Literal": {
-                  "Value": "'{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.json\",\n  \"autosize\": {\"type\": \"fit\", \"contains\": \"padding\"},\n  \"background\": \"transparent\",\n  \"padding\": {\"top\": 12, \"left\": 50, \"right\": 24, \"bottom\": 24},\n  \"data\": [\n    {\n      \"name\": \"dataset\"\n    }\n  ],\n  \"scales\": [\n    {\n      \"name\": \"yscale\",\n      \"type\": \"band\",\n      \"domain\": {\"data\": \"dataset\", \"field\": \"Decade\"},\n      \"range\": \"height\",\n      \"padding\": 0.25\n    },\n    {\n      \"name\": \"xscale\",\n      \"type\": \"linear\",\n      \"domain\": {\"data\": \"dataset\", \"field\": \"Volume\"},\n      \"nice\": true,\n      \"zero\": true,\n      \"range\": \"width\"\n    }\n  ],\n  \"axes\": [\n    {\n      \"orient\": \"left\",\n      \"scale\": \"yscale\",\n      \"domain\": false,\n      \"ticks\": false,\n      \"labelColor\": \"#f5f5f7\",\n      \"labelFont\": \"system-ui, -apple-system, sans-serif\",\n      \"labelFontSize\": 12,\n      \"labelFontWeight\": \"bold\",\n      \"labelPadding\": 8\n    },\n    {\n      \"orient\": \"bottom\",\n      \"scale\": \"xscale\",\n      \"tickCount\": 8,\n      \"format\": \"~s\",\n      \"grid\": true,\n      \"domain\": false,\n      \"ticks\": false,\n      \"gridColor\": \"#2a2a2d\",\n      \"gridDash\": [2, 4],\n      \"labelColor\": \"#86868b\",\n      \"labelFont\": \"system-ui, -apple-system, sans-serif\",\n      \"labelFontSize\": 11\n    }\n  ],\n  \"marks\": [\n    {\n      \"type\": \"rect\",\n      \"from\": {\"data\": \"dataset\"},\n      \"encode\": {\n        \"enter\": {\n          \"y\": {\"scale\": \"yscale\", \"field\": \"Decade\"},\n          \"height\": {\"scale\": \"yscale\", \"band\": 1},\n          \"x\": {\"scale\": \"xscale\", \"value\": 0},\n          \"x2\": {\"scale\": \"xscale\", \"field\": \"Volume\"},\n          \"fill\": {\"value\": \"#2997ff\"},\n          \"cornerRadiusTopRight\": {\"value\": 4},\n          \"cornerRadiusBottomRight\": {\"value\": 4},\n          \"tooltip\": {\n            \"signal\": \"{''Decade'': datum.Decade, ''Aggregate Volume'': format(datum.Volume, '','')}\"\n          }\n        },\n        \"update\": {\n          \"fillOpacity\": {\"value\": 0.85}\n        },\n        \"hover\": {\n          \"fillOpacity\": {\"value\": 1.0}\n        }\n      }\n    }\n  ]\n}'"
+                  "Value": "'{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.json\",\n  \"autosize\": {\"type\": \"fit\", \"contains\": \"padding\", \"resize\": true},\n  \"background\": \"transparent\",\n  \"padding\": {\"top\": 4, \"left\": 50, \"right\": 24, \"bottom\": 36},\n  \"data\": [\n    {\n      \"name\": \"dataset\",\n      \"transform\": [\n        {\n          \"type\": \"filter\",\n          \"expr\": \"datum[''RSI (14-Day)''] > 0 && datum[''RSI (14-Day)''] < 100 && datum.Volume < 2000000000\"\n        }\n      ]\n    }\n  ],\n  \"scales\": [\n    {\n      \"name\": \"xscale\",\n      \"type\": \"linear\",\n      \"domain\": [0, 100],\n      \"range\": \"width\",\n      \"zero\": true\n    },\n    {\n      \"name\": \"yscale\",\n      \"type\": \"sqrt\",\n      \"domain\": {\"data\": \"dataset\", \"field\": \"Volume\"},\n      \"range\": \"height\",\n      \"nice\": true,\n      \"zero\": true\n    }\n  ],\n  \"axes\": [\n    {\n      \"orient\": \"bottom\",\n      \"scale\": \"xscale\",\n      \"title\": \"Relative Strength Index (RSI)\",\n      \"titleColor\": \"#86868b\",\n      \"titleFontWeight\": \"normal\",\n      \"titlePadding\": 8,\n      \"values\": [0, 30, 50, 70, 100],\n      \"grid\": false,\n      \"domain\": false,\n      \"ticks\": false,\n      \"labelColor\": \"#86868b\",\n      \"labelFont\": \"system-ui, -apple-system, sans-serif\",\n      \"labelFontSize\": 11\n    },\n    {\n      \"orient\": \"left\",\n      \"scale\": \"yscale\",\n      \"title\": \"Daily Volume (Square Root Scale)\",\n      \"titleColor\": \"#86868b\",\n      \"titleFontWeight\": \"normal\",\n      \"titlePadding\": 8,\n      \"tickCount\": 5,\n      \"format\": \"~s\",\n      \"grid\": true,\n      \"domain\": false,\n      \"ticks\": false,\n      \"gridColor\": \"#2a2a2d\",\n      \"gridDash\": [2, 4],\n      \"labelColor\": \"#86868b\",\n      \"labelFont\": \"system-ui, -apple-system, sans-serif\",\n      \"labelFontSize\": 11\n    }\n  ],\n  \"marks\": [\n    {\n      \"type\": \"rule\",\n      \"encode\": {\n        \"enter\": {\n          \"x\": {\"scale\": \"xscale\", \"value\": 30},\n          \"y\": {\"value\": 0},\n          \"y2\": {\"signal\": \"height\"},\n          \"stroke\": {\"value\": \"#30d158\"},\n          \"strokeDash\": {\"value\": [4, 4]},\n          \"opacity\": {\"value\": 0.6}\n        }\n      }\n    },\n    {\n      \"type\": \"rule\",\n      \"encode\": {\n        \"enter\": {\n          \"x\": {\"scale\": \"xscale\", \"value\": 70},\n          \"y\": {\"value\": 0},\n          \"y2\": {\"signal\": \"height\"},\n          \"stroke\": {\"value\": \"#ff453a\"},\n          \"strokeDash\": {\"value\": [4, 4]},\n          \"opacity\": {\"value\": 0.6}\n        }\n      }\n    },\n    {\n      \"type\": \"symbol\",\n      \"from\": {\"data\": \"dataset\"},\n      \"encode\": {\n        \"enter\": {\n          \"x\": {\"scale\": \"xscale\", \"field\": \"RSI (14-Day)\"},\n          \"y\": {\"scale\": \"yscale\", \"field\": \"Volume\"},\n          \"size\": {\"value\": 45},\n          \"fill\": [\n            {\"test\": \"datum[''RSI (14-Day)''] <= 30\", \"value\": \"#30d158\"},\n            {\"test\": \"datum[''RSI (14-Day)''] >= 70\", \"value\": \"#ff453a\"},\n            {\"value\": \"#64d2ff\"}\n          ],\n          \"tooltip\": {\n            \"signal\": \"{''Date'': timeFormat(datum.Trade_Date, ''%b %d, %Y''), ''RSI Level'': format(datum[''RSI (14-Day)''], ''.1f''), ''Volume'': format(datum.Volume, '','')}\"\n          }\n        },\n        \"update\": {\n          \"fillOpacity\": {\"value\": 0.6},\n          \"size\": {\"value\": 45}\n        },\n        \"hover\": {\n          \"fillOpacity\": {\"value\": 1.0},\n          \"size\": {\"value\": 100}\n        }\n      }\n    }\n  ]\n}'"
                 }
               }
             },
@@ -140,7 +169,7 @@
             "viewportWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "1228D"
+                  "Value": "772D"
                 }
               }
             }
@@ -193,7 +222,7 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Title - Decadal Volume"
+                  "Property": "Title - Momentum Scatter"
                 }
               }
             }
@@ -230,7 +259,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Aggregate shares traded, highlighting long-term shifts in market momentum.'"
+                  "Value": "'Cross-analyzes momentum extremes against trading volume to identify behavioral capitulation clusters.'"
                 }
               }
             },
