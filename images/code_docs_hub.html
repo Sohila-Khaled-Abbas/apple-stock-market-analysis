@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Code Documentation Hub · Apple Stock Analysis</title>
+  <meta name="description" content="Visual documentation of SQL and Python scripts for the Apple Stock Market Analysis project."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050810;
+      --surface: #0d1220;
+      --surface2: #131928;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8edf5;
+      --text-muted: #6a7a9a;
+      --blue: #3b6ab0;
+      --yellow: #f7c948;
+      --green: #4ecb8c;
+      --purple: #8b2fc9;
+      --red: #ff6b6b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background stars ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 40%, rgba(255,255,255,0.1) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 20%, rgba(255,255,255,0.12) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.08) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,0.14) 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 75%, rgba(255,255,255,0.1) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.1) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 85%, rgba(255,255,255,0.07) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      padding: 60px 40px 50px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(59,106,176,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(247,201,72,0.3);
+      background: rgba(247,201,72,0.06);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #a0c0f8 50%, #4ecb8c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 14px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 54px;
+    }
+    .stat-card {
+      padding: 16px 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-width: 120px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .stat-card:hover { border-color: rgba(59,106,176,0.4); transform: translateY(-2px); }
+    .stat-card .num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--blue);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-card .label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Section header ── */
+    .section-group {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px 60px;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .section-label .line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-label .tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 20px;
+    }
+    .tag-sql { color: var(--blue); border: 1px solid rgba(59,106,176,0.4); background: rgba(59,106,176,0.08); }
+    .tag-py  { color: var(--yellow); border: 1px solid rgba(247,201,72,0.4); background: rgba(247,201,72,0.08); }
+
+    /* ── Visual cards ── */
+    .visual-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+      margin-bottom: 32px;
+    }
+    .visual-card:hover {
+      border-color: rgba(59,106,176,0.4);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      transform: translateY(-3px);
+    }
+    .visual-card.purple:hover { border-color: rgba(139,47,201,0.4); }
+    .visual-card.green:hover  { border-color: rgba(78,203,140,0.4); }
+    .visual-card.yellow:hover { border-color: rgba(247,201,72,0.4); }
+
+    /* Card header bar */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .card-title-group { display: flex; align-items: center; gap: 14px; }
+    .card-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .dot-blue   { background: var(--blue); box-shadow: 0 0 8px var(--blue); }
+    .dot-purple { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+    .dot-green  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .dot-yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+
+    .card-title { font-size: 14px; font-weight: 700; }
+    .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .card-badges { display: flex; gap: 8px; }
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-blue   { background: rgba(59,106,176,0.15); color: #7ab0f0; border: 1px solid rgba(59,106,176,0.3); }
+    .badge-green  { background: rgba(78,203,140,0.12); color: #4ecb8c; border: 1px solid rgba(78,203,140,0.3); }
+    .badge-yellow { background: rgba(247,201,72,0.12); color: #f7c948; border: 1px solid rgba(247,201,72,0.3); }
+    .badge-purple { background: rgba(139,47,201,0.12); color: #c080ff; border: 1px solid rgba(139,47,201,0.3); }
+    .badge-red    { background: rgba(255,107,107,0.12); color: #ff8888; border: 1px solid rgba(255,107,107,0.3); }
+
+    /* SVG container */
+    .svg-container {
+      padding: 24px;
+      background: #04060e;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .svg-container img,
+    .svg-container object {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .svg-container svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 40px 50px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+
+    /* Tooltip hints */
+    .tip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .tip::before { content: '💡'; }
+
+    /* Animations */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .visual-card { animation: fadeSlideUp 0.5s ease-out both; }
+    .visual-card:nth-child(1) { animation-delay: 0.1s; }
+    .visual-card:nth-child(2) { animation-delay: 0.2s; }
+    .visual-card:nth-child(3) { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span>🍎</span> Apple Stock Market Analysis
+    </div>
+    <h1>Code Documentation Hub</h1>
+    <p>Visual documentation of all SQL and Python scripts in the project. Each diagram maps the code's logic, data flow, and key operations for easy reference.</p>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="num">3</div>
+        <div class="label">SQL Scripts</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">2</div>
+        <div class="label">Python Scripts</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">45+</div>
+        <div class="label">Years of Data</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">4</div>
+        <div class="label">SVG Visuals</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SQL Section -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="section-group">
+    <div class="section-label">
+      <div class="line"></div>
+      <span class="tag tag-sql">SQL Scripts</span>
+      <div class="line"></div>
+    </div>
+
+    <!-- Card 1: Data Ingestion -->
+    <div class="visual-card" id="sql-01">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-dot dot-blue"></div>
+          <div>
+            <div class="card-title">01 · Data Ingestion</div>
+            <div class="card-subtitle">Initializes the database schema and bulk-loads 45 years of AAPL historical data</div>
+          </div>
+        </div>
+        <div class="card-badges">
+          <span class="badge badge-blue">DDL</span>
+          <span class="badge badge-green">DML</span>
+          <span class="badge badge-blue">MySQL</span>
+        </div>
+      </div>
+      <div class="svg-container">
+        <img src="sql_01_data_ingestion.svg" alt="SQL Data Ingestion Diagram" loading="lazy"/>
+      </div>
+    </div>
+
+    <!-- Card 2: Data Cleaning -->
+    <div class="visual-card purple" id="sql-02">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-dot dot-purple"></div>
+          <div>
+            <div class="card-title">02 · Data Cleaning &amp; Validation</div>
+            <div class="card-subtitle">Quality assertions, anomaly detection, and data imputation on aapl_daily</div>
+          </div>
+        </div>
+        <div class="card-badges">
+          <span class="badge badge-purple">SELECT</span>
+          <span class="badge badge-yellow">UPDATE</span>
+          <span class="badge badge-red">Assertions</span>
+        </div>
+      </div>
+      <div class="svg-container">
+        <img src="sql_02_data_cleaning.svg" alt="SQL Data Cleaning Diagram" loading="lazy"/>
+      </div>
+    </div>
+
+    <!-- Card 3: EDA and Metrics -->
+    <div class="visual-card green" id="sql-03">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-dot dot-green"></div>
+          <div>
+            <div class="card-title">03 · EDA &amp; Financial Metrics</div>
+            <div class="card-subtitle">CAGR calculation and SMA-50/200 window function crossover strategy</div>
+          </div>
+        </div>
+        <div class="card-badges">
+          <span class="badge badge-green">CTE</span>
+          <span class="badge badge-green">Window Fn</span>
+          <span class="badge badge-yellow">Analytics</span>
+        </div>
+      </div>
+      <div class="svg-container">
+        <img src="sql_03_eda_metrics.svg" alt="SQL EDA and Metrics Diagram" loading="lazy"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- Python Section -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="section-group">
+    <div class="section-label">
+      <div class="line"></div>
+      <span class="tag tag-py">Python Scripts</span>
+      <div class="line"></div>
+    </div>
+
+    <!-- Card 4: Python Automation -->
+    <div class="visual-card yellow" id="python-automation">
+      <div class="card-header">
+        <div class="card-title-group">
+          <div class="card-dot dot-yellow"></div>
+          <div>
+            <div class="card-title">Python · Data Pipeline Automation</div>
+            <div class="card-subtitle">yf_update.py (MySQL daemon) &amp; gh_update_csv.py (GitHub Actions serverless)</div>
+          </div>
+        </div>
+        <div class="card-badges">
+          <span class="badge badge-yellow">yfinance</span>
+          <span class="badge badge-blue">SQLAlchemy</span>
+          <span class="badge badge-green">Serverless</span>
+          <span class="badge badge-green">Cron</span>
+        </div>
+      </div>
+      <div class="svg-container">
+        <img src="python_automation_visual.svg" alt="Python Automation Diagram" loading="lazy"/>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Apple Stock Market Analysis · Code Documentation Hub · Generated 2026</p>
+    <p style="margin-top:8px;">
+      <span class="tip">SVG files are in the <code style="font-family:'JetBrains Mono',monospace;color:#4ecb8c;">images/</code> folder and can be opened directly in any browser</span>
+    </p>
+  </footer>
+
+</body>
+</html>

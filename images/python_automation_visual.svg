@@ -1,0 +1,302 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 780" width="1000" height="780" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06080f"/>
+      <stop offset="100%" style="stop-color:#0b1020"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a0e2a"/>
+      <stop offset="30%" style="stop-color:#3b6ab0"/>
+      <stop offset="60%" style="stop-color:#f7c948"/>
+      <stop offset="100%" style="stop-color:#1a0e2a"/>
+    </linearGradient>
+    <linearGradient id="card1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#121828"/>
+      <stop offset="100%" style="stop-color:#0a1020"/>
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b6ab0"/>
+      <stop offset="100%" style="stop-color:#f7c948"/>
+    </linearGradient>
+    <linearGradient id="pyBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b6ab0"/>
+      <stop offset="100%" style="stop-color:#1a4080"/>
+    </linearGradient>
+    <linearGradient id="pyYellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f7c948"/>
+      <stop offset="100%" style="stop-color:#d09020"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="780" fill="url(#bgGrad)"/>
+
+  <!-- Decorative glow blobs -->
+  <circle cx="900" cy="100" r="150" fill="#3b6ab0" opacity="0.04"/>
+  <circle cx="100" cy="700" r="150" fill="#f7c948" opacity="0.03"/>
+  <circle cx="500" cy="400" r="300" fill="#1a0e2a" opacity="0.3"/>
+
+  <!-- Top accent bar (Python brand colors) -->
+  <rect x="0" y="0" width="500" height="3" fill="#3b6ab0"/>
+  <rect x="500" y="0" width="500" height="3" fill="#f7c948"/>
+
+  <!-- Header -->
+  <rect x="30" y="16" width="940" height="90" rx="16" fill="url(#headerGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="30" y="16" width="940" height="90" rx="16" fill="none" stroke="rgba(247,201,72,0.25)" stroke-width="1"/>
+
+  <!-- Python logo approximation -->
+  <circle cx="82" cy="61" r="30" fill="#1a0e2a" opacity="0.7"/>
+  <!-- Python snake body (simplified) -->
+  <path d="M72,47 Q72,38 82,38 Q94,38 94,47 L94,57 Q94,60 91,60 L82,60 Q82,60 82,65 Q82,68 85,68 L94,68" 
+        fill="none" stroke="#f7c948" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M92,75 Q92,84 82,84 Q70,84 70,75 L70,65 Q70,62 73,62 L82,62 Q82,62 82,57 Q82,54 79,54 L70,54"
+        fill="none" stroke="#3b6ab0" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="76" cy="44" r="2.5" fill="#f7c948"/>
+  <circle cx="88" cy="78" r="2.5" fill="#3b6ab0"/>
+
+  <text x="130" y="46" font-size="11" fill="#a8c8f8" font-weight="600" letter-spacing="3">PYTHON AUTOMATION SCRIPTS</text>
+  <text x="130" y="72" font-size="22" fill="#ffffff" font-weight="700">Data Pipeline Automation</text>
+  <text x="130" y="93" font-size="12" fill="#a8c8f8">yf_update.py  ·  gh_update_csv.py  ·  yfinance API  ·  MySQL  ·  GitHub Actions</text>
+
+  <!-- Badges -->
+  <rect x="760" y="30" width="100" height="22" rx="11" fill="#0a1830" stroke="#3b6ab0" stroke-width="1"/>
+  <text x="810" y="46" font-size="10.5" fill="#7ab0f0" text-anchor="middle">yf_update.py</text>
+  <rect x="868" y="30" width="90" height="22" rx="11" fill="#1a1205" stroke="#f7c948" stroke-width="1"/>
+  <text x="913" y="46" font-size="10.5" fill="#f7c948" text-anchor="middle">gh_update_csv</text>
+  <rect x="760" y="58" width="100" height="22" rx="11" fill="#0a1830" stroke="#3b6ab0" stroke-width="1"/>
+  <text x="810" y="74" font-size="10.5" fill="#7ab0f0" text-anchor="middle">MySQL + ORM</text>
+  <rect x="868" y="58" width="90" height="22" rx="11" fill="#0a2015" stroke="#4ecb8c" stroke-width="1"/>
+  <text x="913" y="74" font-size="10.5" fill="#4ecb8c" text-anchor="middle">Serverless</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION: Pipeline Flow (top-level) -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <text x="30" y="134" font-size="11" fill="#4a6a9a" font-weight="600" letter-spacing="2">◈  DUAL AUTOMATION STRATEGY</text>
+
+  <!-- ── yf_update.py card ── -->
+  <rect x="30" y="145" width="456" height="295" rx="14" fill="url(#card1)" filter="url(#shadow)" stroke="#1a3060" stroke-width="1.5"/>
+  <rect x="30" y="145" width="6" height="295" rx="3" fill="url(#pyBlue)"/>
+
+  <!-- Card header -->
+  <rect x="36" y="145" width="450" height="42" rx="10" fill="#0f2040"/>
+  <circle cx="72" cy="166" r="14" fill="url(#pyBlue)" filter="url(#glow)"/>
+  <text x="72" y="171" font-size="11" fill="white" font-weight="800" text-anchor="middle">PY</text>
+  <text x="96" y="161" font-size="13" fill="#7ab0f0" font-weight="700">yf_update.py</text>
+  <text x="96" y="179" font-size="10.5" fill="#4a7ab0">MySQL daemon · Scheduled at 18:00 daily</text>
+
+  <!-- Step 1: ensure_table_exists -->
+  <rect x="50" y="198" width="420" height="44" rx="8" fill="#0a1828" stroke="#1a3060" stroke-width="1"/>
+  <circle cx="72" cy="220" r="10" fill="#1a3060" stroke="#3b6ab0" stroke-width="1.5"/>
+  <text x="72" y="224" font-size="9" fill="#7ab0f0" text-anchor="middle">fn</text>
+  <text x="92" y="215" font-size="11" fill="#c0d8f8" font-weight="600">ensure_table_exists()</text>
+  <text x="92" y="232" font-size="10" fill="#5a7a9a">CREATE TABLE IF NOT EXISTS aapl_daily (DOUBLE, BIGINT...)</text>
+
+  <!-- Arrow down -->
+  <line x1="260" y1="242" x2="260" y2="255" stroke="#3b6ab0" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <polygon points="256,255 260,261 264,255" fill="#3b6ab0"/>
+
+  <!-- Step 2: get last date -->
+  <rect x="50" y="261" width="420" height="44" rx="8" fill="#0a1828" stroke="#1a3060" stroke-width="1"/>
+  <circle cx="72" cy="283" r="10" fill="#1a3060" stroke="#3b6ab0" stroke-width="1.5"/>
+  <text x="72" y="287" font-size="8" fill="#7ab0f0" text-anchor="middle">SQL</text>
+  <text x="92" y="278" font-size="11" fill="#c0d8f8" font-weight="600">SELECT MAX(Trade_Date)</text>
+  <text x="92" y="295" font-size="10" fill="#5a7a9a">Determines start_date = last_db_date + 1 day</text>
+
+  <!-- Arrow down -->
+  <line x1="260" y1="305" x2="260" y2="318" stroke="#3b6ab0" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <polygon points="256,318 260,324 264,318" fill="#3b6ab0"/>
+
+  <!-- Step 3: yfinance download -->
+  <rect x="50" y="324" width="420" height="44" rx="8" fill="#0a1828" stroke="#f7c948" stroke-width="1"/>
+  <circle cx="72" cy="346" r="10" fill="#1a1205" stroke="#f7c948" stroke-width="1.5"/>
+  <text x="72" y="350" font-size="8" fill="#f7c948" text-anchor="middle">API</text>
+  <text x="92" y="341" font-size="11" fill="#f7c948" font-weight="600">yf.download("AAPL", auto_adjust=False)</text>
+  <text x="92" y="358" font-size="10" fill="#8a7a4a">Pulls OHLCV + Adj Close from yfinance API</text>
+
+  <!-- Arrow down -->
+  <line x1="260" y1="368" x2="260" y2="381" stroke="#3b6ab0" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <polygon points="256,381 260,387 264,381" fill="#3b6ab0"/>
+
+  <!-- Step 4: Transform + validate -->
+  <rect x="50" y="387" width="200" height="40" rx="8" fill="#0a1828" stroke="#1a3060" stroke-width="1"/>
+  <text x="150" y="404" font-size="10.5" fill="#c0d8f8" font-weight="600" text-anchor="middle">Flatten MultiIndex</text>
+  <text x="150" y="420" font-size="9.5" fill="#5a7a9a" text-anchor="middle">rename_map, dropna, dedup</text>
+
+  <rect x="270" y="387" width="200" height="40" rx="8" fill="#0a1828" stroke="#4ecb8c" stroke-width="1"/>
+  <text x="370" y="404" font-size="10.5" fill="#4ecb8c" font-weight="600" text-anchor="middle">df.to_sql( append )</text>
+  <text x="370" y="420" font-size="9.5" fill="#2a7a5a" text-anchor="middle">MySQL · SQLAlchemy · DOUBLE</text>
+
+  <!-- Arrow between step4 boxes -->
+  <line x1="250" y1="407" x2="270" y2="407" stroke="#3b6ab0" stroke-width="1.5"/>
+  <polygon points="268,403 274,407 268,411" fill="#3b6ab0"/>
+
+  <!-- Step 5: Export CSV -->
+  <rect x="50" y="432" width="420" height="40" rx="8" fill="#0a1f10" stroke="#4ecb8c" stroke-width="1"/>
+  <text x="260" y="449" font-size="11" fill="#4ecb8c" font-weight="600" text-anchor="middle">Export to CSV  →  data/processed/aapl_daily.csv</text>
+  <text x="260" y="466" font-size="10" fill="#2a7a5a" text-anchor="middle">full_df = pd.read_sql() → full_df.to_csv()</text>
+
+  <!-- ── gh_update_csv.py card ── -->
+  <rect x="514" y="145" width="456" height="295" rx="14" fill="url(#card1)" filter="url(#shadow)" stroke="#2a1a05" stroke-width="1.5"/>
+  <rect x="514" y="145" width="6" height="295" rx="3" fill="url(#pyYellow)"/>
+
+  <!-- Card header -->
+  <rect x="520" y="145" width="450" height="42" rx="10" fill="#201205"/>
+  <circle cx="556" cy="166" r="14" fill="url(#pyYellow)" filter="url(#glow)"/>
+  <text x="556" y="171" font-size="9" fill="#0a0800" font-weight="800" text-anchor="middle">GH</text>
+  <text x="580" y="161" font-size="13" fill="#f7c948" font-weight="700">gh_update_csv.py</text>
+  <text x="580" y="179" font-size="10.5" fill="#9a7a30">Serverless · GitHub Actions cron · No MySQL</text>
+
+  <!-- Step 1 -->
+  <rect x="534" y="198" width="420" height="44" rx="8" fill="#100c02" stroke="#2a1a05" stroke-width="1"/>
+  <circle cx="556" cy="220" r="10" fill="#201205" stroke="#f7c948" stroke-width="1.5"/>
+  <text x="556" y="224" font-size="8" fill="#f7c948" text-anchor="middle">fs</text>
+  <text x="576" y="215" font-size="11" fill="#e0c870" font-weight="600">pd.read_csv( CSV_PATH, parse_dates )</text>
+  <text x="576" y="232" font-size="10" fill="#7a6a30">Loads existing aapl_daily.csv  →  df_existing</text>
+
+  <line x1="744" y1="242" x2="744" y2="255" stroke="#f7c948" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <polygon points="740,255 744,261 748,255" fill="#f7c948"/>
+
+  <!-- Step 2 -->
+  <rect x="534" y="261" width="420" height="44" rx="8" fill="#100c02" stroke="#2a1a05" stroke-width="1"/>
+  <circle cx="556" cy="283" r="10" fill="#201205" stroke="#f7c948" stroke-width="1.5"/>
+  <text x="556" y="287" font-size="8" fill="#f7c948" text-anchor="middle">dt</text>
+  <text x="576" y="278" font-size="11" fill="#e0c870" font-weight="600">last_csv_date = df_existing['Trade_Date'].max()</text>
+  <text x="576" y="295" font-size="10" fill="#7a6a30">start_date = last_csv_date + timedelta(days=1)</text>
+
+  <line x1="744" y1="305" x2="744" y2="318" stroke="#f7c948" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <polygon points="740,318 744,324 748,318" fill="#f7c948"/>
+
+  <!-- Step 3 -->
+  <rect x="534" y="324" width="420" height="44" rx="8" fill="#100c02" stroke="#f7c948" stroke-width="1"/>
+  <circle cx="556" cy="346" r="10" fill="#201205" stroke="#f7c948" stroke-width="1.5"/>
+  <text x="556" y="350" font-size="8" fill="#f7c948" text-anchor="middle">API</text>
+  <text x="576" y="341" font-size="11" fill="#f7c948" font-weight="600">yf.download("AAPL", auto_adjust=False)</text>
+  <text x="576" y="358" font-size="10" fill="#8a7a4a">Same API call · Flatten MultiIndex · rename_map</text>
+
+  <line x1="744" y1="368" x2="744" y2="381" stroke="#f7c948" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <polygon points="740,381 744,387 748,381" fill="#f7c948"/>
+
+  <!-- Step 4: Concat + sort -->
+  <rect x="534" y="387" width="200" height="40" rx="8" fill="#100c02" stroke="#2a1a05" stroke-width="1"/>
+  <text x="634" y="404" font-size="10.5" fill="#e0c870" font-weight="600" text-anchor="middle">pd.concat( [existing, new] )</text>
+  <text x="634" y="420" font-size="9.5" fill="#7a6a30" text-anchor="middle">drop_duplicates + sort by date</text>
+
+  <rect x="754" y="387" width="200" height="40" rx="8" fill="#0a200a" stroke="#4ecb8c" stroke-width="1"/>
+  <text x="854" y="404" font-size="10.5" fill="#4ecb8c" font-weight="600" text-anchor="middle">df_final.to_csv()</text>
+  <text x="854" y="420" font-size="9.5" fill="#2a7a5a" text-anchor="middle">Overwrite CSV · date string format</text>
+
+  <line x1="734" y1="407" x2="754" y2="407" stroke="#f7c948" stroke-width="1.5"/>
+  <polygon points="752,403 758,407 752,411" fill="#f7c948"/>
+
+  <!-- Step 5: GitHub Actions -->
+  <rect x="534" y="432" width="420" height="40" rx="8" fill="#0a0f20" stroke="#3b6ab0" stroke-width="1"/>
+  <text x="744" y="449" font-size="11" fill="#7ab0f0" font-weight="600" text-anchor="middle">Triggered by: GitHub Actions Cron (.github/workflows/)</text>
+  <text x="744" y="466" font-size="10" fill="#2a4a7a" text-anchor="middle">schedule: cron('0 16 * * 1-5')  →  runs on every market day</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION: Shared Logic Highlight -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="30" y="458" width="940" height="135" rx="14" fill="url(#card1)" filter="url(#shadow)" stroke="#1e3050" stroke-width="1"/>
+  <rect x="30" y="458" width="6" height="135" rx="3" fill="url(#arrowGrad)"/>
+
+  <text x="55" y="480" font-size="11" fill="#7ab0f0" font-weight="600" letter-spacing="2">◈  SHARED DATA TRANSFORMATION LOGIC (BOTH SCRIPTS)</text>
+
+  <!-- 4 shared steps -->
+  <rect x="55" y="490" width="200" height="55" rx="10" fill="#0a1525" stroke="#3b6ab0" stroke-width="1"/>
+  <text x="155" y="509" font-size="10.5" fill="#7ab0f0" font-weight="700" text-anchor="middle">① Flatten MultiIndex</text>
+  <text x="155" y="525" font-size="9.5" fill="#4a6a9a" text-anchor="middle">df.columns = [col[0] for</text>
+  <text x="155" y="539" font-size="9.5" fill="#4a6a9a" text-anchor="middle">col in df.columns]</text>
+
+  <line x1="255" y1="517" x2="278" y2="517" stroke="url(#arrowGrad)" stroke-width="1.5"/>
+  <polygon points="276,513 282,517 276,521" fill="#f7c948"/>
+
+  <rect x="283" y="490" width="197" height="55" rx="10" fill="#0a1525" stroke="#3b6ab0" stroke-width="1"/>
+  <text x="381" y="509" font-size="10.5" fill="#7ab0f0" font-weight="700" text-anchor="middle">② Reset Index + Rename</text>
+  <text x="381" y="525" font-size="9.5" fill="#4a6a9a" text-anchor="middle">df.reset_index(inplace=True)</text>
+  <text x="381" y="539" font-size="9.5" fill="#4a6a9a" text-anchor="middle">df.rename(columns=rename_map)</text>
+
+  <line x1="480" y1="517" x2="504" y2="517" stroke="url(#arrowGrad)" stroke-width="1.5"/>
+  <polygon points="502,513 508,517 502,521" fill="#f7c948"/>
+
+  <rect x="509" y="490" width="197" height="55" rx="10" fill="#0a1525" stroke="#3b6ab0" stroke-width="1"/>
+  <text x="607" y="509" font-size="10.5" fill="#7ab0f0" font-weight="700" text-anchor="middle">③ Validate &amp; Filter</text>
+  <text x="607" y="525" font-size="9.5" fill="#4a6a9a" text-anchor="middle">dropna(['Adj_Close'])</text>
+  <text x="607" y="539" font-size="9.5" fill="#4a6a9a" text-anchor="middle">drop_duplicates(['Trade_Date'])</text>
+
+  <line x1="706" y1="517" x2="730" y2="517" stroke="url(#arrowGrad)" stroke-width="1.5"/>
+  <polygon points="728,513 734,517 728,521" fill="#f7c948"/>
+
+  <rect x="735" y="490" width="220" height="55" rx="10" fill="#0a1f10" stroke="#4ecb8c" stroke-width="1.5"/>
+  <text x="845" y="509" font-size="10.5" fill="#4ecb8c" font-weight="700" text-anchor="middle">④ Idempotent Guard</text>
+  <text x="845" y="525" font-size="9.5" fill="#2a7a5a" text-anchor="middle">df[df['Trade_Date'] > last_date]</text>
+  <text x="845" y="539" font-size="9.5" fill="#2a7a5a" text-anchor="middle">Prevents any duplicate inserts</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION: Scheduler -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <rect x="30" y="610" width="456" height="130" rx="14" fill="url(#card1)" filter="url(#shadow)" stroke="#1a3060" stroke-width="1"/>
+  <rect x="30" y="610" width="6" height="130" rx="3" fill="url(#pyBlue)"/>
+  <text x="55" y="633" font-size="11" fill="#7ab0f0" font-weight="600" letter-spacing="2">◈  LOCAL SCHEDULER (yf_update.py)</text>
+  <!-- Timeline -->
+  <line x1="55" y1="680" x2="468" y2="680" stroke="#1a3060" stroke-width="1.5"/>
+  <circle cx="80" cy="680" r="8" fill="#0f2040" stroke="#3b6ab0" stroke-width="1.5"/>
+  <text x="80" y="675" font-size="9" fill="#3b6ab0" text-anchor="middle">▶</text>
+  <text x="80" y="700" font-size="9" fill="#5a8ab0" text-anchor="middle">Start</text>
+  <text x="80" y="712" font-size="8.5" fill="#2a5a7a" text-anchor="middle">run_update()</text>
+
+  <circle cx="200" cy="680" r="8" fill="#0f2040" stroke="#f7c948" stroke-width="1.5"/>
+  <text x="200" y="684" font-size="10" fill="#f7c948" text-anchor="middle">⏰</text>
+  <text x="200" y="700" font-size="9" fill="#a08030" text-anchor="middle">18:00</text>
+  <text x="200" y="712" font-size="8.5" fill="#6a5020" text-anchor="middle">schedule daily</text>
+
+  <circle cx="320" cy="680" r="8" fill="#0f2040" stroke="#f7c948" stroke-width="1.5"/>
+  <text x="320" y="684" font-size="10" fill="#f7c948" text-anchor="middle">⏰</text>
+  <text x="320" y="700" font-size="9" fill="#a08030" text-anchor="middle">18:00</text>
+  <text x="320" y="712" font-size="8.5" fill="#6a5020" text-anchor="middle">+1 day</text>
+
+  <circle cx="440" cy="680" r="8" fill="#0f2040" stroke="#f7c948" stroke-width="1.5"/>
+  <text x="440" y="684" font-size="10" fill="#f7c948" text-anchor="middle">⏰</text>
+  <text x="440" y="700" font-size="9" fill="#a08030" text-anchor="middle">18:00</text>
+  <text x="440" y="712" font-size="8.5" fill="#6a5020" text-anchor="middle">+2 days</text>
+
+  <text x="55" y="655" font-size="10.5" fill="#4a7ab0">while True: schedule.run_pending() · time.sleep(60) · Daemon loop</text>
+
+  <!-- SECTION: GH Actions -->
+  <rect x="514" y="610" width="456" height="130" rx="14" fill="url(#card1)" filter="url(#shadow)" stroke="#2a1a05" stroke-width="1"/>
+  <rect x="514" y="610" width="6" height="130" rx="3" fill="url(#pyYellow)"/>
+  <text x="539" y="633" font-size="11" fill="#f7c948" font-weight="600" letter-spacing="2">◈  GITHUB ACTIONS CRON (gh_update_csv.py)</text>
+  <text x="539" y="655" font-size="10.5" fill="#9a7a30">cron: '0 16 * * 1-5' → Mon-Fri at 16:00 UTC (after NYSE close)</text>
+
+  <!-- GH Actions flow -->
+  <rect x="539" y="665" width="120" height="45" rx="8" fill="#0a1525" stroke="#3b6ab0" stroke-width="1"/>
+  <text x="599" y="684" font-size="10" fill="#7ab0f0" text-anchor="middle">Cron Trigger</text>
+  <text x="599" y="700" font-size="9" fill="#3a5a7a" text-anchor="middle">GitHub Runner</text>
+
+  <line x1="659" y1="687" x2="680" y2="687" stroke="#f7c948" stroke-width="1.5"/>
+  <polygon points="678,683 684,687 678,691" fill="#f7c948"/>
+
+  <rect x="685" y="665" width="130" height="45" rx="8" fill="#0a1525" stroke="#f7c948" stroke-width="1"/>
+  <text x="750" y="684" font-size="10" fill="#f7c948" text-anchor="middle">Run Script</text>
+  <text x="750" y="700" font-size="9" fill="#7a6a30" text-anchor="middle">python gh_update_csv.py</text>
+
+  <line x1="815" y1="687" x2="836" y2="687" stroke="#f7c948" stroke-width="1.5"/>
+  <polygon points="834,683 840,687 834,691" fill="#f7c948"/>
+
+  <rect x="841" y="665" width="115" height="45" rx="8" fill="#0a200a" stroke="#4ecb8c" stroke-width="1"/>
+  <text x="898" y="684" font-size="10" fill="#4ecb8c" text-anchor="middle">git commit</text>
+  <text x="898" y="700" font-size="9" fill="#2a7a5a" text-anchor="middle">Push CSV to repo</text>
+
+  <!-- Footer -->
+  <text x="500" y="768" font-size="10" fill="#1a2a4a" text-anchor="middle">Apple Stock Market Analysis · Python Automation Visual · yf_update.py &amp; gh_update_csv.py</text>
+</svg>

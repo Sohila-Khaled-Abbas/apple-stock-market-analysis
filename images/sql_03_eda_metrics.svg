@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" width="900" height="720" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#0d1b2e"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a3020"/>
+      <stop offset="50%" style="stop-color:#1e7a3a"/>
+      <stop offset="100%" style="stop-color:#1a3020"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#122215"/>
+      <stop offset="100%" style="stop-color:#0a160d"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ecb8c"/>
+      <stop offset="100%" style="stop-color:#20a060"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700"/>
+      <stop offset="100%" style="stop-color:#e0a000"/>
+    </linearGradient>
+    <linearGradient id="barBull" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ecb8c"/>
+      <stop offset="100%" style="stop-color:#20a060"/>
+    </linearGradient>
+    <linearGradient id="barBear" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b"/>
+      <stop offset="100%" style="stop-color:#cc2222"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="720" fill="url(#bgGrad)"/>
+  <!-- Decorative circles -->
+  <circle cx="820" cy="80" r="100" fill="#1e7a3a" opacity="0.04"/>
+  <circle cx="80" cy="680" r="100" fill="#ffd700" opacity="0.03"/>
+
+  <!-- Top accent (green) -->
+  <rect x="0" y="0" width="900" height="3" fill="url(#greenGrad)"/>
+
+  <!-- Header -->
+  <rect x="30" y="18" width="840" height="82" rx="14" fill="url(#headerGrad)" filter="url(#shadow)"/>
+  <rect x="30" y="18" width="840" height="82" rx="14" fill="none" stroke="#1e7a3a" stroke-width="1" opacity="0.6"/>
+
+  <!-- Chart/analytics icon -->
+  <circle cx="78" cy="59" r="26" fill="#1e7a3a" opacity="0.3"/>
+  <circle cx="78" cy="59" r="20" fill="#1e7a3a" opacity="0.5"/>
+  <!-- Mini bar chart icon -->
+  <rect x="65" y="63" width="5" height="8" fill="#4ecb8c"/>
+  <rect x="73" y="57" width="5" height="14" fill="#4ecb8c"/>
+  <rect x="81" y="50" width="5" height="21" fill="#ffd700"/>
+  <line x1="63" y1="71" x2="90" y2="71" stroke="#4ecb8c" stroke-width="1"/>
+
+  <text x="112" y="48" font-size="11" fill="#7ae0a0" font-weight="600" letter-spacing="3">SQL SCRIPT 03</text>
+  <text x="112" y="70" font-size="20" fill="#ffffff" font-weight="700">EDA &amp; Financial Metrics</text>
+  <text x="112" y="89" font-size="12" fill="#7ae0a0">CAGR Calculation · Moving Average Crossover · Window Functions</text>
+
+  <rect x="682" y="33" width="175" height="22" rx="11" fill="#0a2015" stroke="#1e7a3a" stroke-width="1"/>
+  <text x="769" y="49" font-size="11" fill="#7ae0a0" text-anchor="middle">03_eda_and_metrics.sql</text>
+  <rect x="682" y="62" width="80" height="22" rx="11" fill="#1a3a2a" stroke="#1e7a3a" stroke-width="1"/>
+  <text x="722" y="78" font-size="11" fill="#4ecb8c" text-anchor="middle">SELECT</text>
+  <rect x="770" y="62" width="88" height="22" rx="11" fill="#1a1a0a" stroke="#e0c000" stroke-width="1"/>
+  <text x="814" y="78" font-size="11" fill="#ffd700" text-anchor="middle">CTE / DQL</text>
+
+  <!-- ── STEP 1: CAGR ── -->
+  <rect x="30" y="120" width="840" height="195" rx="12" fill="url(#cardGrad)" filter="url(#shadow)" stroke="#1a3020" stroke-width="1"/>
+  <rect x="30" y="120" width="5" height="195" rx="2" fill="url(#goldGrad)"/>
+  <circle cx="68" cy="175" r="18" fill="url(#goldGrad)" filter="url(#glow)"/>
+  <text x="68" y="181" font-size="14" fill="#0a0a00" font-weight="800" text-anchor="middle">1</text>
+
+  <text x="100" y="142" font-size="13" fill="#7ae0a0" font-weight="600" letter-spacing="2">COMPOUND ANNUAL GROWTH RATE (CAGR)</text>
+  <text x="100" y="160" font-size="12" fill="#a0d0b0">Calculates the annualized return of AAPL over the full dataset footprint (1980–2025).</text>
+
+  <!-- CAGR formula display -->
+  <rect x="100" y="170" width="500" height="60" rx="10" fill="#0a1810" stroke="#1e7a3a" stroke-width="1"/>
+  <text x="350" y="188" font-size="11" fill="#7ae0a0" text-anchor="middle" font-weight="600">FORMULA</text>
+  <text x="350" y="208" font-size="14" fill="#ffd700" text-anchor="middle" font-style="italic">( Ending Value / Beginning Value ) ^ ( 1 / Years ) − 1</text>
+  <text x="350" y="224" font-size="10.5" fill="#5a8a6a" text-anchor="middle">POW( MAX(Adj_Close) / MIN(Adj_Close),  1 / (DATEDIFF(MAX(Trade_Date), MIN(Trade_Date)) / 365) ) − 1</text>
+
+  <!-- Result badges -->
+  <rect x="615" y="170" width="100" height="55" rx="10" fill="#0a1810" stroke="#4ecb8c" stroke-width="1.5"/>
+  <text x="665" y="192" font-size="10" fill="#7ae0a0" text-anchor="middle" font-weight="600">START DATE</text>
+  <text x="665" y="212" font-size="12" fill="#ffd700" text-anchor="middle" font-weight="700">1980</text>
+  <text x="665" y="225" font-size="9.5" fill="#5a8a6a" text-anchor="middle">MIN(Trade_Date)</text>
+
+  <rect x="725" y="170" width="105" height="55" rx="10" fill="#0a1810" stroke="#4ecb8c" stroke-width="1.5"/>
+  <text x="777" y="192" font-size="10" fill="#7ae0a0" text-anchor="middle" font-weight="600">END DATE</text>
+  <text x="777" y="212" font-size="12" fill="#ffd700" text-anchor="middle" font-weight="700">2025</text>
+  <text x="777" y="225" font-size="9.5" fill="#5a8a6a" text-anchor="middle">MAX(Trade_Date)</text>
+
+  <rect x="100" y="242" width="730" height="56" rx="6" fill="#050f08" stroke="#1a3020" stroke-width="1"/>
+  <text x="115" y="260" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace">
+    <tspan fill="#4ecb8c">SELECT</tspan><tspan fill="#e0e8ff">  MIN(Trade_Date) as Start_Date, MAX(Trade_Date) as End_Date,</tspan>
+  </text>
+  <text x="115" y="278" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace">
+    <tspan fill="#4ecb8c">POW</tspan><tspan fill="#e0e8ff">(</tspan><tspan fill="#4ecb8c">MAX</tspan><tspan fill="#e0e8ff">(Adj_Close) / </tspan><tspan fill="#4ecb8c">MIN</tspan><tspan fill="#e0e8ff">(Adj_Close), 1 / (</tspan><tspan fill="#4ecb8c">DATEDIFF</tspan><tspan fill="#e0e8ff">(</tspan><tspan fill="#4ecb8c">MAX</tspan><tspan fill="#e0e8ff">(Trade_Date), </tspan><tspan fill="#4ecb8c">MIN</tspan><tspan fill="#e0e8ff">(Trade_Date))/365)) - 1 as CAGR  </tspan><tspan fill="#4ecb8c">FROM</tspan><tspan fill="#e0e8ff"> aapl_daily </tspan><tspan fill="#4ecb8c">WHERE</tspan><tspan fill="#ffd700"> Adj_Close &gt; 0;</tspan>
+  </text>
+
+  <!-- ── STEP 2: Moving Averages ── -->
+  <rect x="30" y="333" width="840" height="345" rx="12" fill="url(#cardGrad)" filter="url(#shadow)" stroke="#1a3020" stroke-width="1"/>
+  <rect x="30" y="333" width="5" height="345" rx="2" fill="url(#greenGrad)"/>
+  <circle cx="68" cy="385" r="18" fill="url(#greenGrad)" filter="url(#glow)"/>
+  <text x="68" y="391" font-size="14" fill="white" font-weight="800" text-anchor="middle">2</text>
+
+  <text x="100" y="355" font-size="13" fill="#7ae0a0" font-weight="600" letter-spacing="2">MOVING AVERAGE CROSSOVER — Golden / Death Cross Strategy</text>
+  <text x="100" y="372" font-size="12" fill="#a0d0b0">Uses SQL window functions to calculate SMA-50 and SMA-200, then classify market trend signals.</text>
+
+  <!-- CTE Box -->
+  <rect x="100" y="382" width="750" height="30" rx="6" fill="#0a1810" stroke="#1e7a3a" stroke-width="1.5"/>
+  <text x="115" y="400" font-size="11" fill="#7ae0a0" font-weight="600">① COMMON TABLE EXPRESSION (CTE): SMAs</text>
+  <rect x="620" y="385" width="220" height="22" rx="6" fill="#1e3a2a"/>
+  <text x="730" y="400" font-size="10" fill="#5ae0a0" text-anchor="middle">WITH SMAs AS ( SELECT ... FROM aapl_daily )</text>
+
+  <!-- Window function boxes -->
+  <rect x="100" y="422" width="358" height="75" rx="10" fill="#051508" stroke="#ffd700" stroke-width="1.5"/>
+  <text x="279" y="442" font-size="11" fill="#ffd700" font-weight="700" text-anchor="middle">SMA-50  (Short-Term)</text>
+  <text x="279" y="460" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace" text-anchor="middle">AVG(Adj_Close) OVER(</text>
+  <text x="279" y="476" font-size="10.5" fill="#ffd700" font-family="'Courier New', monospace" text-anchor="middle">ROWS BETWEEN 49 PRECEDING AND CURRENT ROW)</text>
+  <text x="279" y="491" font-size="10" fill="#5a8a6a" text-anchor="middle">Rolling 50-row window on ordered dates</text>
+
+  <rect x="472" y="422" width="378" height="75" rx="10" fill="#051508" stroke="#4ecb8c" stroke-width="1.5"/>
+  <text x="661" y="442" font-size="11" fill="#4ecb8c" font-weight="700" text-anchor="middle">SMA-200  (Long-Term)</text>
+  <text x="661" y="460" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace" text-anchor="middle">AVG(Adj_Close) OVER(</text>
+  <text x="661" y="476" font-size="10.5" fill="#4ecb8c" font-family="'Courier New', monospace" text-anchor="middle">ROWS BETWEEN 199 PRECEDING AND CURRENT ROW)</text>
+  <text x="661" y="491" font-size="10" fill="#5a8a6a" text-anchor="middle">Rolling 200-row window on ordered dates</text>
+
+  <!-- Signal classification -->
+  <text x="100" y="520" font-size="11" fill="#7ae0a0" font-weight="600">② CASE-BASED TREND CLASSIFICATION</text>
+
+  <rect x="100" y="530" width="246" height="55" rx="10" fill="#0a200a" stroke="#4ecb8c" stroke-width="1.5"/>
+  <text x="223" y="550" font-size="11" fill="#4ecb8c" font-weight="700" text-anchor="middle">🐂 BULLISH — Golden Cross</text>
+  <text x="223" y="568" font-size="10.5" fill="#90e0b0" text-anchor="middle">SMA_50 &gt; SMA_200</text>
+  <text x="223" y="579" font-size="9.5" fill="#3a7a5a" text-anchor="middle">Short-term above long-term trend</text>
+
+  <rect x="358" y="530" width="230" height="55" rx="10" fill="#200a0a" stroke="#ff6b6b" stroke-width="1.5"/>
+  <text x="473" y="550" font-size="11" fill="#ff6b6b" font-weight="700" text-anchor="middle">🐻 BEARISH — Death Cross</text>
+  <text x="473" y="568" font-size="10.5" fill="#ffaaaa" text-anchor="middle">SMA_50 ≤ SMA_200</text>
+  <text x="473" y="579" font-size="9.5" fill="#7a3a3a" text-anchor="middle">Short-term below long-term trend</text>
+
+  <rect x="600" y="530" width="250" height="55" rx="10" fill="#181808" stroke="#ffd700" stroke-width="1.5"/>
+  <text x="725" y="550" font-size="11" fill="#ffd700" font-weight="700" text-anchor="middle">⏳ COLD START</text>
+  <text x="725" y="568" font-size="10.5" fill="#e0d080" text-anchor="middle">Data_Points &lt; 200</text>
+  <text x="725" y="579" font-size="9.5" fill="#7a6a30" text-anchor="middle">Insufficient data for SMA-200</text>
+
+  <!-- Simulated chart bars -->
+  <text x="100" y="610" font-size="11" fill="#7ae0a0" font-weight="600">③ SAMPLE OUTPUT PATTERN (2024 Signals)</text>
+  <!-- Y axis -->
+  <line x1="140" y1="618" x2="140" y2="665" stroke="#2a4a3a" stroke-width="1"/>
+  <!-- X axis -->
+  <line x1="140" y1="665" x2="850" y2="665" stroke="#2a4a3a" stroke-width="1"/>
+  <!-- Bullish bars -->
+  <rect x="148" y="635" width="28" height="30" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="182" y="628" width="28" height="37" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="216" y="630" width="28" height="35" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="250" y="622" width="28" height="43" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="284" y="625" width="28" height="40" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <!-- Bear signals -->
+  <rect x="318" y="640" width="28" height="25" fill="url(#barBear)" rx="3" opacity="0.8"/>
+  <rect x="352" y="643" width="28" height="22" fill="url(#barBear)" rx="3" opacity="0.8"/>
+  <!-- Bullish recovery -->
+  <rect x="386" y="633" width="28" height="32" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="420" y="626" width="28" height="39" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="454" y="620" width="28" height="45" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="488" y="618" width="28" height="47" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <!-- More bear -->
+  <rect x="522" y="645" width="28" height="20" fill="url(#barBear)" rx="3" opacity="0.8"/>
+  <rect x="556" y="638" width="28" height="27" fill="url(#barBear)" rx="3" opacity="0.8"/>
+  <!-- Then bullish -->
+  <rect x="590" y="630" width="28" height="35" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="624" y="622" width="28" height="43" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="658" y="615" width="28" height="50" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="692" y="618" width="28" height="47" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="726" y="624" width="28" height="41" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="760" y="620" width="28" height="45" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <rect x="794" y="617" width="28" height="48" fill="url(#barBull)" rx="3" opacity="0.8"/>
+  <!-- SMA line suggestion -->
+  <polyline points="162,638 196,633 230,630 264,625 298,626 332,641 366,643 400,634 434,628 468,623 502,620 536,646 570,640 604,631 638,623 672,617 706,620 740,625 774,622 808,619" 
+            fill="none" stroke="#ffd700" stroke-width="2" stroke-dasharray="4,2" opacity="0.7"/>
+
+  <!-- Legend -->
+  <rect x="148" y="668" width="12" height="8" fill="url(#barBull)" rx="2"/>
+  <text x="164" y="677" font-size="9" fill="#4ecb8c">Bullish</text>
+  <rect x="220" y="668" width="12" height="8" fill="url(#barBear)" rx="2"/>
+  <text x="236" y="677" font-size="9" fill="#ff6b6b">Bearish</text>
+  <line x1="290" y1="672" x2="310" y2="672" stroke="#ffd700" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="316" y="677" font-size="9" fill="#ffd700">SMA-50 trend</text>
+
+  <!-- Footer -->
+  <text x="450" y="710" font-size="10" fill="#1a4a2a" text-anchor="middle">Apple Stock Market Analysis · SQL EDA &amp; Metrics Visual · 03_eda_and_metrics.sql</text>
+</svg>

@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" width="900" height="680" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#0d1b2e"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3a1a4a"/>
+      <stop offset="50%" style="stop-color:#8b2fc9"/>
+      <stop offset="100%" style="stop-color:#3a1a4a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1535"/>
+      <stop offset="100%" style="stop-color:#140f28"/>
+    </linearGradient>
+    <linearGradient id="stepGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b"/>
+      <stop offset="100%" style="stop-color:#ee2244"/>
+    </linearGradient>
+    <linearGradient id="stepGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffa500"/>
+      <stop offset="100%" style="stop-color:#e07010"/>
+    </linearGradient>
+    <linearGradient id="stepGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ecb8c"/>
+      <stop offset="100%" style="stop-color:#20a060"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="680" fill="url(#bgGrad)"/>
+
+  <!-- Decorative dots -->
+  <circle cx="850" cy="50" r="60" fill="#8b2fc9" opacity="0.05"/>
+  <circle cx="60" cy="650" r="80" fill="#8b2fc9" opacity="0.05"/>
+
+  <!-- Top accent line (purple) -->
+  <rect x="0" y="0" width="900" height="3" fill="url(#headerGrad)"/>
+
+  <!-- Header -->
+  <rect x="30" y="18" width="840" height="82" rx="14" fill="url(#headerGrad)" filter="url(#shadow)"/>
+  <rect x="30" y="18" width="840" height="82" rx="14" fill="none" stroke="#8b2fc9" stroke-width="1" opacity="0.6"/>
+
+  <!-- Shield/Check icon -->
+  <circle cx="78" cy="59" r="26" fill="#8b2fc9" opacity="0.3"/>
+  <circle cx="78" cy="59" r="20" fill="#8b2fc9" opacity="0.5"/>
+  <!-- Checkmark icon for validation -->
+  <path d="M67,59 L75,67 L90,50" stroke="#d0a0ff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="112" y="48" font-size="11" fill="#d0a0ff" font-weight="600" letter-spacing="3">SQL SCRIPT 02</text>
+  <text x="112" y="70" font-size="20" fill="#ffffff" font-weight="700">Data Cleaning &amp; Validation</text>
+  <text x="112" y="89" font-size="12" fill="#d0a0ff">apple_stock_db · aapl_daily · Quality Assertions &amp; Data Imputation</text>
+
+  <rect x="682" y="33" width="175" height="22" rx="11" fill="#2a1040" stroke="#8b2fc9" stroke-width="1"/>
+  <text x="769" y="49" font-size="11" fill="#d0a0ff" text-anchor="middle">02_data_cleaning.sql</text>
+
+  <rect x="682" y="62" width="80" height="22" rx="11" fill="#1a3a2a" stroke="#2d8a59" stroke-width="1"/>
+  <text x="722" y="78" font-size="11" fill="#4ecb8c" text-anchor="middle">SELECT</text>
+  <rect x="770" y="62" width="88" height="22" rx="11" fill="#2a1a0a" stroke="#e08a20" stroke-width="1"/>
+  <text x="814" y="78" font-size="11" fill="#ffa640" text-anchor="middle">UPDATE / DQL</text>
+
+  <!-- ── STEP 1: Logical Range Assertion ── -->
+  <rect x="30" y="120" width="840" height="145" rx="12" fill="url(#cardGrad)" filter="url(#shadow)" stroke="#3a1a5a" stroke-width="1"/>
+  <rect x="30" y="120" width="5" height="145" rx="2" fill="#ff6b6b"/>
+  <circle cx="68" cy="155" r="18" fill="url(#stepGrad1)" filter="url(#glow)"/>
+  <text x="68" y="161" font-size="14" fill="white" font-weight="800" text-anchor="middle">1</text>
+
+  <text x="100" y="142" font-size="13" fill="#d0a0ff" font-weight="600" letter-spacing="2">LOGICAL RANGE ASSERTION — Price Boundaries</text>
+
+  <!-- Three condition badges -->
+  <rect x="100" y="152" width="235" height="38" rx="8" fill="#2a0a15" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="120" y="167" font-size="10" fill="#ff8888" font-weight="600">CONDITION 1</text>
+  <text x="120" y="183" font-size="11" fill="#ffbbbb" font-family="'Courier New', monospace">High &lt; Low_Price → Anomaly</text>
+  
+  <rect x="348" y="152" width="235" height="38" rx="8" fill="#2a0a15" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="368" y="167" font-size="10" fill="#ff8888" font-weight="600">CONDITION 2</text>
+  <text x="368" y="183" font-size="11" fill="#ffbbbb" font-family="'Courier New', monospace">High &lt; Close_Price → Alert</text>
+
+  <rect x="596" y="152" width="255" height="38" rx="8" fill="#2a0a15" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="616" y="167" font-size="10" fill="#ff8888" font-weight="600">CONDITION 3</text>
+  <text x="616" y="183" font-size="11" fill="#ffbbbb" font-family="'Courier New', monospace">Low &gt; Close_Price → Invalid</text>
+
+  <!-- Expected result badge -->
+  <rect x="100" y="200" width="148" height="22" rx="11" fill="#0a2a1a" stroke="#4ecb8c" stroke-width="1"/>
+  <text x="122" y="215" font-size="10.5" fill="#4ecb8c">✓ Expected: 0 Rows</text>
+
+  <rect x="100" y="228" width="740" height="26" rx="6" fill="#0a0a18" stroke="#3a1a5a" stroke-width="1"/>
+  <text x="115" y="245" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace">
+    <tspan fill="#9b59ff">SELECT</tspan>
+    <tspan fill="#e0e8ff"> * </tspan>
+    <tspan fill="#9b59ff">FROM</tspan>
+    <tspan fill="#e0e8ff"> aapl_daily </tspan>
+    <tspan fill="#9b59ff">WHERE</tspan>
+    <tspan fill="#ffd700"> High_Price &lt; Low_Price </tspan>
+    <tspan fill="#9b59ff">OR</tspan>
+    <tspan fill="#ffd700"> High_Price &lt; Close_Price </tspan>
+    <tspan fill="#9b59ff">OR</tspan>
+    <tspan fill="#ffd700"> Low_Price &gt; Close_Price</tspan>
+  </text>
+
+  <!-- ── STEP 2: Data Imputation ── -->
+  <rect x="30" y="282" width="840" height="180" rx="12" fill="url(#cardGrad)" filter="url(#shadow)" stroke="#3a1a5a" stroke-width="1"/>
+  <rect x="30" y="282" width="5" height="180" rx="2" fill="#ffa500"/>
+  <circle cx="68" cy="340" r="18" fill="url(#stepGrad2)" filter="url(#glow)"/>
+  <text x="68" y="346" font-size="14" fill="white" font-weight="800" text-anchor="middle">2</text>
+
+  <text x="100" y="302" font-size="13" fill="#d0a0ff" font-weight="600" letter-spacing="2">DATA IMPUTATION — Fix Zero Volume Anomaly</text>
+  <text x="100" y="320" font-size="12" fill="#c0b0e0">Detected anomalous 0-volume record on 1981-08-10. Imputed using 20-day moving average.</text>
+
+  <!-- Imputation flow diagram -->
+  <!-- Box 1: Detect -->
+  <rect x="100" y="330" width="180" height="50" rx="10" fill="#2a1a0a" stroke="#ffa500" stroke-width="1.5"/>
+  <text x="190" y="351" font-size="11" fill="#ffa500" font-weight="700" text-anchor="middle">① DETECT</text>
+  <text x="190" y="368" font-size="10.5" fill="#e0c880" text-anchor="middle">Volume = 0</text>
+  <text x="190" y="381" font-size="10" fill="#a08040" text-anchor="middle">Record: 1981-08-10</text>
+
+  <!-- Arrow -->
+  <line x1="280" y1="355" x2="336" y2="355" stroke="#ffa500" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="336,351 342,355 336,359" fill="#ffa500"/>
+
+  <!-- Box 2: Calculate -->
+  <rect x="342" y="330" width="200" height="50" rx="10" fill="#2a1a0a" stroke="#ffa500" stroke-width="1.5"/>
+  <text x="442" y="351" font-size="11" fill="#ffa500" font-weight="700" text-anchor="middle">② CALCULATE AVG</text>
+  <text x="442" y="368" font-size="10.5" fill="#e0c880" text-anchor="middle">Window: 1981-08-01</text>
+  <text x="442" y="381" font-size="10" fill="#a08040" text-anchor="middle">to 1981-08-20 (20 days)</text>
+
+  <!-- Arrow -->
+  <line x1="542" y1="355" x2="596" y2="355" stroke="#ffa500" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="596,351 602,355 596,359" fill="#ffa500"/>
+
+  <!-- Box 3: Update -->
+  <rect x="602" y="330" width="200" height="50" rx="10" fill="#1a2a0a" stroke="#4ecb8c" stroke-width="1.5"/>
+  <text x="702" y="351" font-size="11" fill="#4ecb8c" font-weight="700" text-anchor="middle">③ UPDATE RECORD</text>
+  <text x="702" y="368" font-size="10.5" fill="#90e0b0" text-anchor="middle">SET Volume = avg_v</text>
+  <text x="702" y="381" font-size="10" fill="#4a8a60" text-anchor="middle">Data continuity restored</text>
+
+  <!-- SQL code -->
+  <rect x="100" y="392" width="740" height="55" rx="6" fill="#0a0a18" stroke="#3a1a5a" stroke-width="1"/>
+  <text x="115" y="410" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace">
+    <tspan fill="#9b59ff">UPDATE</tspan><tspan fill="#e0e8ff"> aapl_daily t1  </tspan>
+    <tspan fill="#9b59ff">JOIN</tspan><tspan fill="#e0e8ff"> (</tspan><tspan fill="#9b59ff">SELECT</tspan><tspan fill="#e0e8ff"> AVG(Volume) as avg_v </tspan><tspan fill="#9b59ff">FROM</tspan><tspan fill="#e0e8ff"> aapl_daily </tspan><tspan fill="#9b59ff">WHERE</tspan><tspan fill="#ffd700"> Trade_Date BETWEEN '1981-08-01' AND '1981-08-20'</tspan><tspan fill="#e0e8ff">) t2</tspan>
+  </text>
+  <text x="115" y="430" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace">
+    <tspan fill="#9b59ff">SET</tspan><tspan fill="#e0e8ff"> t1.Volume = t2.avg_v  </tspan>
+    <tspan fill="#9b59ff">WHERE</tspan><tspan fill="#ffd700"> t1.Volume = 0;</tspan>
+  </text>
+
+  <!-- ── STEP 3: Consistency Check ── -->
+  <rect x="30" y="480" width="840" height="140" rx="12" fill="url(#cardGrad)" filter="url(#shadow)" stroke="#3a1a5a" stroke-width="1"/>
+  <rect x="30" y="480" width="5" height="140" rx="2" fill="#4ecb8c"/>
+  <circle cx="68" cy="538" r="18" fill="url(#stepGrad3)" filter="url(#glow)"/>
+  <text x="68" y="544" font-size="14" fill="white" font-weight="800" text-anchor="middle">3</text>
+
+  <text x="100" y="500" font-size="13" fill="#d0a0ff" font-weight="600" letter-spacing="2">CONSISTENCY CHECK — Adjusted Close vs. Close Price</text>
+  <text x="100" y="518" font-size="12" fill="#c0b0e0">Validates data provider methodology by counting records where Adj_Close &gt; Close_Price.</text>
+
+  <!-- Two boxes: normal and anomaly explanation -->
+  <rect x="100" y="528" width="340" height="50" rx="10" fill="#0a2a1a" stroke="#4ecb8c" stroke-width="1"/>
+  <text x="270" y="547" font-size="11" fill="#7ab8f5" font-weight="600" text-anchor="middle">✓ EXPECTED BEHAVIOR</text>
+  <text x="270" y="565" font-size="11" fill="#90e0b0" text-anchor="middle">Adj_Close ≤ Close_Price (post-split adjusted)</text>
+
+  <rect x="456" y="528" width="385" height="50" rx="10" fill="#2a0a10" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="648" y="547" font-size="11" fill="#ff8888" font-weight="600" text-anchor="middle">⚠ ANOMALY FLAG</text>
+  <text x="648" y="565" font-size="11" fill="#ffbbbb" text-anchor="middle">Adj_Close &gt; Close_Price → Non-standard adjustment</text>
+
+  <rect x="100" y="586" width="740" height="24" rx="6" fill="#0a0a18" stroke="#3a1a5a" stroke-width="1"/>
+  <text x="115" y="602" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace">
+    <tspan fill="#9b59ff">SELECT COUNT</tspan><tspan fill="#e0e8ff">(*) </tspan>
+    <tspan fill="#9b59ff">FROM</tspan><tspan fill="#e0e8ff"> aapl_daily </tspan>
+    <tspan fill="#9b59ff">WHERE</tspan><tspan fill="#ffd700"> Adj_Close &gt; Close_Price;</tspan>
+  </text>
+
+  <!-- Footer -->
+  <text x="450" y="668" font-size="10" fill="#3a2a6a" text-anchor="middle">Apple Stock Market Analysis · SQL Data Cleaning Visual · 02_data_cleaning.sql</text>
+</svg>

@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="900" height="620" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0d1b2e;stop-opacity:1"/>
+    </linearGradient>
+    <!-- Header gradient -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e3a5f;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#0f6fbf;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1e3a5f;stop-opacity:1"/>
+    </linearGradient>
+    <!-- Card gradient -->
+    <linearGradient id="cardGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a2744;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#121d33;stop-opacity:1"/>
+    </linearGradient>
+    <!-- Step number gradient -->
+    <linearGradient id="stepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f6fbf;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#06a0f5;stop-opacity:1"/>
+    </linearGradient>
+    <!-- Table row gradient -->
+    <linearGradient id="tableRowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0f3460;stop-opacity:0.5"/>
+      <stop offset="100%" style="stop-color:#0a1e3d;stop-opacity:0.5"/>
+    </linearGradient>
+    <!-- Glow filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <!-- Clip path for rounded corners -->
+    <clipPath id="cardClip1"><rect x="30" y="120" width="840" height="100" rx="12"/></clipPath>
+    <clipPath id="cardClip2"><rect x="30" y="250" width="840" height="100" rx="12"/></clipPath>
+    <clipPath id="cardClip3"><rect x="30" y="380" width="840" height="200" rx="12"/></clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid lines -->
+  <g opacity="0.04" stroke="#4a90d9" stroke-width="1">
+    <line x1="0" y1="60" x2="900" y2="60"/>
+    <line x1="0" y1="120" x2="900" y2="120"/>
+    <line x1="0" y1="180" x2="900" y2="180"/>
+    <line x1="0" y1="240" x2="900" y2="240"/>
+    <line x1="0" y1="300" x2="900" y2="300"/>
+    <line x1="0" y1="360" x2="900" y2="360"/>
+    <line x1="0" y1="420" x2="900" y2="420"/>
+    <line x1="0" y1="480" x2="900" y2="480"/>
+    <line x1="0" y1="540" x2="900" y2="540"/>
+    <line x1="0" y1="600" x2="900" y2="600"/>
+  </g>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="900" height="3" fill="url(#stepGrad)"/>
+
+  <!-- Header section -->
+  <rect x="30" y="18" width="840" height="82" rx="14" fill="url(#headerGrad)" filter="url(#shadow)"/>
+  <rect x="30" y="18" width="840" height="82" rx="14" fill="none" stroke="#1a6fbf" stroke-width="1" opacity="0.6"/>
+
+  <!-- SQL icon circle -->
+  <circle cx="78" cy="59" r="26" fill="#0f6fbf" opacity="0.3"/>
+  <circle cx="78" cy="59" r="20" fill="#0f6fbf" opacity="0.5"/>
+  <!-- Database icon -->
+  <ellipse cx="78" cy="51" rx="12" ry="5" fill="none" stroke="#60c0ff" stroke-width="1.5"/>
+  <line x1="66" y1="51" x2="66" y2="67" stroke="#60c0ff" stroke-width="1.5"/>
+  <line x1="90" y1="51" x2="90" y2="67" stroke="#60c0ff" stroke-width="1.5"/>
+  <ellipse cx="78" cy="67" rx="12" ry="5" fill="none" stroke="#60c0ff" stroke-width="1.5"/>
+  <ellipse cx="78" cy="59" rx="12" ry="5" fill="none" stroke="#60c0ff" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Header text -->
+  <text x="112" y="48" font-size="11" fill="#7ab8f5" font-weight="600" letter-spacing="3">SQL SCRIPT 01</text>
+  <text x="112" y="70" font-size="20" fill="#ffffff" font-weight="700" letter-spacing="1">Data Ingestion</text>
+  <text x="112" y="89" font-size="12" fill="#7ab8f5">apple_stock_db · aapl_daily table · LOAD DATA INFILE</text>
+
+  <!-- Badge: File -->
+  <rect x="700" y="33" width="158" height="22" rx="11" fill="#0f3460" stroke="#1a6fbf" stroke-width="1"/>
+  <text x="779" y="49" font-size="11" fill="#7ab8f5" text-anchor="middle">01_data_ingestion.sql</text>
+
+  <!-- Badge: MySQL -->
+  <rect x="700" y="62" width="80" height="22" rx="11" fill="#1a3a2a" stroke="#2d8a59" stroke-width="1"/>
+  <text x="740" y="78" font-size="11" fill="#4ecb8c" text-anchor="middle">MySQL</text>
+  <rect x="788" y="62" width="70" height="22" rx="11" fill="#2a1a0a" stroke="#e08a20" stroke-width="1"/>
+  <text x="823" y="78" font-size="11" fill="#ffa640" text-anchor="middle">DDL + DML</text>
+
+  <!-- ── STEP 1: Create Schema ── -->
+  <rect x="30" y="120" width="840" height="100" rx="12" fill="url(#cardGrad1)" filter="url(#shadow)" stroke="#1a4080" stroke-width="1"/>
+  <!-- Left accent bar -->
+  <rect x="30" y="120" width="5" height="100" rx="2" fill="#0f6fbf"/>
+  <!-- Step number -->
+  <circle cx="68" cy="170" r="18" fill="url(#stepGrad)" filter="url(#glow)"/>
+  <text x="68" y="176" font-size="14" fill="white" font-weight="800" text-anchor="middle">1</text>
+  <!-- Step content -->
+  <text x="100" y="150" font-size="13" fill="#7ab8f5" font-weight="600" letter-spacing="2">CREATE SCHEMA &amp; DATABASE</text>
+  <text x="100" y="172" font-size="12" fill="#c0d8f5">Initializes the dedicated database namespace for the project.</text>
+  <!-- Code snippet box -->
+  <rect x="100" y="183" width="740" height="26" rx="6" fill="#0a1525" stroke="#1a3a5f" stroke-width="1"/>
+  <text x="115" y="201" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace" letter-spacing="0.5">
+    <tspan fill="#0f6fbf">CREATE DATABASE</tspan>
+    <tspan fill="#e0e8ff"> apple_stock_db;</tspan>
+    <tspan fill="#0f6fbf">  USE</tspan>
+    <tspan fill="#e0e8ff"> apple_stock_db;</tspan>
+  </text>
+
+  <!-- ── STEP 2: Create Table ── -->
+  <rect x="30" y="238" width="840" height="260" rx="12" fill="url(#cardGrad1)" filter="url(#shadow)" stroke="#1a4080" stroke-width="1"/>
+  <rect x="30" y="238" width="5" height="260" rx="2" fill="#06a0f5"/>
+  <circle cx="68" cy="270" r="18" fill="url(#stepGrad)" filter="url(#glow)"/>
+  <text x="68" y="276" font-size="14" fill="white" font-weight="800" text-anchor="middle">2</text>
+
+  <text x="100" y="258" font-size="13" fill="#7ab8f5" font-weight="600" letter-spacing="2">CREATE TABLE — aapl_daily</text>
+  <text x="100" y="276" font-size="12" fill="#c0d8f5">Defines the primary table schema with precise column types for AAPL stock data.</text>
+
+  <!-- Table schema visual -->
+  <!-- Header row -->
+  <rect x="100" y="286" width="750" height="28" rx="6" fill="#0f3460"/>
+  <text x="120" y="304" font-size="11" fill="#7ab8f5" font-weight="700">COLUMN NAME</text>
+  <text x="340" y="304" font-size="11" fill="#7ab8f5" font-weight="700">DATA TYPE</text>
+  <text x="500" y="304" font-size="11" fill="#7ab8f5" font-weight="700">CONSTRAINT</text>
+  <text x="660" y="304" font-size="11" fill="#7ab8f5" font-weight="700">DESCRIPTION</text>
+  <line x1="325" y1="286" x2="325" y2="484" stroke="#1a4080" stroke-width="1"/>
+  <line x1="485" y1="286" x2="485" y2="484" stroke="#1a4080" stroke-width="1"/>
+  <line x1="645" y1="286" x2="645" y2="484" stroke="#1a4080" stroke-width="1"/>
+
+  <!-- Row 1 -->
+  <rect x="100" y="314" width="750" height="28" rx="0" fill="url(#tableRowGrad)"/>
+  <text x="120" y="332" font-size="11.5" fill="#ffd700" font-family="'Courier New', monospace">Trade_Date</text>
+  <text x="340" y="332" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace">DATETIME</text>
+  <text x="500" y="332" font-size="11" fill="#ff8c66">PRIMARY KEY</text>
+  <text x="660" y="332" font-size="11" fill="#a0b8d0">Trading session date/time</text>
+
+  <!-- Row 2 -->
+  <text x="120" y="360" font-size="11.5" fill="#c0d8f5" font-family="'Courier New', monospace">Adj_Close</text>
+  <text x="340" y="360" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace">DECIMAL(18,6)</text>
+  <text x="500" y="360" font-size="11" fill="#7ab8f5">NULLABLE</text>
+  <text x="660" y="360" font-size="11" fill="#a0b8d0">Adjusted closing price</text>
+
+  <!-- Row 3 -->
+  <rect x="100" y="370" width="750" height="28" rx="0" fill="url(#tableRowGrad)"/>
+  <text x="120" y="388" font-size="11.5" fill="#c0d8f5" font-family="'Courier New', monospace">Close_Price</text>
+  <text x="340" y="388" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace">DECIMAL(18,6)</text>
+  <text x="500" y="388" font-size="11" fill="#7ab8f5">NULLABLE</text>
+  <text x="660" y="388" font-size="11" fill="#a0b8d0">Standard market close price</text>
+
+  <!-- Row 4 -->
+  <text x="120" y="416" font-size="11.5" fill="#c0d8f5" font-family="'Courier New', monospace">High_Price</text>
+  <text x="340" y="416" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace">DECIMAL(18,6)</text>
+  <text x="500" y="416" font-size="11" fill="#7ab8f5">NULLABLE</text>
+  <text x="660" y="416" font-size="11" fill="#a0b8d0">Session high price</text>
+
+  <!-- Row 5 -->
+  <rect x="100" y="426" width="750" height="28" rx="0" fill="url(#tableRowGrad)"/>
+  <text x="120" y="444" font-size="11.5" fill="#c0d8f5" font-family="'Courier New', monospace">Low_Price</text>
+  <text x="340" y="444" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace">DECIMAL(18,6)</text>
+  <text x="500" y="444" font-size="11" fill="#7ab8f5">NULLABLE</text>
+  <text x="660" y="444" font-size="11" fill="#a0b8d0">Session low price</text>
+
+  <!-- Row 6 -->
+  <text x="120" y="472" font-size="11.5" fill="#c0d8f5" font-family="'Courier New', monospace">Open_Price</text>
+  <text x="340" y="472" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace">DECIMAL(18,6)</text>
+  <text x="500" y="472" font-size="11" fill="#7ab8f5">NULLABLE</text>
+  <text x="660" y="472" font-size="11" fill="#a0b8d0">Price at market open</text>
+
+  <!-- Row 7 - bottom border -->
+  <rect x="100" y="480" width="750" height="28" rx="0" fill="url(#tableRowGrad)"/>
+  <text x="120" y="498" font-size="11.5" fill="#c0d8f5" font-family="'Courier New', monospace">Volume</text>
+  <text x="340" y="498" font-size="11.5" fill="#4ecb8c" font-family="'Courier New', monospace">BIGINT</text>
+  <text x="500" y="498" font-size="11" fill="#7ab8f5">NULLABLE</text>
+  <text x="660" y="498" font-size="11" fill="#a0b8d0">Total shares traded</text>
+
+  <!-- ── STEP 3: Load Data ── -->
+  <rect x="30" y="515" width="840" height="82" rx="12" fill="url(#cardGrad1)" filter="url(#shadow)" stroke="#1a4080" stroke-width="1"/>
+  <rect x="30" y="515" width="5" height="82" rx="2" fill="#4ecb8c"/>
+  <circle cx="68" cy="556" r="18" fill="#1a3a2a" stroke="#2d8a59" stroke-width="1.5"/>
+  <text x="68" y="562" font-size="14" fill="#4ecb8c" font-weight="800" text-anchor="middle">3</text>
+
+  <text x="100" y="538" font-size="13" fill="#7ab8f5" font-weight="600" letter-spacing="2">BULK DATA INGESTION — LOAD DATA INFILE</text>
+  <text x="100" y="556" font-size="12" fill="#c0d8f5">Loads raw CSV data (1980–2025) into the table using MySQL's high-performance bulk load method.</text>
+
+  <rect x="100" y="565" width="750" height="22" rx="5" fill="#0a1525" stroke="#1a3a5f" stroke-width="1"/>
+  <text x="115" y="580" font-size="10.5" fill="#e0e8ff" font-family="'Courier New', monospace">
+    <tspan fill="#0f6fbf">LOAD DATA LOCAL INFILE</tspan>
+    <tspan fill="#ffa640"> '../data/raw/apple_stock_history_1980_2025.csv'</tspan>
+    <tspan fill="#0f6fbf"> INTO TABLE</tspan>
+    <tspan fill="#e0e8ff"> aapl_daily  </tspan>
+    <tspan fill="#0f6fbf">IGNORE</tspan>
+    <tspan fill="#e0e8ff"> 1 LINES</tspan>
+  </text>
+
+  <!-- Bottom footer -->
+  <text x="450" y="612" font-size="10" fill="#3a5a8a" text-anchor="middle">Apple Stock Market Analysis · SQL Data Ingestion Visual · 01_data_ingestion.sql</text>
+</svg>
