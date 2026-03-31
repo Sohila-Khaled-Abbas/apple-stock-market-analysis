@@ -1976,6 +1976,13 @@ table _Measures
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	measure 'Title - Decadal Volume' =
+			
+			// Appends the active CEO Era filter to provide context to the aggregation
+			"Historical Trading Volume by Decade | " & [Filter Text - CEO Era]
+		displayFolder: 🏷️ Labels & Filters
+		lineageTag: d4a81b52-2e65-4bbc-849b-db408f4a9d8a
+
 	partition _Measures = m
 		mode: import
 		source =

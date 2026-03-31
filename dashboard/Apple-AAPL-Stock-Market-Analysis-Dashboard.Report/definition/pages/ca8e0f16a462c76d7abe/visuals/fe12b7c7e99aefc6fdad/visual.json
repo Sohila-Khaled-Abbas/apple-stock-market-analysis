@@ -753,6 +753,13 @@
                   "Value": "true"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
             }
           }
         }
@@ -1248,7 +1255,7 @@
             "presetsFontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "11D"
+                  "Value": "13D"
                 }
               }
             },
