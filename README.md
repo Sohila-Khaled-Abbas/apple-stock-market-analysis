@@ -25,6 +25,9 @@
       - [B. Cloud Engine (GitHub Actions)](#b-cloud-engine-github-actions)
     - [Zone 3: BI Visualization \& Cloud Sync](#zone-3-bi-visualization--cloud-sync)
     - [Core Technologies Workflow](#core-technologies-workflow)
+  - [🗂️ Code Documentation Visuals](#️-code-documentation-visuals)
+    - [SQL Scripts](#sql-scripts)
+    - [Python Scripts](#python-scripts)
   - [🎨 Power BI Dashboard Design \& Architecture](#-power-bi-dashboard-design--architecture)
     - [1. Data Architecture (The Backend)](#1-data-architecture-the-backend)
     - [2. User Interface (The Frontend)](#2-user-interface-the-frontend)
@@ -101,6 +104,52 @@ This final section shows how the data moves from your local computer into Micros
 2. **Data Profiling & Validation (Python/Pandas):** Live database connection to perform initial dataset exploration, quality checking, and API cross-validation.
 3. **Data Storage & Transformation (MySQL):** Persistent robust storage, data cleansing imputation, aggregations, window functions (moving averages), and structured queries to prep the data for visualization.
 4. **Interactive Visualization (Power BI):** Business intelligence dashboards that bring the "Cook Premium" and the "Buy the Dip" signals to life.
+
+---
+
+## 🗂️ Code Documentation Visuals
+
+The following SVG diagrams visually document every SQL and Python script in the project — mapping the logic, data flow, and key operations at a glance. Each diagram uses a modern dark-mode design with colour-coded steps and embedded code snippets.
+
+> 💡 **Tip:** Click any image to open the full-resolution SVG in your browser. An interactive gallery is also available at [`images/code_docs_hub.html`](images/code_docs_hub.html).
+
+---
+
+### SQL Scripts
+
+#### 01 · Data Ingestion
+
+> **`sql/01_data_ingestion.sql`** — Initialises the `apple_stock_db` schema, creates the `aapl_daily` table with exact column types, and bulk-loads 45 years of historical AAPL data via `LOAD DATA INFILE`.
+
+![SQL Data Ingestion Visual](images/sql_01_data_ingestion.svg)
+
+---
+
+#### 02 · Data Cleaning & Validation
+
+> **`sql/02_data_cleaning.sql`** — Runs three quality checks: a logical price-boundary assertion, a zero-volume anomaly imputation using a 20-day moving average window, and an Adjusted-Close consistency audit.
+
+![SQL Data Cleaning Visual](images/sql_02_data_cleaning.svg)
+
+---
+
+#### 03 · EDA & Financial Metrics
+
+> **`sql/03_eda_and_metrics.sql`** — Calculates Compound Annual Growth Rate (CAGR) and implements a Moving Average Crossover strategy (SMA-50 vs SMA-200) using SQL window functions to generate Bullish / Bearish / Cold-Start trend signals.
+
+![SQL EDA and Metrics Visual](images/sql_03_eda_metrics.svg)
+
+---
+
+### Python Scripts
+
+#### Python Pipeline Automation — `yf_update.py` & `gh_update_csv.py`
+
+> Two complementary automation strategies run in parallel:
+> - **`yf_update.py`** — A local MySQL daemon scheduled daily at 18:00 via the `schedule` library. Fetches new records from yfinance, transforms them via SQLAlchemy, appends to MySQL, and exports a synced CSV.
+> - **`gh_update_csv.py`** — A fully serverless script triggered by GitHub Actions cron (`Mon–Fri 16:00 UTC`). Reads the existing repo CSV, fetches only missing dates, concatenates, and pushes the updated file back to the repository — zero infrastructure required.
+
+![Python Automation Visual](images/python_automation_visual.svg)
 
 ---
 
@@ -192,7 +241,14 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.SemanticModel/
 │   └── theme/             # Custom JSON themes and assets
 ├── images/                # Exported diagrams and graphics
-│   └── pipeline_architecture.jpg
+│   ├── pipeline_architecture.jpg
+│   ├── data_lineage_architecture.svg
+│   ├── data_lineage_architecture.png
+│   ├── sql_01_data_ingestion.svg      # Visual diagram: SQL ingestion script
+│   ├── sql_02_data_cleaning.svg       # Visual diagram: SQL cleaning script
+│   ├── sql_03_eda_metrics.svg         # Visual diagram: SQL EDA & metrics script
+│   ├── python_automation_visual.svg   # Visual diagram: Python automation scripts
+│   └── code_docs_hub.html             # Interactive gallery of all code visuals
 ├── docs/                  # Technical documentation
 │   ├── data_pipeline.md             # Data flow and architecture
 │   ├── data_lineage.md              # Origin-to-destination map
