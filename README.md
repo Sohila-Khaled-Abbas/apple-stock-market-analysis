@@ -18,6 +18,7 @@
   - [📑 Table of Contents](#-table-of-contents)
   - [🚀 Project Overview](#-project-overview)
   - [🏗️ Project Architecture](#️-project-architecture)
+    - [Data Lineage Architecture](#data-lineage-architecture)
     - [Zone 1: Initial Historical Load (Past Data)](#zone-1-initial-historical-load-past-data)
     - [Zone 2: Automated Daily Enrichment (Present Data)](#zone-2-automated-daily-enrichment-present-data)
       - [A. Local Engine (MySQL)](#a-local-engine-mysql)
