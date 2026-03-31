@@ -1707,6 +1707,7 @@ table _Measures
 			```
 		formatString: 0
 		displayFolder: 06 - Deneb (Chart Data)
+		lineageTag: be6afa99-ca86-4a96-a945-e19fcec6bd39
 
 	/// 
 	/// Supplies the Candlestick Deneb visual with a pre-formatted date string (YYYY-MM-DD) for the x-axis. Returns BLANK() on non-trading days so Deneb's transform/filter can exclude those rows cleanly.
@@ -1721,6 +1722,7 @@ table _Measures
 			
 			```
 		displayFolder: 06 - Deneb (Chart Data)
+		lineageTag: 5cbde6c4-d437-4e4e-a589-28f031f7ded2
 
 	/// RSI (14-Day) restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-step artifacts in Deneb line charts.
 	measure 'RSI (14-Day) Deneb' = ```
@@ -1734,6 +1736,7 @@ table _Measures
 			```
 		formatString: 0.00
 		displayFolder: 06 - Deneb (Chart Data)
+		lineageTag: 8490a567-d6bf-4d9b-acfe-b27976170c23
 
 	/// 50-Day SMA restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-step artifacts in Deneb line charts.
 	measure '50-Day SMA Deneb' = ```
@@ -1747,6 +1750,7 @@ table _Measures
 			```
 		formatString: 0.00
 		displayFolder: 06 - Deneb (Chart Data)
+		lineageTag: b1c0abaf-e503-4278-bb06-8ec4f5e82879
 
 	/// 200-Day SMA restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-step artifacts in Deneb line charts.
 	measure '200-Day SMA Deneb' = ```
@@ -1760,6 +1764,7 @@ table _Measures
 			```
 		formatString: 0.00
 		displayFolder: 06 - Deneb (Chart Data)
+		lineageTag: b508d664-65a9-4c21-9bda-13f643f611d7
 
 	/// Daily Drawdown % restricted to trading days only. Returns BLANK on weekends/holidays to prevent flat-line artifacts in Deneb area charts.
 	measure 'Daily Drawdown % Deneb' = ```
@@ -1773,6 +1778,7 @@ table _Measures
 			```
 		formatString: 0.00%
 		displayFolder: 06 - Deneb (Chart Data)
+		lineageTag: 79ccff22-943d-4239-ace8-d91086c0ac83
 
 	/// Fixed Vega spec for Institutional Volume-at-Price chart. Field names corrected, Y-axis bin orientation fixed, current price reference line added, gradient color encoding by volume density added.
 	measure 'Deneb - VAP Chart JSON' = ```
@@ -1781,6 +1787,7 @@ table _Measures
 			
 			```
 		displayFolder: 06 - Deneb (Chart Data)
+		lineageTag: 29be1519-d89e-43bc-b802-7800ff1b8d97
 
 	partition _Measures = m
 		mode: import
