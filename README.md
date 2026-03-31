@@ -276,6 +276,7 @@ Looking ahead, based on the 2024-2025 "AI Hype" trend in the data:
 │   ├── 02_data_cleaning.sql     # Validation, imputation, and anomaly checks
 │   └── 03_eda_and_metrics.sql   # CAGR & Simple Moving Average tracking
 ├── requirements.txt       # Python dependencies
+├── LICENSE                # MIT License
 └── .gitignore             # Git ignore definitions
 ```
 
