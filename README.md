@@ -56,7 +56,7 @@ For an actionable breakdown of the engineering pipeline and the resulting strate
 
 ### Data Lineage Architecture
 
-![Data Lineage Architecture](docs/data_lineage_architecture.drawio)
+![Data Lineage Architecture](images/data_lineage_architecture.svg)
 
 This diagram visualizes the end-to-end architecture of your Apple Stock (AAPL) data analysis project. It is structured horizontally and vertically to show how different technologies interact to move data from historical sources and the live API through your database and into the visualization layer.
 
