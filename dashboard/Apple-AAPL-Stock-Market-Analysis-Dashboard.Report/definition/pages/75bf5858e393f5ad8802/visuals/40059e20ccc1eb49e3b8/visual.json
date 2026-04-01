@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "5670bffbf4957639edfb",
+  "name": "40059e20ccc1eb49e3b8",
   "position": {
-    "x": 264,
-    "y": 720,
-    "z": 8000,
-    "height": 360,
-    "width": 1632,
-    "tabOrder": 8001
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "height": 240,
+    "width": 320,
+    "tabOrder": 0
   },
   "visual": {
     "visualType": "htmlContent443BE3AD55E043BF878BED274D3A6855",
@@ -23,40 +23,18 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "HTML - Decade Summary Table"
+                  "Property": "HTML Tooltip - Tech"
                 }
               },
-              "queryRef": "_Measures.HTML - Decade Summary Table",
-              "nativeQueryRef": "HTML - Decade Summary Table"
+              "queryRef": "_Measures.HTML Tooltip - Volatility Enriched",
+              "nativeQueryRef": "HTML Tooltip - Tech"
             }
           ]
         }
       }
     },
-    "objects": {
-      "contentFormatting": [
-        {
-          "properties": {
-            "userSelect": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "hyperlinks": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
     "visualContainerObjects": {
-      "border": [
+      "background": [
         {
           "properties": {
             "show": {
@@ -69,7 +47,7 @@
           }
         }
       ],
-      "background": [
+      "border": [
         {
           "properties": {
             "show": {
@@ -124,51 +102,6 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Title - Decade Matrix"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "visualTooltip": [
-        {
-          "properties": {
-            "type": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Canvas'"
-                }
-              }
-            },
-            "section": {
-              "expr": {
-                "Literal": {
-                  "Value": "'bed9852626b0e92ebdda'"
                 }
               }
             }

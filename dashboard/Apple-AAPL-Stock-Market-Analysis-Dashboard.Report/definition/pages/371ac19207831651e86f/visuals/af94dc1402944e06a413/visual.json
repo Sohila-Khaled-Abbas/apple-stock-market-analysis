@@ -1,62 +1,93 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "5670bffbf4957639edfb",
+  "name": "af94dc1402944e06a413",
   "position": {
-    "x": 264,
-    "y": 720,
-    "z": 8000,
-    "height": 360,
-    "width": 1632,
-    "tabOrder": 8001
+    "x": 240,
+    "y": 95,
+    "z": 0,
+    "height": 60,
+    "width": 1680,
+    "tabOrder": 4000
   },
   "visual": {
-    "visualType": "htmlContent443BE3AD55E043BF878BED274D3A6855",
-    "query": {
-      "queryState": {
-        "content": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "HTML - Decade Summary Table"
-                }
-              },
-              "queryRef": "_Measures.HTML - Decade Summary Table",
-              "nativeQueryRef": "HTML - Decade Summary Table"
-            }
-          ]
-        }
-      }
-    },
+    "visualType": "shape",
     "objects": {
-      "contentFormatting": [
+      "shape": [
         {
           "properties": {
-            "userSelect": {
+            "tileShape": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "'rectangleRoundedByPixel'"
                 }
               }
             },
-            "hyperlinks": {
+            "rectangleRoundedCurve": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "8L"
                 }
               }
             }
           }
         }
+      ],
+      "rotation": [
+        {
+          "properties": {
+            "shapeAngle": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "fill": [
+        {
+          "properties": {
+            "fillColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#151516'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "outline": [
+        {
+          "properties": {
+            "lineColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#424245'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
       ]
     },
     "visualContainerObjects": {
-      "border": [
+      "background": [
         {
           "properties": {
             "show": {
@@ -69,7 +100,7 @@
           }
         }
       ],
-      "background": [
+      "border": [
         {
           "properties": {
             "show": {
@@ -129,53 +160,9 @@
             }
           }
         }
-      ],
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Title - Decade Matrix"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "visualTooltip": [
-        {
-          "properties": {
-            "type": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Canvas'"
-                }
-              }
-            },
-            "section": {
-              "expr": {
-                "Literal": {
-                  "Value": "'bed9852626b0e92ebdda'"
-                }
-              }
-            }
-          }
-        }
       ]
     },
     "drillFilterOtherVisuals": true
-  }
+  },
+  "howCreated": "InsertVisualButton"
 }

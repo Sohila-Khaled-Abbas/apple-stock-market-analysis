@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "fad2d3b785d22a4bffb9",
+  "name": "60f1af42b84491d80aad",
   "position": {
-    "x": 648,
-    "y": 312,
-    "z": 9000,
+    "x": 264,
+    "y": 600,
+    "z": 10000,
     "height": 264,
-    "width": 1248,
-    "tabOrder": 9000
+    "width": 816,
+    "tabOrder": 10000
   },
   "visual": {
     "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
@@ -20,33 +20,76 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Calendar"
-                    }
-                  },
-                  "Property": "Decade"
-                }
-              },
-              "queryRef": "Calendar.Decade",
-              "nativeQueryRef": "Decade"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
                       "Entity": "aapl_daily"
                     }
                   },
-                  "Property": "Volume"
+                  "Property": "Trade_Date"
                 }
               },
-              "queryRef": "aapl_daily.Volume",
-              "nativeQueryRef": "Volume"
+              "queryRef": "aapl_daily.Trade_Date",
+              "nativeQueryRef": "Trade_Date"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Latest Price"
+                }
+              },
+              "queryRef": "_Measures.Latest Price",
+              "nativeQueryRef": "Latest Price"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "50-Day SMA"
+                }
+              },
+              "queryRef": "_Measures.50-Day SMA",
+              "nativeQueryRef": "50-Day SMA"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "200-Day SMA"
+                }
+              },
+              "queryRef": "_Measures.200-Day SMA",
+              "nativeQueryRef": "200-Day SMA"
             }
           ]
         }
       },
       "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "aapl_daily"
+                  }
+                },
+                "Property": "Trade_Date"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
         "isDefaultSort": true
       }
     },
@@ -57,14 +100,14 @@
             "provider": {
               "expr": {
                 "Literal": {
-                  "Value": "'vega'"
+                  "Value": "'vegaLite'"
                 }
               }
             },
             "jsonSpec": {
               "expr": {
                 "Literal": {
-                  "Value": "'{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.json\",\n  \"autosize\": {\"type\": \"fit\", \"contains\": \"padding\"},\n  \"background\": \"transparent\",\n  \"padding\": {\"top\": 12, \"left\": 50, \"right\": 24, \"bottom\": 24},\n  \"data\": [\n    {\n      \"name\": \"dataset\"\n    }\n  ],\n  \"scales\": [\n    {\n      \"name\": \"yscale\",\n      \"type\": \"band\",\n      \"domain\": {\"data\": \"dataset\", \"field\": \"Decade\"},\n      \"range\": \"height\",\n      \"padding\": 0.25\n    },\n    {\n      \"name\": \"xscale\",\n      \"type\": \"linear\",\n      \"domain\": {\"data\": \"dataset\", \"field\": \"Volume\"},\n      \"nice\": true,\n      \"zero\": true,\n      \"range\": \"width\"\n    }\n  ],\n  \"axes\": [\n    {\n      \"orient\": \"left\",\n      \"scale\": \"yscale\",\n      \"domain\": false,\n      \"ticks\": false,\n      \"labelColor\": \"#f5f5f7\",\n      \"labelFont\": \"system-ui, -apple-system, sans-serif\",\n      \"labelFontSize\": 12,\n      \"labelFontWeight\": \"bold\",\n      \"labelPadding\": 8\n    },\n    {\n      \"orient\": \"bottom\",\n      \"scale\": \"xscale\",\n      \"tickCount\": 8,\n      \"format\": \"~s\",\n      \"grid\": true,\n      \"domain\": false,\n      \"ticks\": false,\n      \"gridColor\": \"#2a2a2d\",\n      \"gridDash\": [2, 4],\n      \"labelColor\": \"#86868b\",\n      \"labelFont\": \"system-ui, -apple-system, sans-serif\",\n      \"labelFontSize\": 11\n    }\n  ],\n  \"marks\": [\n    {\n      \"type\": \"rect\",\n      \"from\": {\"data\": \"dataset\"},\n      \"encode\": {\n        \"enter\": {\n          \"y\": {\"scale\": \"yscale\", \"field\": \"Decade\"},\n          \"height\": {\"scale\": \"yscale\", \"band\": 1},\n          \"x\": {\"scale\": \"xscale\", \"value\": 0},\n          \"x2\": {\"scale\": \"xscale\", \"field\": \"Volume\"},\n          \"fill\": {\"value\": \"#2997ff\"},\n          \"cornerRadiusTopRight\": {\"value\": 4},\n          \"cornerRadiusBottomRight\": {\"value\": 4},\n          \"tooltip\": {\n            \"signal\": \"{''Decade'': datum.Decade, ''Aggregate Volume'': format(datum.Volume, '','')}\"\n          }\n        },\n        \"update\": {\n          \"fillOpacity\": {\"value\": 0.85}\n        },\n        \"hover\": {\n          \"fillOpacity\": {\"value\": 1.0}\n        }\n      }\n    }\n  ]\n}'"
+                  "Value": "'{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n  \"data\": {\"name\": \"dataset\"},\n  \"autosize\": {\"type\": \"fit\", \"contains\": \"padding\"},\n  \"background\": \"transparent\",\n  \"padding\": {\"left\": 10, \"right\": 25, \"top\": 10, \"bottom\": 10},\n  \"config\": {\n    \"font\": \"Segoe UI, system-ui, -apple-system, sans-serif\",\n    \"axis\": {\n      \"labelFontSize\": 12, \"titleFontSize\": 13, \"titleColor\": \"#86868b\", \"labelColor\": \"#86868b\",\n      \"gridColor\": \"#2a2a2d\", \"domain\": false, \"ticks\": false\n    },\n    \"view\": {\"stroke\": \"transparent\"}\n  },\n  \"transform\": [\n    {\n      \"fold\": [\"Latest Price\", \"50-Day SMA\", \"200-Day SMA\"],\n      \"as\": [\"Metric\", \"Value\"]\n    }\n  ],\n  \"mark\": {\"type\": \"line\", \"interpolate\": \"monotone\"},\n  \"encoding\": {\n    \"x\": {\n      \"field\": \"Trade_Date\",\n      \"type\": \"temporal\",\n      \"axis\": {\"labels\": false, \"title\": null, \"grid\": true, \"gridDash\": [2, 4]}\n    },\n    \"y\": {\n      \"field\": \"Value\",\n      \"type\": \"quantitative\",\n      \"scale\": {\"zero\": false},\n      \"axis\": {\n        \"title\": \"Price Level (USD)\", \"format\": \"$,.0f\", \n        \"minExtent\": 65, \"maxExtent\": 65, \n        \"grid\": true, \"gridDash\": [2, 4]\n      }\n    },\n    \"color\": {\n      \"field\": \"Metric\",\n      \"type\": \"nominal\",\n      \"scale\": {\n        \"domain\": [\"Latest Price\", \"50-Day SMA\", \"200-Day SMA\"],\n        \"range\": [\"#f5f5f7\", \"#ff9f0a\", \"#bf5af2\"]\n      },\n      \"legend\": {\n        \"orient\": \"top-left\", \"title\": null, \"labelColor\": \"#f5f5f7\", \"symbolType\": \"stroke\"\n      }\n    },\n    \"strokeWidth\": {\n      \"condition\": {\"test\": \"datum.Metric === ''Latest Price''\", \"value\": 2},\n      \"value\": 1.5\n    },\n    \"tooltip\": [\n      {\"field\": \"Trade_Date\", \"type\": \"temporal\", \"title\": \"Date\", \"format\": \"%b %d, %Y\"},\n      {\"field\": \"Metric\", \"type\": \"nominal\", \"title\": \"Metric\"},\n      {\"field\": \"Value\", \"type\": \"quantitative\", \"title\": \"Price\", \"format\": \"$,.2f\"}\n    ]\n  }\n}'"
                 }
               }
             },
@@ -120,7 +163,7 @@
             "version": {
               "expr": {
                 "Literal": {
-                  "Value": "'6.2.0'"
+                  "Value": "'6.4.1'"
                 }
               }
             }
@@ -133,14 +176,14 @@
             "viewportHeight": {
               "expr": {
                 "Literal": {
-                  "Value": "187.7999973297119D"
+                  "Value": "154.19999504089355D"
                 }
               }
             },
             "viewportWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "1228D"
+                  "Value": "796D"
                 }
               }
             }
@@ -154,19 +197,6 @@
               "expr": {
                 "Literal": {
                   "Value": "'1.9.0.0'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "editor": [
-        {
-          "properties": {
-            "theme": {
-              "expr": {
-                "Literal": {
-                  "Value": "'dark'"
                 }
               }
             }
@@ -193,7 +223,7 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Title - Decadal Volume"
+                  "Property": "Title - Native Price"
                 }
               }
             }
@@ -230,7 +260,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Aggregate shares traded, highlighting long-term shifts in market momentum.'"
+                  "Value": "'Evaluating long-term momentum shifts and structural trend crossovers.'"
                 }
               }
             },
@@ -283,7 +313,7 @@
             "section": {
               "expr": {
                 "Literal": {
-                  "Value": "'bed9852626b0e92ebdda'"
+                  "Value": "'75bf5858e393f5ad8802'"
                 }
               }
             }

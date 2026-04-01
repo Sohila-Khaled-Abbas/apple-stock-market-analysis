@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "9457681bfa2cc32c76d1",
+  "name": "f13d413394ccbf45d054",
   "position": {
     "x": 1104,
     "y": 600,
@@ -148,7 +148,7 @@
             "viewportHeight": {
               "expr": {
                 "Literal": {
-                  "Value": "187.7999973297119D"
+                  "Value": "154.19999504089355D"
                 }
               }
             },

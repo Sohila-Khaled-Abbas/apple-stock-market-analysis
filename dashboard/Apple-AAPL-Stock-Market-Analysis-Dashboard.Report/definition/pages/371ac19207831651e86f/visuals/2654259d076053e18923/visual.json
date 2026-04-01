@@ -1,9 +1,9 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
-  "name": "c7210fcfe162d63f833e",
+  "name": "2654259d076053e18923",
   "position": {
-    "x": 312,
-    "y": 504,
+    "x": 311.99999999999994,
+    "y": 432,
     "z": 7000,
     "height": 72,
     "width": 264,
@@ -95,7 +95,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'1Y Horizon'"
+                  "Value": "'Max Horizon'"
                 }
               }
             },
@@ -347,7 +347,7 @@
             "navigationSection": {
               "expr": {
                 "Literal": {
-                  "Value": "'371ac19207831651e86f'"
+                  "Value": "'ca8e0f16a462c76d7abe'"
                 }
               }
             }

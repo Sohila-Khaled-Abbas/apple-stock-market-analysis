@@ -55,23 +55,13 @@ table _Measures
 		lineageTag: 517aea45-1ca9-4652-aa46-042557378a08
 
 	/// 50-calendar-day simple moving average of the adjusted closing price. Short-to-medium-term momentum indicator.
-	measure '50-Day SMA' =
-			
-			AVERAGEX(
-			    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -50, DAY),
-			    CALCULATE(MAX(aapl_daily[Adj_Close]))
-			)
+	measure '50-Day SMA' = AVERAGE('Technical_Metrics'[50-Day SMA])
 		formatString: 0.00
 		displayFolder: 03 - Technical Indicators
 		lineageTag: d3a958b8-b3fa-42ae-9489-8160453a72f9
 
 	/// 200-calendar-day simple moving average. The institutional indicator for long-term bull vs. bear market phases.
-	measure '200-Day SMA' =
-			
-			AVERAGEX(
-			    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -200, DAY),
-			    CALCULATE(MAX(aapl_daily[Adj_Close]))
-			)
+	measure '200-Day SMA' = AVERAGE('Technical_Metrics'[200-Day SMA])
 		formatString: 0.00
 		displayFolder: 03 - Technical Indicators
 		lineageTag: 7e2982cf-c937-4990-b74f-254d1dab3726
@@ -1165,76 +1155,163 @@ table _Measures
 		displayFolder: 10 - Filters & Titles
 		lineageTag: f6cc6703-f083-42fe-8f68-9985a24c6d87
 
-	measure 'SVG Tooltip - Drawdown Recovery' = ```
+	measure 'HTML Tooltip - Macro' = ```
 			
-			VAR CurrentPrice = [Latest Price]
-			VAR AllTimeHigh = 
-			    CALCULATE(
-			        MAX(aapl_daily[Adj_Close]),
-			        ALLSELECTED('Calendar'),
-			        'Calendar'[Date] <= MAX('Calendar'[Date])
-			    )
-			VAR RecoveryRatio = DIVIDE(CurrentPrice, AllTimeHigh, 0)
+			VAR CurrentDate = MAX('Calendar'[Date])
+			VAR CurrentPrice = CALCULATE(SUM(aapl_daily[Close_Price]))
+			VAR PrevPrice = CALCULATE(SUM(aapl_daily[Close_Price]), PREVIOUSDAY('Calendar'[Date]))
+			VAR PctChange = DIVIDE(CurrentPrice - PrevPrice, PrevPrice)
+			
+			VAR Color = IF(PctChange >= 0, "#30d158", "#ff453a")
+			VAR Sign = IF(PctChange >= 0, "+", "")
+			
+			VAR ATH = CALCULATE(MAX(aapl_daily[Close_Price]), FILTER(ALL('Calendar'), 'Calendar'[Date] <= CurrentDate))
+			VAR Drawdown = DIVIDE(CurrentPrice - ATH, ATH)
+			
+			VAR SMA200 = CALCULATE(AVERAGE('Technical_Metrics'[200-Day SMA]))
+			VAR SMADistance = DIVIDE(CurrentPrice - SMA200, SMA200)
+			
+			// CSS proximity bar logic
+			VAR BarWidth = MIN(MAX((CurrentPrice / ATH) * 100, 5), 100) 
 			
 			RETURN
-			    XU.SVG.Progress.LabeledBar(
-			        RecoveryRatio, 
-			        "#424245",    // Background: Dark Grey
-			        IF(RecoveryRatio >= 0.95, "#30d158", "#ff9f0a"), // Green if near ATH, Orange otherwise
-			        4,            // Corner Radius
-			        TRUE(), 
-			        "Recovery: " & FORMAT(RecoveryRatio, "0.0%"), 
-			        "#f5f5f7"     // Text Color
-			    )
+			"<div style='font-family: system-ui, -apple-system, sans-serif; color: #f5f5f7; padding: 15px; background: #1d1d1f; border-radius: 12px; width: 290px; box-sizing: border-box;'>
+			    <div style='color: #86868b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;'>" & FORMAT(CurrentDate, "MMMM dd, yyyy") & "</div>
+			    
+			    <div style='display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;'>
+			        <div style='font-size: 28px; font-weight: 600;'>" & FORMAT(CurrentPrice, "$#,0.00") & "</div>
+			        <div style='font-size: 14px; font-weight: 600; color: " & Color & ";'>" & Sign & FORMAT(PctChange, "0.00%") & "</div>
+			    </div>
+			
+			    <div style='display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;'>
+			        <span style='color: #86868b;'>Drawdown from ATH</span>
+			        <span style='color: #ff453a; font-weight: 500;'>" & FORMAT(Drawdown, "0.0%") & "</span>
+			    </div>
+			    
+			    <div style='width: 100%; height: 6px; background: #2a2a2d; border-radius: 3px; margin-bottom: 15px; overflow: hidden;'>
+			        <div style='width: " & BarWidth & "%; height: 100%; background: #64d2ff; border-radius: 3px;'></div>
+			    </div>
+			
+			    <div style='display: flex; justify-content: space-between; font-size: 12px;'>
+			        <span style='color: #86868b;'>200-Day SMA Premium</span>
+			        <span style='font-weight: 500; color: " & IF(SMADistance > 0, "#30d158", "#ff453a") & "'>" & FORMAT(SMADistance, "+0.0%;-0.0%") & "</span>
+			    </div>
+			</div>"
 			```
 		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 08308c5e-cc64-4867-96a9-c5ef2b3ae6d7
 
-	measure 'SVG Tooltip - Volatility Donut' = ```
+	measure 'HTML Tooltip - RSI Enriched' = ```
 			
-			VAR AAPLVol = [Annualized Volatility]
-			VAR SP500Vol = 
-			    VAR SP_DailyStdDev = STDEV.S(sp500_daily[Historical_SP500_Return])
-			    RETURN SP_DailyStdDev * SQRT(252)
+			VAR CurrentDate = MAX('Calendar'[Date])
+			VAR CurrentRSI = CALCULATE(MAX('Technical_Metrics'[RSI (14-Day)]))
 			
-			// Ratio of AAPL Volatility relative to a "Highly Volatile" threshold (e.g., 2x the market)
-			VAR VolatilityRatio = MIN(1, DIVIDE(AAPLVol, SP500Vol * 1.5, 1))
+			// Safety check: Avoid DAX errors during the 14-day warm-up period
+			VAR SafeRSI = COALESCE(CurrentRSI, 0)
+			
+			// Renamed from 'Status' to avoid keyword collision
+			VAR RSI_Label = SWITCH(TRUE(), SafeRSI >= 70, "OVERBOUGHT", SafeRSI <= 30, "OVERSOLD", "NEUTRAL")
+			VAR TrackColor = SWITCH(TRUE(), SafeRSI >= 70, "#ff453a", SafeRSI <= 30, "#30d158", "#64d2ff")
+			
+			// ENRICHMENT 1: Calculate Day-over-Day Momentum Shift
+			VAR PrevDate = CALCULATE(MAX('Calendar'[Date]), 'Calendar'[Date] < CurrentDate)
+			VAR PrevRSI = CALCULATE(MAX('Technical_Metrics'[RSI (14-Day)]), 'Calendar'[Date] = PrevDate)
+			VAR RSIDelta = CurrentRSI - PrevRSI
+			VAR DeltaSign = IF(RSIDelta > 0, "+", "")
+			VAR DeltaColor = IF(RSIDelta > 0, "#30d158", IF(RSIDelta < 0, "#ff453a", "#86868b"))
+			
+			// ENRICHMENT 2: Fetch corresponding Closing Price
+			VAR CurrentPrice = CALCULATE(SUM(aapl_daily[Close_Price]))
+			
+			VAR RSIWidth = MIN(MAX(SafeRSI, 0), 100)
 			
 			RETURN
-			    XU.SVG.Progress.Donut(
-			        VolatilityRatio,
-			        "#424245",    // Background 
-			        "#1d1d1f",    // Inner hole background (matches dark theme)
-			        0.65,         // Hole size
-			        "#ff453a",    // Fill: System Red (indicating risk)
-			        "#1d1d1f",    // Stroke color
-			        TRUE(), 
-			        "#ffffff"     // Text color
-			    )
+			// Return a clean error state if hovering over the first 14 days of IPO data
+			IF(ISBLANK(CurrentRSI), 
+			    "<div style='font-family: system-ui; color:#86868b; padding:15px; background:#1d1d1f; border-radius:12px; width:300px; text-align:center;'>Calculating 14-Day Moving Average...</div>",
+			    
+			    // The Enriched HTML Widget
+			    "<div style='font-family: system-ui, -apple-system, sans-serif; background: #1d1d1f; border: 1px solid #333; padding: 15px; border-radius: 12px; width: 300px; box-sizing: border-box;'>
+			        
+			        <div style='display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px;'>
+			            <div style='color: #86868b; font-size: 11px; font-weight: 600; letter-spacing: 0.5px;'>14-DAY RSI HEAT</div>
+			            <div style='color: " & TrackColor & "; font-size: 11px; font-weight: 700;'>" & RSI_Label & "</div>
+			        </div>
+			        
+			        <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;'>
+			            <div style='display: flex; align-items: baseline; gap: 4px;'>
+			                <span style='color: #f5f5f7; font-size: 26px; font-weight: 700;'>" & FORMAT(CurrentRSI, "0.0") & "</span>
+			            </div>
+			            <div style='text-align: right;'>
+			                <div style='color: #86868b; font-size: 10px; text-transform: uppercase;'>Day-over-Day</div>
+			                <div style='color: " & DeltaColor & "; font-size: 13px; font-weight: 600;'>" & DeltaSign & FORMAT(RSIDelta, "0.0") & " pts</div>
+			            </div>
+			        </div>
+			        
+			        <div style='position: relative; width: 100%; height: 12px; background: #2a2a2d; border-radius: 6px; overflow: hidden;'>
+			            <div style='position: absolute; left: 0; width: 30%; height: 100%; background: rgba(48, 209, 88, 0.15);'></div>
+			            <div style='position: absolute; left: 70%; width: 30%; height: 100%; background: rgba(255, 69, 58, 0.15);'></div>
+			            <div style='position: absolute; left: 30%; height: 100%; width: 2px; background: #1d1d1f; z-index: 2;'></div>
+			            <div style='position: absolute; left: 70%; height: 100%; width: 2px; background: #1d1d1f; z-index: 2;'></div>
+			            <div style='position: absolute; left: 0; width: " & RSIWidth & "%; height: 100%; background: " & TrackColor & "; border-radius: 6px; z-index: 1;'></div>
+			        </div>
+			        
+			        <div style='display: flex; justify-content: space-between; margin-top: 8px; margin-bottom: 12px; color: #86868b; font-size: 10px;'>
+			            <span>Oversold (0-30)</span>
+			            <span>Overbought (70-100)</span>
+			        </div>
+			
+			        <div style='display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed #333;'>
+			            <span style='color: #86868b; font-size: 11px;'>Closing Price Context</span>
+			            <span style='color: #f5f5f7; font-size: 13px; font-weight: 600;'>" & FORMAT(CurrentPrice, "$#,0.00") & "</span>
+			        </div>
+			    </div>"
+			)
 			```
 		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 678f7e80-2655-4d0d-99d3-1dfabf039d48
 
-	measure 'SVG Tooltip - RSI Capsule' = ```
+	measure 'HTML Tooltip - Tech' = ```
 			
-			VAR RSIRatio = DIVIDE([RSI (14-Day)], 100, 0)
-			VAR BarColor = 
-			    SWITCH(
-			        TRUE(),
-			        RSIRatio >= 0.70, "#ff453a", // Overbought (Red)
-			        RSIRatio <= 0.30, "#30d158", // Oversold (Green)
-			        "#64d2ff"                    // Neutral (Blue)
-			    )
+			VAR CurrentDate = MAX('Calendar'[Date])
+			VAR RSI = CALCULATE(MAX('Technical_Metrics'[RSI (14-Day)]))
+			VAR HighP = CALCULATE(MAX(aapl_daily[High_Price]))
+			VAR LowP = CALCULATE(MIN(aapl_daily[Low_Price]))
+			VAR Volatility = DIVIDE(HighP - LowP, LowP)
+			
+			VAR Vol = CALCULATE(SUM(aapl_daily[Volume]))
+			
+			// Conditional Formatting Logic
+			VAR RSILabel = SWITCH(TRUE(), RSI >= 70, "Overbought", RSI <= 30, "Oversold", "Neutral")
+			VAR RSIColor = SWITCH(TRUE(), RSI >= 70, "#ff453a", RSI <= 30, "#30d158", "#64d2ff")
+			
+			// RSI CSS Bar Width
+			VAR RSIWidth = MIN(MAX(RSI, 0), 100)
 			
 			RETURN
-			    XU.SVG.Progress.Capsule(
-			        RSIRatio,
-			        "#424245",
-			        BarColor,
-			        TRUE(),
-			        "RSI Heat",
-			        "#ffffff"
-			    )
+			"<div style='font-family: system-ui, -apple-system, sans-serif; color: #f5f5f7; padding: 15px; background: #1d1d1f; border-radius: 12px; width: 290px; box-sizing: border-box;'>
+			    <div style='color: #86868b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px;'>" & FORMAT(CurrentDate, "MMMM dd, yyyy") & " | TECHNICALS</div>
+			    
+			    <div style='display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;'>
+			        <span style='color: #86868b;'>RSI (14-Day)</span>
+			        <span style='font-weight: 600; color: " & RSIColor & ";'>" & FORMAT(RSI, "0.0") & " <span style='font-weight: 400; font-size: 10px; padding-left:4px;'>" & RSILabel & "</span></span>
+			    </div>
+			    <div style='width: 100%; height: 6px; background: #2a2a2d; border-radius: 3px; margin-bottom: 15px; position: relative;'>
+			        <div style='position:absolute; left: 30%; height: 100%; width: 2px; background: #333;'></div>
+			        <div style='position:absolute; left: 70%; height: 100%; width: 2px; background: #333;'></div>
+			        <div style='width: " & RSIWidth & "%; height: 100%; background: " & RSIColor & "; border-radius: 3px;'></div>
+			    </div>
+			
+			    <div style='display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #333;'>
+			        <span style='color: #86868b;'>Intraday Spread (High/Low)</span>
+			        <span style='font-weight: 500; color: #ff9f0a;'>" & FORMAT(Volatility, "0.00%") & "</span>
+			    </div>
+			
+			    <div style='display: flex; justify-content: space-between; font-size: 12px;'>
+			        <span style='color: #86868b;'>Daily Volume Traded</span>
+			        <span style='font-weight: 500;'>" & FORMAT(Vol, "#,##0,,.00") & "M</span>
+			    </div>
+			</div>"
 			```
 		displayFolder: 08 - SVG & Tooltips
 		lineageTag: 8b2999e0-60a5-437a-8f87-fd69429a6e11
@@ -1753,22 +1830,9 @@ table _Measures
 		displayFolder: 06 - Deneb (Chart Data)
 		lineageTag: 29be1519-d89e-43bc-b802-7800ff1b8d97
 
-	measure 'RSI (14-Day)' = ```
+	measure 'RSI (14-Day)' =
 			
-			// Identifies the most recent trading date that actually has a calculated RSI
-			VAR MaxDateWithData = 
-			    CALCULATE(
-			        MAX('Technical_Metrics'[Trade_Date]),
-			        NOT(ISBLANK('Technical_Metrics'[RSI (14-Day)]))
-			    )
-			
-			// Retrieves the Python-calculated RSI for that specific date
-			RETURN
-			    CALCULATE(
-			        MAX('Technical_Metrics'[RSI (14-Day)]),
-			        'Calendar'[Date] = MaxDateWithData
-			    )
-			```
+			AVERAGE(Technical_Metrics[RSI (14-Day)])
 		formatString: 0.00
 		displayFolder: 03 - Technical Indicators
 		lineageTag: 49274518-bd55-470f-a188-39d49c17632d
