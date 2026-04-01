@@ -7,6 +7,9 @@
 [![Python](https://img.shields.io/badge/Python-Power_Query_Embedded-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://learn.microsoft.com/en-us/power-bi/connect-data/desktop-python-scripts)
 [![MySQL](https://img.shields.io/badge/MySQL-Source_Database-005C84?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Deneb](https://img.shields.io/badge/Deneb-Vega_Lite_Charts-0078D4?style=for-the-badge&logo=vega&logoColor=white)](https://deneb-viz.github.io/)
+[![Live Dashboard](https://img.shields.io/badge/▶_Live_Dashboard-View_on_Power_BI_Web-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)
+
+> 📺 **[▶ View the Live Interactive Dashboard (Power BI Web)](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)** — No Power BI account required.
 
 > A financial dashboard must go beyond being a mere "database GUI" — it must present a visual argument. The semantic model and visualization layers are strictly separated, highly performant, and structurally sound. This document serves as the **definitive deployment checklist** to assemble the distinct codebases, external UDF libraries, and optimized data models into a cohesive, web-tier financial application.
 

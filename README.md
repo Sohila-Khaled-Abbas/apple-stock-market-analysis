@@ -22,6 +22,7 @@
 [![DAX Measures](https://img.shields.io/badge/DAX_Measures-47_Implemented-FF6B35?style=flat-square)](docs/powerbi_dashboard_design.md#dax-measure-catalogue)
 [![Dataset](https://img.shields.io/badge/Dataset-11%2C400%2B_Trading_Days-0078D4?style=flat-square)](data/)
 [![Cron](https://img.shields.io/badge/Cron-Mon–Fri_16:00_UTC-2088FF?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/data_update.yml)
+[![Live Dashboard](https://img.shields.io/badge/▶_Live_Dashboard-Power_BI_Web-F2C811?style=flat-square&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)
 
 > An end-to-end **data engineering and analytics** project analyzing historical Apple Inc. (AAPL) stock market data from 1980 to the present day — combining an automated MySQL pipeline, GitHub Actions cloud sync, and an enterprise-grade Power BI dashboard to extract actionable investment insights.
 
@@ -53,6 +54,8 @@
 This project focuses on the ingestion, processing, and visualization of Apple's stock market data spanning from **1980 to the present day**, using the Yahoo Finance API for continuous daily updates. By combining **Python** for initial profiling and automation, **MySQL** for robust relational data storage and querying, and **Power BI** for interactive institutional-grade dashboards, this project demonstrates how historical and current market trends can inform actionable investment strategies.
 
 📊 **[View the Executive Business Case Presentation (Google Slides)](https://docs.google.com/presentation/d/1v5ssMhSDsMxkJXG-Xy1a-X05HoXnfY5Ce7pQUGvhGaE/edit?usp=sharing)**
+
+📺 **[▶ View the Live Interactive Dashboard (Power BI Web)](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)**
 
 For an actionable breakdown of the engineering pipeline and the resulting strategic insights, refer to the [Presentation Outline](docs/business_case_presentation.md).
 
@@ -187,6 +190,9 @@ The following SVG diagrams visually document every SQL and Python script in the 
 [![TMDL](https://img.shields.io/badge/Semantic_Model-TMDL_Source_Control-00BCF2?style=for-the-badge&logo=databricks&logoColor=white)](dashboard/Apple-AAPL-Stock-Market-Analysis-Dashboard.SemanticModel/)
 [![Pages](https://img.shields.io/badge/Report-7_Interactive_Pages-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](dashboard/Apple-AAPL-Stock-Market-Analysis-Dashboard.Report/)
 [![DAX](https://img.shields.io/badge/DAX-47_Measures_%7C_11_Folders-FF6B35?style=for-the-badge&logo=microsoftexcel&logoColor=white)](docs/powerbi_dashboard_design.md#dax-measure-catalogue)
+[![Live Dashboard](https://img.shields.io/badge/▶_Live_Dashboard-View_on_Power_BI_Web-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)
+
+> 📺 **[▶ Open Live Interactive Dashboard](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)** — No Power BI account required.
 
 Your dashboard is a fully realized, enterprise-grade financial application built on a `.pbip` project structure for complete Git-based source control. Here is the final architecture summary:
 
@@ -424,5 +430,6 @@ Apple Stock Market Analysis/
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-sohilakabbas-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sohilakabbas/)
 [![GitHub](https://img.shields.io/badge/GitHub-Sohila--Khaled--Abbas-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sohila-Khaled-Abbas)
+[![Live Dashboard](https://img.shields.io/badge/▶_Live_Dashboard-Power_BI_Web-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)
 
 </div>
