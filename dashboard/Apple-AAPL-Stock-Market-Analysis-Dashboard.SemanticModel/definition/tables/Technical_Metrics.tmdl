@@ -1,0 +1,78 @@
+table Technical_Metrics
+	lineageTag: 29a78e01-1d9e-4019-b715-23d36d297ed4
+
+	column Trade_Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 1546ebe5-9afe-4140-821f-3a6fc4e369ff
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Trade_Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Close_Price
+		dataType: double
+		isHidden
+		lineageTag: ac31991a-d4e2-4caa-af6b-fef2474f8dbe
+		summarizeBy: sum
+		sourceColumn: Close_Price
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column '50-Day SMA'
+		dataType: double
+		formatString: 0.00
+		lineageTag: 468cbd12-97ab-4f49-9c02-5138add75988
+		summarizeBy: sum
+		sourceColumn: 50-Day SMA
+
+		annotation SummarizationSetBy = Automatic
+
+	column '200-Day SMA'
+		dataType: double
+		formatString: 0.00
+		lineageTag: 37e08eec-cbaf-4181-87d0-26b97c7f58ff
+		summarizeBy: sum
+		sourceColumn: 200-Day SMA
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'RSI (14-Day)'
+		dataType: double
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: d28e639d-6946-4f8f-8f1d-62eef6204d9d
+		summarizeBy: sum
+		sourceColumn: RSI (14-Day)
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Technical_Metrics = m
+		mode: import
+		source =
+				let
+				    Source = aapl_daily,
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Trade_Date", "Close_Price"}),
+				    #"Sorted Rows" = Table.Sort(#"Removed Other Columns",{{"Trade_Date", Order.Ascending}}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Sorted Rows",{{"Trade_Date", type date}}),
+				    #"Added Custom" = Table.AddColumn(#"Changed Type", "Trade_Date_String", each Date.ToText([Trade_Date], "yyyy-MM-dd")),
+				    #"Removed Columns" = Table.RemoveColumns(#"Added Custom",{"Trade_Date"}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Removed Columns",{"Trade_Date_String", "Close_Price"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"Trade_Date_String", "Trade_Date"}}),
+				    #"Run Python script" = Python.Execute("import pandas as pd#(lf)#(lf)# 1. Safely parse the hard-converted text strings into Pandas Datetimes#(lf)dataset['Trade_Date'] = pd.to_datetime(dataset['Trade_Date'], format='%Y-%m-%d')#(lf)#(lf)# 2. Ensure chronological sorting#(lf)dataset = dataset.sort_values(by='Trade_Date').reset_index(drop=True)#(lf)#(lf)# 3. Calculate Moving Averages#(lf)dataset['50-Day SMA'] = dataset['Close_Price'].rolling(window=50).mean()#(lf)dataset['200-Day SMA'] = dataset['Close_Price'].rolling(window=200).mean()#(lf)#(lf)# 4. Calculate RSI (Wilder's Smoothing)#(lf)delta = dataset['Close_Price'].diff()#(lf)gain = delta.clip(lower=0)#(lf)loss = -delta.clip(upper=0)#(lf)avg_gain = gain.ewm(alpha=1/14, adjust=False).mean()#(lf)avg_loss = loss.ewm(alpha=1/14, adjust=False).mean()#(lf)rs = avg_gain / avg_loss#(lf)dataset['RSI (14-Day)'] = 100 - (100 / (1 + rs))#(lf)#(lf)# 5. Convert back to string for the return trip to Power BI#(lf)dataset['Trade_Date'] = dataset['Trade_Date'].dt.strftime('%Y-%m-%d')#(lf)#(lf)# 6. Output Table#(lf)output_table = dataset[['Trade_Date', '50-Day SMA', '200-Day SMA', 'RSI (14-Day)']]#(lf)#(lf)# 7. THE FIX: Drop all mathematically incomplete rows (the first 200 days)#(lf)output_table = output_table.dropna()",[dataset=#"Renamed Columns"]),
+				    #"Expanded Value" = Table.ExpandTableColumn(#"Run Python script", "Value", {"Trade_Date", "Close_Price", "50-Day SMA", "200-Day SMA", "RSI (14-Day)"}, {"Trade_Date", "Close_Price", "50-Day SMA", "200-Day SMA", "RSI (14-Day)"}),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Expanded Value",{"Name"}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Removed Columns1",{{"Trade_Date", type date}, {"Close_Price", type number}, {"50-Day SMA", type number}, {"200-Day SMA", type number}, {"RSI (14-Day)", type number}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

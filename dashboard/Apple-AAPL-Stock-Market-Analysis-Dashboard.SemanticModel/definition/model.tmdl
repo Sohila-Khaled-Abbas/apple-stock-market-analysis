@@ -9,7 +9,7 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["aapl_daily","sp500_daily","Calendar","_Measures"]
+annotation PBI_QueryOrder = ["aapl_daily","sp500_daily","Calendar","_Measures","Technical_Metrics"]
 
 annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop","DevMode"]
 
@@ -20,6 +20,7 @@ ref table Calendar
 ref table _Measures
 ref table sp500_daily
 ref table 'Data Dictionary'
+ref table Technical_Metrics
 
 ref cultureInfo en-US
 

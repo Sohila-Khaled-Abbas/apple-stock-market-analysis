@@ -164,46 +164,6 @@ table _Measures
 		displayFolder: 02 - Returns & Performance
 		lineageTag: 2c45cf84-2226-443b-8dac-30dff7a145c3
 
-	/// Relative Strength Index (SMA method). Oscillates from 0 to 100 to evaluate whether the stock is overbought (>70) or oversold (<30). Optimized to use the pre-materialized Historical_Daily_Return column instead of the [Daily Return %] measure to avoid 14 expensive context transitions per row.
-	measure 'RSI (14-Day)' =
-			
-			VAR CurrentDate = MAX('Calendar'[Date])
-			
-			-- Get the last 14 actual trading dates (non-blank) up to and including CurrentDate
-			VAR ReferenceDates =
-			    TOPN(
-			        14,
-			        FILTER(
-			            ALL('Calendar'),
-			            'Calendar'[Date] <= CurrentDate
-			                && NOT(ISBLANK(CALCULATE(COUNTROWS(aapl_daily))))
-			        ),
-			        'Calendar'[Date], DESC
-			    )
-			
-			-- Use the pre-materialized Historical_Daily_Return column
-			-- CALCULATE(MAX(...)) performs a simple, fast storage-engine context transition
-			-- instead of calling [Daily Return %] which runs FILTER(ALLSELECTED(Calendar)...) 14 times
-			VAR ReturnsTable =
-			    ADDCOLUMNS(
-			        ReferenceDates,
-			        "@Return", CALCULATE(MAX(aapl_daily[Historical_Daily_Return]))
-			    )
-			
-			VAR AvgGain = AVERAGEX(ReturnsTable, IF([@Return] > 0, [@Return], 0))
-			VAR AvgLoss = AVERAGEX(ReturnsTable, IF([@Return] < 0, ABS([@Return]), 0))
-			VAR RS     = DIVIDE(AvgGain, AvgLoss)
-			
-			RETURN
-			    IF(
-			        ISBLANK(AvgLoss) || AvgLoss = 0,
-			        100,
-			        100 - DIVIDE(100, 1 + RS)
-			    )
-		formatString: 0.00
-		displayFolder: 03 - Technical Indicators
-		lineageTag: 4383ee5d-8a7c-48e1-aed1-4fa415950dad
-
 	/// Calendar days since the all-time high price within the selected context. Optimized: reads the pre-materialized Historical_Rolling_Max column (computed in Python) instead of running two nested FILTER scans over ALLSELECTED, which caused ~3s FE latency per render.
 	measure 'Days Since ATH' = ```
 			
@@ -1655,7 +1615,9 @@ table _Measures
 		displayFolder: 10 - Filters & Titles
 		lineageTag: f3e497c8-c1b5-49a4-8527-e2fdc5798980
 
-	measure 'Title - VAP Profile' = "Institutional Volume-at-Price (VAP) | " & [Filter Text - CEO Era]
+	measure 'Title - Native Price' =
+			
+			"Price Trend & Moving Averages (50D vs 200D) | " & [Filter Text - CEO Era]
 		displayFolder: 10 - Filters & Titles
 		lineageTag: cca23525-c31b-4cc6-a71d-5f8339f2884e
 
@@ -1689,7 +1651,9 @@ table _Measures
 		displayFolder: 10 - Filters & Titles
 		lineageTag: d4a81b52-2e65-4bbc-849b-db408f4a9d8a
 
-	measure 'Title - Momentum Scatter' = "RSI Capitulation Matrix | " & [Filter Text - CEO Era]
+	measure 'Title - Native RSI' =
+			
+			"Relative Strength Index (14-Day Momentum) | " & [Filter Text - CEO Era]
 		displayFolder: 10 - Filters & Titles
 		lineageTag: 1ef510e0-bc43-4cfe-a2b7-f110710fa506
 
@@ -1788,6 +1752,26 @@ table _Measures
 			```
 		displayFolder: 06 - Deneb (Chart Data)
 		lineageTag: 29be1519-d89e-43bc-b802-7800ff1b8d97
+
+	measure 'RSI (14-Day)' = ```
+			
+			// Identifies the most recent trading date that actually has a calculated RSI
+			VAR MaxDateWithData = 
+			    CALCULATE(
+			        MAX('Technical_Metrics'[Trade_Date]),
+			        NOT(ISBLANK('Technical_Metrics'[RSI (14-Day)]))
+			    )
+			
+			// Retrieves the Python-calculated RSI for that specific date
+			RETURN
+			    CALCULATE(
+			        MAX('Technical_Metrics'[RSI (14-Day)]),
+			        'Calendar'[Date] = MaxDateWithData
+			    )
+			```
+		formatString: 0.00
+		displayFolder: 03 - Technical Indicators
+		lineageTag: 49274518-bd55-470f-a188-39d49c17632d
 
 	partition _Measures = m
 		mode: import

@@ -10,10 +10,10 @@
     "tabOrder": 10000
   },
   "visual": {
-    "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
+    "visualType": "lineChart",
     "query": {
       "queryState": {
-        "dataset": {
+        "Category": {
           "projections": [
             {
               "field": {
@@ -23,26 +23,17 @@
                       "Entity": "aapl_daily"
                     }
                   },
-                  "Property": "Close_Price"
+                  "Property": "Trade_Date"
                 }
               },
-              "queryRef": "aapl_daily.Close_Price",
-              "nativeQueryRef": "Close_Price"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "aapl_daily"
-                    }
-                  },
-                  "Property": "Volume"
-                }
-              },
-              "queryRef": "aapl_daily.Volume",
-              "nativeQueryRef": "Volume"
-            },
+              "queryRef": "aapl_daily.Trade_Date",
+              "nativeQueryRef": "Trade_Date",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
             {
               "field": {
                 "Measure": {
@@ -65,11 +56,25 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Trade Date Key"
+                  "Property": "50-Day SMA"
                 }
               },
-              "queryRef": "_Measures.Trade Date Key",
-              "nativeQueryRef": "Trade Date Key"
+              "queryRef": "_Measures.50-Day SMA",
+              "nativeQueryRef": "50-Day SMA"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "200-Day SMA"
+                }
+              },
+              "queryRef": "_Measures.200-Day SMA",
+              "nativeQueryRef": "200-Day SMA"
             }
           ]
         }
@@ -84,7 +89,7 @@
                     "Entity": "aapl_daily"
                   }
                 },
-                "Property": "Close_Price"
+                "Property": "Trade_Date"
               }
             },
             "direction": "Ascending"
@@ -94,125 +99,167 @@
       }
     },
     "objects": {
-      "vega": [
+      "categoryAxis": [
         {
           "properties": {
-            "provider": {
-              "expr": {
-                "Literal": {
-                  "Value": "'vega'"
-                }
-              }
-            },
-            "jsonSpec": {
-              "expr": {
-                "Literal": {
-                  "Value": "'{\n  \"$schema\": \"https://vega.github.io/schema/vega/v5.json\",\n  \"autosize\": {\"type\": \"fit\", \"contains\": \"padding\", \"resize\": true},\n  \"background\": \"transparent\",\n  \"padding\": {\"top\": 15, \"left\": 75, \"right\": 25, \"bottom\": 55},\n  \"config\": {\n    \"font\": \"Segoe UI, system-ui, -apple-system, sans-serif\",\n    \"axis\": {\n      \"labelFontSize\": 12,\n      \"titleFontSize\": 14,\n      \"titleFontWeight\": \"normal\",\n      \"titleColor\": \"#86868b\",\n      \"labelColor\": \"#86868b\",\n      \"gridColor\": \"#2a2a2d\",\n      \"domainColor\": \"transparent\",\n      \"tickColor\": \"transparent\"\n    }\n  },\n  \"data\": [\n    {\n      \"name\": \"dataset\",\n      \"transform\": [\n        {\n          \"type\": \"filter\",\n          \"expr\": \"datum[''Close_Price''] != null && datum[''Close_Price''] > 0 && datum[''Volume''] != null && datum[''Volume''] > 0 && datum[''Volume''] < 2000000000\"\n        },\n        {\n          \"type\": \"extent\",\n          \"field\": \"Close_Price\",\n          \"signal\": \"price_extent\"\n        },\n        {\n          \"type\": \"bin\",\n          \"field\": \"Close_Price\",\n          \"extent\": {\"signal\": \"price_extent\"},\n          \"maxbins\": 60,\n          \"as\": [\"bin0\", \"bin1\"]\n        },\n        {\n          \"type\": \"aggregate\",\n          \"groupby\": [\"bin0\", \"bin1\"],\n          \"ops\": [\"sum\"],\n          \"fields\": [\"Volume\"],\n          \"as\": [\"sum_Volume\"]\n        }\n      ]\n    },\n    {\n      \"name\": \"current_price\",\n      \"source\": \"dataset\",\n      \"transform\": [\n        {\n          \"type\": \"filter\",\n          \"expr\": \"datum[''Latest Price''] != null\"\n        },\n        {\n          \"type\": \"aggregate\",\n          \"ops\": [\"max\"],\n          \"fields\": [\"Latest Price\"],\n          \"as\": [\"current_price_val\"]\n        }\n      ]\n    }\n  ],\n  \"scales\": [\n    {\n      \"name\": \"xscale\",\n      \"type\": \"sqrt\",\n      \"domain\": {\"data\": \"dataset\", \"field\": \"sum_Volume\"},\n      \"range\": \"width\",\n      \"nice\": true,\n      \"zero\": true\n    },\n    {\n      \"name\": \"yscale\",\n      \"type\": \"linear\",\n      \"domain\": {\"signal\": \"price_extent\"},\n      \"range\": \"height\",\n      \"nice\": true,\n      \"zero\": true\n    },\n    {\n      \"name\": \"colorscale\",\n      \"type\": \"sqrt\",\n      \"domain\": {\"data\": \"dataset\", \"field\": \"sum_Volume\"},\n      \"range\": [\"#1a3a5c\", \"#2997ff\"]\n    }\n  ],\n  \"axes\": [\n    {\n      \"orient\": \"bottom\",\n      \"scale\": \"xscale\",\n      \"title\": \"Historical Volume Traded (√ Scale)\",\n      \"titlePadding\": 15,\n      \"tickCount\": 5,\n      \"format\": \"~s\",\n      \"grid\": true,\n      \"gridDash\": [2, 4]\n    },\n    {\n      \"orient\": \"left\",\n      \"scale\": \"yscale\",\n      \"title\": \"Price Level (USD)\",\n      \"titlePadding\": 15,\n      \"tickCount\": 8,\n      \"format\": \"$,.0f\",\n      \"grid\": false\n    }\n  ],\n  \"marks\": [\n    {\n      \"type\": \"rect\",\n      \"from\": {\"data\": \"dataset\"},\n      \"encode\": {\n        \"enter\": {\n          \"x\": {\"scale\": \"xscale\", \"value\": 0},\n          \"x2\": {\"scale\": \"xscale\", \"field\": \"sum_Volume\"},\n          \"y\": {\"scale\": \"yscale\", \"field\": \"bin1\"},\n          \"y2\": {\"scale\": \"yscale\", \"field\": \"bin0\", \"offset\": 1},\n          \"fill\": {\"scale\": \"colorscale\", \"field\": \"sum_Volume\"},\n          \"cornerRadiusTopRight\": {\"value\": 2},\n          \"cornerRadiusBottomRight\": {\"value\": 2},\n          \"tooltip\": {\n            \"signal\": \"{''Price Range'': ''$'' + format(datum.bin0, '',.2f'') + '' – $'' + format(datum.bin1, '',.2f''), ''Total Volume'': format(datum.sum_Volume, '',d''), ''Volume (M)'': format(datum.sum_Volume / 1e6, ''.1f'') + ''M''}\"\n          }\n        },\n        \"update\": {\n          \"fillOpacity\": {\"value\": 0.9}\n        },\n        \"hover\": {\n          \"fillOpacity\": {\"value\": 1.0},\n          \"fill\": {\"value\": \"#64d2ff\"}\n        }\n      }\n    },\n    {\n      \"type\": \"rule\",\n      \"from\": {\"data\": \"current_price\"},\n      \"encode\": {\n        \"enter\": {\n          \"x\": {\"value\": 0},\n          \"x2\": {\"signal\": \"width\"},\n          \"y\": {\"scale\": \"yscale\", \"field\": \"current_price_val\"},\n          \"stroke\": {\"value\": \"#ff9f0a\"},\n          \"strokeWidth\": {\"value\": 1.5},\n          \"strokeDash\": {\"value\": [5, 3]},\n          \"opacity\": {\"value\": 0.9}\n        }\n      }\n    },\n    {\n      \"type\": \"text\",\n      \"from\": {\"data\": \"current_price\"},\n      \"encode\": {\n        \"enter\": {\n          \"x\": {\"signal\": \"width\"},\n          \"y\": {\"scale\": \"yscale\", \"field\": \"current_price_val\", \"offset\": -5},\n          \"align\": {\"value\": \"right\"},\n          \"text\": {\"signal\": \"''▶ $'' + format(datum.current_price_val, '',.2f'')\"},\n          \"fill\": {\"value\": \"#ff9f0a\"},\n          \"fontSize\": {\"value\": 12},\n          \"fontWeight\": {\"value\": \"bold\"}\n        }\n      }\n    }\n  ]\n}'"
-                }
-              }
-            },
-            "jsonConfig": {
-              "expr": {
-                "Literal": {
-                  "Value": "'{}'"
-                }
-              }
-            },
-            "enableTooltips": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "enableContextMenu": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "enableHighlight": {
+            "show": {
               "expr": {
                 "Literal": {
                   "Value": "false"
                 }
               }
             },
-            "enableSelection": {
+            "showAxisTitle": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "valueAxis": [
+        {
+          "properties": {
+            "showAxisTitle": {
               "expr": {
                 "Literal": {
                   "Value": "false"
                 }
               }
             },
-            "selectionMaxDataPoints": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "50D"
+                  "Value": "true"
                 }
               }
             },
-            "selectionMode": {
+            "gridlineStyle": {
               "expr": {
                 "Literal": {
-                  "Value": "'simple'"
+                  "Value": "'dashed'"
                 }
               }
             },
-            "version": {
+            "gridlineAutoScale": {
               "expr": {
                 "Literal": {
-                  "Value": "'6.2.0'"
+                  "Value": "false"
+                }
+              }
+            },
+            "gridlineTransparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "30D"
+                }
+              }
+            },
+            "gridlineShow": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "logAxisScale": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }
           }
         }
       ],
-      "stateManagement": [
+      "legend": [
         {
           "properties": {
-            "viewportHeight": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "187.7999973297119D"
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "lineStyles": [
+        {
+          "properties": {
+            "lineChartType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'smooth'"
                 }
               }
             },
-            "viewportWidth": {
+            "strokeWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "796D"
+                  "Value": "2D"
                 }
               }
             }
           }
         }
       ],
-      "developer": [
+      "dataPoint": [
         {
           "properties": {
-            "version": {
-              "expr": {
-                "Literal": {
-                  "Value": "'1.9.0.0'"
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F5F5F7'"
+                    }
+                  }
                 }
               }
             }
+          },
+          "selector": {
+            "metadata": "_Measures.Latest Price"
           }
-        }
-      ],
-      "editor": [
+        },
         {
           "properties": {
-            "theme": {
-              "expr": {
-                "Literal": {
-                  "Value": "'dark'"
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FF9F0A'"
+                    }
+                  }
                 }
               }
             }
+          },
+          "selector": {
+            "metadata": "_Measures.50-Day SMA"
+          }
+        },
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#BF5AF2'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.200-Day SMA"
           }
         }
       ]
@@ -236,7 +283,7 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Title - VAP Profile"
+                  "Property": "Title - Native Price"
                 }
               }
             }
@@ -273,7 +320,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Identifies historical liquidity nodes and structural support/resistance levels independently of time.'"
+                  "Value": "'Evaluating long-term momentum shifts and structural trend crossovers.'"
                 }
               }
             },

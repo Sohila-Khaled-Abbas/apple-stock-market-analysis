@@ -3,3 +3,11 @@ relationship 54654d8d-fd2b-9df1-012a-be6b7f5e3b7a
 	fromColumn: aapl_daily.Trade_Date
 	toColumn: Calendar.Date
 
+relationship f8e1de59-9c9e-13ff-8d60-bd9935153822
+	fromColumn: sp500_daily.Trade_Date
+	toColumn: Calendar.Date
+
+relationship 6fc4fefc-aa43-8a68-20c8-a52ae30cd0ed
+	fromColumn: Technical_Metrics.Trade_Date
+	toColumn: aapl_daily.Trade_Date
+

@@ -81,8 +81,10 @@ table sp500_daily
 
 	column Trade_Date
 		dataType: dateTime
+		isKey
 		formatString: Long Date
 		lineageTag: 22035fdb-4893-4659-8386-3f47c166ad89
+		isDefaultLabel
 		summarizeBy: none
 		sourceColumn: Trade_Date
 
