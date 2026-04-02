@@ -314,24 +314,35 @@ Apple Stock Market Analysis/
 │   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.pbip   ← Open this to edit
 │   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.pbix   ← Compiled snapshot
 │   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.Report/
-│   │   └── definition/
-│   │       ├── report.json
-│   │       └── pages/                 ← 7 × page.json + visuals (JSON)
+│   │   ├── .pbi/
+│   │   ├── .platform/
+│   │   ├── definition.pbir
+│   │   ├── definition/
+│   │   │   ├── report.json
+│   │   │   ├── version.json
+│   │   │   └── pages/                 ← 7 × page.json + visuals (JSON)
+│   │   └── StaticResources/
 │   ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.SemanticModel/
-│   │   └── definition/
-│   │       ├── model.tmdl             ← Model settings, culture, query order
-│   │       ├── relationships.tmdl    ← 3 table relationships
-│   │       ├── functions.tmdl        ← 5 injected UDF libraries (~344 KB)
-│   │       ├── tables/
-│   │       │   ├── aapl_daily.tmdl   ← Fact: AAPL data (MySQL source)
-│   │       │   ├── sp500_daily.tmdl  ← Fact: S&P 500 (yfinance Python source)
-│   │       │   ├── Calendar.tmdl     ← Dimension: CEO Eras, Decades
-│   │       │   ├── _Measures.tmdl    ← All 47 DAX measures
-│   │       │   ├── Technical_Metrics.tmdl  ← SMA50, SMA200, RSI (Python-computed)
-│   │       │   └── Data Dictionary.tmdl    ← Auto-generated measure catalog
-│   │       └── cultures/en-US/
+│   │   ├── .pbi/
+│   │   ├── .platform/
+│   │   ├── definition.pbism
+│   │   ├── diagramLayout.json
 │   │   ├── DAXQueries/                ← Saved DAX Query View scripts
-│   │   └── diagramLayout.json
+│   │   ├── TMDLScripts/
+│   │   └── definition/
+│   │       ├── database.tmdl          ← Database details
+│   │       ├── model.tmdl             ← Model settings, culture, query order
+│   │       ├── relationships.tmdl     ← 3 table relationships
+│   │       ├── functions.tmdl         ← 5 injected UDF libraries (~344 KB)
+│   │       ├── cultures/
+│   │       │   └── en-US.tmdl
+│   │       └── tables/
+│   │           ├── aapl_daily.tmdl    ← Fact: AAPL data (MySQL)
+│   │           ├── sp500_daily.tmdl   ← Fact: S&P 500 (API)
+│   │           ├── Calendar.tmdl      ← Dimension: CEO Eras
+│   │           ├── _Measures.tmdl     ← 47 DAX measures
+│   │           ├── Technical_Metrics.tmdl
+│   │           └── Data Dictionary.tmdl
 │   └── theme/                         ← Custom JSON theme & assets
 │
 ├── data/                              # Datasets

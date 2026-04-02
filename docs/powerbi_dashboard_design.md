@@ -62,10 +62,14 @@ dashboard/
 ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.pbix       ← Compiled snapshot
 │
 ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.Report/    ← Frontend (UI Layer)
+│   ├── .pbi/                                             ← Metadata for PBI desktop
+│   ├── .platform/                                        ← Platform metadata
+│   ├── definition.pbir                                   ← Report definition root
 │   ├── definition/
 │   │   ├── report.json                                   ← Global report settings
-│   │   ├── version.json
+│   │   ├── version.json                                  ← Versioning info
 │   │   └── pages/                                        ← 7 report pages (JSON)
+│   │       ├── pages.json                                ← Pages configuration
 │   │       ├── e27774228289ca9fe100/  (Home)
 │   │       ├── 3244a5c5ada8b5854b5a/  (Macro View)
 │   │       ├── ca8e0f16a462c76d7abe/  (Technical View)
@@ -76,20 +80,26 @@ dashboard/
 │   └── StaticResources/
 │
 ├── Apple-AAPL-Stock-Market-Analysis-Dashboard.SemanticModel/  ← Backend (Data Model)
-│   ├── definition/
-│   │   ├── model.tmdl                                    ← Model-level settings
-│   │   ├── relationships.tmdl                            ← Table relationships
-│   │   ├── functions.tmdl                                ← Injected UDF libraries
-│   │   ├── tables/
-│   │   │   ├── aapl_daily.tmdl                           ← Primary fact table
-│   │   │   ├── sp500_daily.tmdl                          ← Benchmark fact table
-│   │   │   ├── Calendar.tmdl                             ← Date dimension
-│   │   │   ├── _Measures.tmdl                            ← All 47 DAX measures
-│   │   │   ├── Technical_Metrics.tmdl                    ← Python-computed indicators
-│   │   │   └── Data Dictionary.tmdl                      ← Auto-generated data catalog
-│   │   └── cultures/en-US/
+│   ├── .pbi/                                             ← Metadata for PBI desktop
+│   ├── .platform/                                        ← Platform metadata
+│   ├── definition.pbism                                  ← Semantic model definition
+│   ├── diagramLayout.json                                ← Model diagram layout
 │   ├── DAXQueries/                                       ← Saved DAX Query View scripts
-│   └── diagramLayout.json                                ← Model diagram layout
+│   ├── TMDLScripts/                                      ← Exported TMDL scripts
+│   └── definition/
+│       ├── database.tmdl                                 ← Database details
+│       ├── model.tmdl                                    ← Model-level settings
+│       ├── relationships.tmdl                            ← Table relationships
+│       ├── functions.tmdl                                ← Injected UDF libraries
+│       ├── cultures/
+│       │   └── en-US.tmdl                                ← Culture terminology
+│       └── tables/
+│           ├── aapl_daily.tmdl                           ← Primary fact table
+│           ├── sp500_daily.tmdl                          ← Benchmark fact table
+│           ├── Calendar.tmdl                             ← Date dimension
+│           ├── _Measures.tmdl                            ← All 47 DAX measures
+│           ├── Technical_Metrics.tmdl                    ← Python-computed indicators
+│           └── Data Dictionary.tmdl                      ← Auto-generated data catalog
 │
 └── theme/                                                ← Custom JSON theme & assets
 ```
@@ -319,16 +329,16 @@ Install the following UDF libraries via Tabular Editor (`.tmdl` scripts in `func
 
 `Page ID: ca8e0f16a462c76d7abe`
 
-| Zone | Visual | Measure |
-|:-----|:-------|:--------|
+| Zone | Visual | Measure / Description |
+|:-----|:-------|:----------------------|
 | Left Sidebar | HTML Content | `Sidebar Navigation HTML 2` (`VAR ActivePage = "Technical"`) |
 | Top Header | HTML Content | `Header - Technical View HTML` (shows Period Volatility chip) |
-| Date Slicer | Relative Date Slicer | Default: Last 1 Year |
-| Date Badge | Native Pill Button | Text: `Button Text - Active Dates` (SavoryData) |
+| Date Slicer | Native Slider | Adjust date bounds manually |
+| Date Badge | Native Pill Button | Guide into 1-Year Horizon using Relative Date Slicer |
 | KPI Strip | 3 × HTML Content | `KPI - Volatility` · `KPI - RSI` · `KPI - Trend State` |
-| Price Chart | Native Line | `Latest Price` + `50-Day SMA` + `200-Day SMA` |
-| Volume Chart | Stacked Column | `Volume` with `Is Volume Surge` conditional formatting |
-| RSI Oscillator | Native Line | `RSI (14-Day)` — Y-axis reference lines at 30 and 70 |
+| Price Chart | Deneb | `Latest Price` + `50-Day SMA Deneb` + `200-Day SMA Deneb` |
+| Volume Chart | Deneb | `Volume` with `Is Volume Surge` conditional formatting |
+| RSI Oscillator | Deneb | `RSI (14-Day) Deneb` — Y-axis reference lines at 30 and 70 |
 | Advisory Engine | HTML Content | `Dynamic Business Recommendation` (footer) |
 
 **Quantitative Advisory Logic (`Dynamic Business Recommendation`):**
