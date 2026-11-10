@@ -202,7 +202,7 @@
   <!-- Step 5: GitHub Actions -->
   <rect x="534" y="432" width="420" height="40" rx="8" fill="#0a0f20" stroke="#3b6ab0" stroke-width="1"/>
   <text x="744" y="449" font-size="11" fill="#7ab0f0" font-weight="600" text-anchor="middle">Triggered by: GitHub Actions Cron (.github/workflows/)</text>
-  <text x="744" y="466" font-size="10" fill="#2a4a7a" text-anchor="middle">schedule: cron('0 16 * * 1-5')  →  runs on every market day</text>
+  <text x="744" y="466" font-size="10" fill="#2a4a7a" text-anchor="middle">schedule: cron('0 22 * * 1-5')  →  runs on every market day</text>
 
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- SECTION: Shared Logic Highlight -->
@@ -276,7 +276,7 @@
   <rect x="514" y="610" width="456" height="130" rx="14" fill="url(#card1)" filter="url(#shadow)" stroke="#2a1a05" stroke-width="1"/>
   <rect x="514" y="610" width="6" height="130" rx="3" fill="url(#pyYellow)"/>
   <text x="539" y="633" font-size="11" fill="#f7c948" font-weight="600" letter-spacing="2">◈  GITHUB ACTIONS CRON (gh_update_csv.py)</text>
-  <text x="539" y="655" font-size="10.5" fill="#9a7a30">cron: '0 16 * * 1-5' → Mon-Fri at 16:00 UTC (after NYSE close)</text>
+  <text x="539" y="655" font-size="10.5" fill="#9a7a30">cron: '0 16 * * 1-5' → Mon-Fri at 22:00 UTC (after NYSE close)</text>
 
   <!-- GH Actions flow -->
   <rect x="539" y="665" width="120" height="45" rx="8" fill="#0a1525" stroke="#3b6ab0" stroke-width="1"/>

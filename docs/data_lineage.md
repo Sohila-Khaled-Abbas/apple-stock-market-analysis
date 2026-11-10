@@ -1,63 +1,49 @@
-# Data Lineage Documentation: Apple Stock Market Analysis
+# AAPL Data Lineage & Refresh Architecture
 
-This document traces the complete lifecycle of data within the Apple Stock Market Analysis project, illustrating how raw stock market data is ingested, transformed, and ultimately presented to end-users in Power BI. Understanding the data lineage ensures data trust, traceability, and easier debugging if issues arise in the pipeline.
+This guide traces the project from the historical source files to the Power BI report and documents the two independent incremental refresh paths. The diagram is the source-aligned system map; the sections below explain each route.
 
-## 1. Source Systems
-Data originates from two primary sources, capturing both historical records and ongoing daily updates.
+![AAPL data lineage architecture](../images/architecture_overview.svg)
 
-- **Kaggle / Excel Export (`Apple-Stock-Historical-Data.xlsx`)**
-  - **Type:** Static File (CSV / Excel).
-  - **Role:** Provides the initial bulk history of AAPL stock prices spanning from 1980 to early 2025.
-  - **Attributes Captured:** `Date`, `Open`, `High`, `Low`, `Close`, `Adj Close`, `Volume`.
-  
-- **Yahoo Finance API (`yfinance`)**
-  - **Type:** Live External API.
-  - **Role:** Fetches daily incremental market data to keep the database up-to-date.
-  - **Trigger:** Queried dynamically by identifying the maximum date in the database and fetching subsequent records.
+[Open the SVG](../images/architecture_overview.svg) · [Open the PNG export](../images/architecture_overview.png)
 
-## 2. Processing Layer (Python)
-Raw data is extracted and prepared for database insertion using Python scripts and Jupyter Notebooks.
+## 1. Historical bootstrap
 
-- **Initial Profiling (`notebooks/01_data_profiling.ipynb`)**
-  - Conducts Exploratory Data Analysis (EDA) on the static Excel source to verify schema, handle null values, and ensure logical consistency (e.g., `High >= Low`).
-  
-- **Incremental Fetching & Cleaning (`notebooks/02_data_loading.ipynb` / `scripts/yf_update.py`)**
-  - Connects to the Yahoo Finance API.
-  - Flattens multi-level indexes returned by `yfinance`.
-  - Normalizes column names to match the target database schema structure.
-  - Validates missing trading days.
-  - **Output Destination:** MySQL Database via SQLAlchemy.
+The initial dataset is stored under `data/raw/` as CSV and Excel source files. Jupyter notebooks profile and prepare the records, while `sql/01_data_ingestion.sql` creates the `apple_stock_db` schema and `aapl_daily` table and demonstrates the bulk-load step.
 
-## 3. Storage & Transformation Layer (MySQL)
-The central data warehouse ensuring consistency, relational integrity, and analytical transformations.
+The primary market columns are the trade date, adjusted close, close, high, low, open, and volume.
 
-- **Raw Data Ingestion (`sql/01_data_ingestion.sql`)**
-  - **Table:** `aapl_daily` (Serves as the Single Source of Truth).
-  - Handles the direct bulk insert mapping of the static CSV dataset into strictly typed columns (`DOUBLE`, `BIGINT`).
+## 2. Incremental refresh paths
 
-- **Data Cleaning (`sql/02_data_cleaning.sql`)**
-  - Performs deduplication based on matching dates.
-  - Applies imputation logic (e.g., replacing 0 Volume with a 20-day average).
-  - Validates price consistencies directly within the storage layer.
+### A. Local MySQL daemon
 
-- **Data Enrichment (`sql/03_eda_and_metrics.sql`)**
-  - Computes persistent metrics essential for the dashboards.
-  - Generates the 50-day and 200-day Simple Moving Averages (SMA).
-  - Calculates the Compound Annual Growth Rate (CAGR).
-  - Flags market momentum indicators directly into columns/views.
+`scripts/yf_update.py` runs locally and uses the `schedule` package to call the update function every day at **18:00 local machine time**. It reads the latest `Trade_Date` from MySQL, requests subsequent AAPL observations from `yfinance`, normalizes the response, filters invalid and duplicate dates, appends new records to MySQL through SQLAlchemy, and exports the table to `data/processed/aapl_daily.csv`.
 
-## 4. Presentation & Visualization Layer (Power BI)
-The final stage where structured data is consumed by stakeholders.
+### B. GitHub Actions CSV updater
 
-- **On-premises Data Gateway**
-  - Acts as the secure bridge between the local MySQL database and the Microsoft cloud ecosystem.
-  - Facilitates the scheduled refreshes of the dataset without manual intervention.
+`/.github/workflows/data_update.yml` schedules `scripts/gh_update_csv.py` for **weekdays at 22:00 UTC** using `0 22 * * 1-5`. This route does not connect to MySQL. It reads the processed CSV in the repository, derives the next date from the latest `Trade_Date`, fetches later observations from `yfinance`, normalizes and deduplicates the rows, then writes the updated CSV. The workflow commits and pushes only when the file changed.
 
-- **Power BI Service (Cloud) & Interactive Dashboard**
-  - Ingests the enriched data from `aapl_daily` via the secure gateway.
-  - Presents interactive visualizations detailing the "Cook Premium", "Buy the Dip" signals, and Moving Average cross-overs.
+These are parallel update mechanisms with different destinations; the cloud updater does not write into the local MySQL database.
 
----
-## Summary Flow Diagram
+## 3. Storage and transformation
 
-**Raw Data** `(Excel/yfinance)` ➔ **Python Processing** `(Jupyter/Pandas)` ➔ **MySQL Database** `(Storage & SQL Tranformations)` ➔ **On-premises Gateway** ➔ **Power BI Dashboard**
+The MySQL `aapl_daily` table is the source used by the local relational analytics path. The SQL scripts cover initial loading, data-quality checks and the volume anomaly treatment, plus the CAGR and SMA-50/SMA-200 calculations.
+
+The GitHub-hosted CSV is a separate versioned data artifact. It is maintained by the cloud updater and should not be described as a MySQL replica kept in sync by the same process.
+
+## 4. Power BI consumption
+
+The Power BI semantic model contains AAPL market data, S&P 500 benchmark data, a calendar table, technical metrics, and a dedicated DAX measure table. The documented MySQL route uses an on-premises data gateway to connect the local database to Power BI Service. The report includes three visible navigation pages — Home, Macro View, and Technical View — along with additional analytics and tooltip pages in the project structure.
+
+[Open the live Power BI report](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9) · [Dashboard design guide](powerbi_dashboard_design.md)
+
+## 5. Traceability
+
+| Layer | Main implementation | Output |
+|---|---|---|
+| Historical source | `data/raw/` | Initial AAPL history |
+| Profiling and preparation | `notebooks/` | Validated, standardized data |
+| MySQL ingestion and QA | `sql/` | `apple_stock_db.aapl_daily` |
+| Local incremental refresh | `scripts/yf_update.py` | MySQL append + CSV export |
+| Cloud CSV refresh | `scripts/gh_update_csv.py` + GitHub Actions | Versioned repository CSV |
+| BI delivery | Power BI + on-premises gateway | Interactive report |
+

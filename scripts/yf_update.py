@@ -7,21 +7,35 @@ them to the MySQL database without duplicating existing historical data.
 import yfinance as yf
 import pandas as pd
 from sqlalchemy import create_engine, text, types
+from sqlalchemy.engine import URL
 from datetime import datetime, timedelta
 import os
 import time
 import schedule
 
 # 1. Database Configuration
-DB_USER = 'root'
-DB_PASSWORD = 'EqV2P9j$0!MduLH' # Change to your actual MySQL password
-DB_HOST = 'localhost'
-DB_NAME = 'apple_stock_db'
-TABLE_NAME = 'aapl_daily'
+DB_USER = os.getenv("MYSQL_USER", "root")
+DB_PASSWORD = os.getenv("MYSQL_PASSWORD")
+DB_HOST = os.getenv("MYSQL_HOST", "localhost")
+DB_NAME = os.getenv("MYSQL_DATABASE", "apple_stock_db")
+TABLE_NAME = "aapl_daily"
 
-# Create the SQLAlchemy engine for connecting to MySQL
-# Note: ensure pymysql is installed via pip (`pip install pymysql`)
-engine = create_engine(f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
+if not DB_PASSWORD:
+    raise RuntimeError(
+        "MYSQL_PASSWORD is not set. Configure the local MySQL credentials "
+        "as environment variables before running this script."
+    )
+
+# URL.create safely handles special characters in the password.
+# Note: ensure pymysql is installed via pip (`pip install pymysql`).
+db_url = URL.create(
+    drivername="mysql+pymysql",
+    username=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    database=DB_NAME,
+)
+engine = create_engine(db_url)
 
 def ensure_table_exists():
     """Forces MySQL to use DOUBLE to prevent the 1265 Truncation Error."""

@@ -1,30 +1,30 @@
-# 🍏 Apple Stock Market Analysis — AAPL (1980 → Present)
+<div align="center">
 
-<!-- Tech Stack Badges -->
-[![Power BI](https://img.shields.io/badge/Power_BI_Desktop-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com/)
-[![MySQL](https://img.shields.io/badge/MySQL_8.0-005C84?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
-[![Python](https://img.shields.io/badge/Python_3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=Jupyter&logoColor=white)](https://jupyter.org/)
-[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
+# 🍏 Apple Stock Market Analysis — AAPL
 
-<!-- Library Badges -->
-[![Pandas](https://img.shields.io/badge/pandas-150458?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
-[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=flat-square&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
-[![yfinance](https://img.shields.io/badge/yfinance-0055A4?style=flat-square&logo=yahoo&logoColor=white)](https://pypi.org/project/yfinance/)
-[![PyMySQL](https://img.shields.io/badge/PyMySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://pypi.org/project/PyMySQL/)
-[![openpyxl](https://img.shields.io/badge/openpyxl-217346?style=flat-square&logo=microsoftexcel&logoColor=white)](https://pypi.org/project/openpyxl/)
-[![schedule](https://img.shields.io/badge/schedule-grey?style=flat-square&logo=python&logoColor=white)](https://pypi.org/project/schedule/)
+**An end-to-end financial analytics and data engineering system spanning 1980–present.**
 
-<!-- Status Badges -->
-[![Data Pipeline](https://img.shields.io/badge/Data_Pipeline-✅_Automated-30d158?style=flat-square)](docs/data_pipeline.md)
-[![Dashboard](https://img.shields.io/badge/Dashboard-✅_7_Pages-F2C811?style=flat-square)](docs/powerbi_dashboard_design.md)
-[![DAX Measures](https://img.shields.io/badge/DAX_Measures-47_Implemented-FF6B35?style=flat-square)](docs/powerbi_dashboard_design.md#dax-measure-catalogue)
-[![Dataset](https://img.shields.io/badge/Dataset-11%2C400%2B_Trading_Days-0078D4?style=flat-square)](data/)
-[![Cron](https://img.shields.io/badge/Cron-Mon–Fri_16:00_UTC-2088FF?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/data_update.yml)
-[![Live Dashboard](https://img.shields.io/badge/▶_Live_Dashboard-Power_BI_Web-F2C811?style=flat-square&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9)
+<a href="https://app.powerbi.com/view?r=eyJrIjoiNTNhYmI1ZjUtNDNhZC00OWM3LWFjYzktMmU0NWYyODYzZjIxIiwidCI6IjI1Y2UwMjYxLWJiZDYtNDljZC1hMWUyLTU0MjYwODg2ZDE1OSJ9"><img src="https://img.shields.io/badge/OPEN_LIVE_DASHBOARD-Power_BI-F2C811?style=for-the-badge&logo=powerbi&logoColor=black" alt="Open live Power BI dashboard"></a>
+<a href="docs/powerbi_dashboard_design.md"><img src="https://img.shields.io/badge/REPORT-7_PAGES-F2C811?style=for-the-badge&logo=powerbi&logoColor=black" alt="Seven report pages"></a>
+<a href="dashboard/"><img src="https://img.shields.io/badge/POWER_BI-PBIP_&_TMDL-0078D4?style=for-the-badge&logo=microsoftpowerpoint&logoColor=white" alt="Power BI project format"></a>
 
-> An end-to-end **data engineering and analytics** project analyzing historical Apple Inc. (AAPL) stock market data from 1980 to the present day — combining an automated MySQL pipeline, GitHub Actions cloud sync, and an enterprise-grade Power BI dashboard to extract actionable investment insights.
+[![CSV Sync Workflow](https://img.shields.io/github/actions/workflow/status/Sohila-Khaled-Abbas/apple-stock-market-analysis/data_update.yml?branch=main&label=CSV%20sync&logo=githubactions)](https://github.com/Sohila-Khaled-Abbas/apple-stock-market-analysis/actions/workflows/data_update.yml)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-005C84?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Pandas](https://img.shields.io/badge/Pandas-Analytics-150458?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-D71F00?logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
+[![License](https://img.shields.io/github/license/Sohila-Khaled-Abbas/apple-stock-market-analysis)](LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/Sohila-Khaled-Abbas/apple-stock-market-analysis?color=8A9BAE)](https://github.com/Sohila-Khaled-Abbas/apple-stock-market-analysis/commits/main)
+[![GitHub Stars](https://img.shields.io/github/stars/Sohila-Khaled-Abbas/apple-stock-market-analysis?style=social)](https://github.com/Sohila-Khaled-Abbas/apple-stock-market-analysis/stargazers)
+
+**Python · SQL · MySQL · GitHub Actions · Power BI · DAX · TMDL · Deneb**
+
+[Project overview](#-project-overview) · [Architecture](#️-project-architecture) · [Code visuals](#️-code-documentation-visuals) · [Dashboard design](#-power-bi-dashboard-design--architecture) · [Setup](#️-getting-started)
+
+</div>
+
+> An end-to-end **data engineering and analytics** project analyzing historical Apple Inc. (AAPL) market data. It combines historical ingestion, two independent incremental refresh paths, relational storage, automated CSV publishing, and an interactive Power BI report to explore long-term performance, market context, technical indicators, and risk.
+
 
 ---
 
@@ -63,15 +63,16 @@ For an actionable breakdown of the engineering pipeline and the resulting strate
 
 ## 🏗️ Project Architecture
 
-![Pipeline Architecture](images/pipeline_architecture.jpg)
+![AAPL data architecture — SVG](images/architecture_overview.svg)
 
-### Data Lineage Architecture
+<p align="center">
+  <a href="images/architecture_overview.svg">Open scalable SVG</a> ·
+  <a href="images/architecture_overview.png">Open PNG export</a>
+</p>
 
-![Data Lineage Architecture](images/data_lineage_architecture.svg)
+The architecture map distinguishes the one-time historical load from the two independent incremental refresh engines. The local Python daemon writes to MySQL and exports a CSV snapshot; the cloud workflow updates the repository CSV directly. Power BI consumes the relational MySQL path through the on-premises gateway, while the versioned CSV remains a separate repository artifact.
 
-This diagram visualizes the end-to-end architecture of the Apple Stock (AAPL) data analysis project. It is structured horizontally to show how different technologies interact to move data from historical sources and the live API through the database and into the visualization layer.
-
-The pipeline is organized into three distinct labeled zones that correspond to the lifecycle of the project:
+The pipeline is organized into three lifecycle zones:
 
 ### Zone 1: Initial Historical Load (Past Data)
 
@@ -99,10 +100,10 @@ This pipeline features **two parallel refresh engines**: a local MySQL daemon an
 
 #### B. Cloud Engine (GitHub Actions)
 
-[![GitHub Actions](https://img.shields.io/badge/Trigger-Mon–Fri_16:00_UTC-2088FF?style=flat-square&logo=githubactions&logoColor=white)]()
+[![GitHub Actions](https://img.shields.io/badge/Trigger-Mon–Fri_22:00_UTC-2088FF?style=flat-square&logo=githubactions&logoColor=white)]()
 [![Serverless](https://img.shields.io/badge/Infrastructure-Serverless-30d158?style=flat-square)]()
 
-- **Serverless Automation:** A cron-triggered workflow (`.github/workflows/data_update.yml`) runs on weekdays at 16:00 UTC.
+- **Serverless Automation:** A cron-triggered workflow (`.github/workflows/data_update.yml`) runs on weekdays at 22:00 UTC.
 - **Python CSV Updater:** `scripts/gh_update_csv.py` bypasses MySQL entirely — reads the existing repo `aapl_daily.csv`, fetches only missing Yahoo Finance records, and appends them.
 - **Git Push:** A bot automatically commits the updated CSV back to the repository, ensuring a completely serverless, zero-infrastructure data feed.
 
@@ -178,7 +179,7 @@ The following SVG diagrams visually document every SQL and Python script in the 
 
 > Two complementary automation strategies run in parallel:
 > - **`yf_update.py`** — A local MySQL daemon scheduled daily at 18:00 via the `schedule` library. Fetches new records from yfinance, transforms them via SQLAlchemy, appends to MySQL, and exports a synced CSV.
-> - **`gh_update_csv.py`** — A fully serverless script triggered by GitHub Actions cron (`Mon–Fri 16:00 UTC`). Reads the existing repo CSV, fetches only missing dates, concatenates, and pushes the updated file back to the repository — zero infrastructure required.
+> - **`gh_update_csv.py`** — A fully serverless script triggered by GitHub Actions cron (`Mon–Fri 22:00 UTC`). Reads the existing repo CSV, fetches only missing dates, concatenates, and pushes the updated file back to the repository — zero infrastructure required.
 
 ![Python Automation Visual](images/python_automation_visual.svg)
 
@@ -351,15 +352,13 @@ Apple Stock Market Analysis/
 │
 ├── docs/                              # Technical Documentation
 │   ├── data_pipeline.md               # Data flow and architecture notes
-│   ├── data_lineage.md                # Origin-to-destination lineage map
-│   ├── data_lineage_architecture.drawio  # Visual Draw.io representation
+│   ├── data_lineage.md                # Source-to-report lineage guide
 │   ├── business_case_presentation.md  # Business case slide outline
 │   └── powerbi_dashboard_design.md    # ★ Power BI UI/UX, TMDL & DAX catalogue
 │
 ├── images/                            # Exported Diagrams & Graphics
-│   ├── pipeline_architecture.jpg      # High-level pipeline overview
-│   ├── data_lineage_architecture.svg  # SVG lineage diagram
-│   ├── data_lineage_architecture.png  # PNG fallback
+│   ├── architecture_overview.svg     # Source-aligned architecture / lineage map
+│   ├── architecture_overview.png     # PNG export
 │   ├── sql_01_data_ingestion.svg      # SQL script documentation visual
 │   ├── sql_02_data_cleaning.svg       # SQL script documentation visual
 │   ├── sql_03_eda_metrics.svg         # SQL script documentation visual
@@ -418,6 +417,18 @@ Apple Stock Market Analysis/
 
 3. **Set up the database:**
    - Start MySQL Server and execute `sql/01_data_ingestion.sql` to initialize the schema and bulk-load historical AAPL data.
+
+### Local MySQL credentials
+
+The local updater reads its connection settings from environment variables. Keep credentials out of source control. Copy [`.env.example`](.env.example) as a reference, then set these variables in your shell before running `scripts/yf_update.py`:
+
+```powershell
+$env:MYSQL_USER = "root"
+$env:MYSQL_PASSWORD = "your-local-mysql-password"
+$env:MYSQL_HOST = "localhost"
+$env:MYSQL_DATABASE = "apple_stock_db"
+python scripts/yf_update.py
+```
 
 4. **Fetch the latest live data increments:**
    - Run `notebooks/02_data_loading.ipynb` to append new dates via the Yahoo Finance API.
